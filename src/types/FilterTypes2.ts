@@ -38,7 +38,7 @@ enum FontType {
 
 type LootFilter = {
   name: string;
-  displayConfigBase: Partial<DisplayConfig> & {
+  displayConfig: Partial<DisplayConfig> & {
     textColor: ArgbHexColor;
     fontType: FontType;
   };
@@ -48,14 +48,14 @@ type LootFilter = {
 type LootGroup = {
   name: string;
   description?: string;
-  displayConfigOverrides: Partial<DisplayConfig>;
+  displayConfig: Partial<DisplayConfig>;
   targets: LootTarget[];
 };
 
 type LootTarget = {
   name: string;
   description?: string;
-  displayConfigOverrides: Partial<DisplayConfig>;
+  displayConfig: Partial<DisplayConfig>;
   examples?: string[];
   rules: LootRule[];
 };
@@ -117,19 +117,117 @@ type ItemTradeableRule = {
   tradeable: boolean;
 };
 
-export { TextAccent, FontType };
+export { FontType, TextAccent };
 
 export type {
-  DisplayConfig,
-  LootFilter,
-  LootGroup,
-  LootTarget,
-  LootRule,
   BooleanRule,
-  ItemNameRule,
+  DisplayConfig,
   ItemIdRule,
-  ItemValueRule,
+  ItemNameRule,
   ItemNotedRule,
   ItemStackableRule,
   ItemTradeableRule,
+  ItemValueRule,
+  LootFilter,
+  LootGroup,
+  LootRule,
+  LootTarget,
+};
+
+// Customizations
+
+type LootFilterCustomization = {
+  filterName: string;
+  displayConfigCustomizations: Partial<DisplayConfig>;
+  lootGroupCustomizations: LootGroupCustomization[];
+};
+
+type LootGroupCustomization = {
+  groupName: string;
+  displayConfig: Partial<DisplayConfig>;
+  lootTargets: LootTargetCustomization[];
+};
+
+type LootTargetCustomization = {
+  targetName: string;
+  displayConfigCustomizations: Partial<DisplayConfig>;
+  lootRules: LootRuleCustomization[];
+};
+
+type LootRuleCustomization = {
+  lootRule: LootRule;
+  operation: "add" | "remove" | "replace";
+};
+
+export type {
+  LootFilterCustomization,
+  LootGroupCustomization,
+  LootTargetCustomization,
+  LootRuleCustomization,
+};
+
+const applyLootGroupCustomization = (
+  group: LootGroup,
+  customization: LootGroupCustomization
+): LootGroup => {
+  const updated = { ...group };
+  updated.targets = group.targets.map((target) => {
+    const targetCustomization = customization.lootTargets.find(
+      (customization) => customization.targetName === target.name
+    );
+    if (targetCustomization) {
+      return applyLootTargetCustomization(target, targetCustomization);
+    }
+    return target;
+  });
+  return updated;
+};
+
+const applyLootTargetCustomization = (
+  target: LootTarget,
+  customization: LootTargetCustomization
+): LootTarget => {
+  let rules = [...target.rules];
+
+  customization.lootRules.forEach((ruleCustomization) => {
+    switch (ruleCustomization.operation) {
+      case "add":
+        rules.push(ruleCustomization.lootRule);
+        break;
+      case "remove":
+        rules = rules.filter((rule) => rule !== ruleCustomization.lootRule);
+        break;
+    }
+  });
+
+  return {
+    ...target,
+    rules,
+    displayConfig: {
+      ...target.displayConfig,
+      ...customization.displayConfigCustomizations,
+    },
+  };
+};
+
+export const applyCustomizations = (
+  filter: LootFilter,
+  customizations: LootFilterCustomization
+): LootFilter => {
+  const updated = { ...filter };
+  updated.displayConfig = {
+    ...filter.displayConfig,
+    ...customizations.displayConfigCustomizations,
+  };
+  updated.groups = filter.groups.map((group) => {
+    const groupCustomization = customizations.lootGroupCustomizations.find(
+      (customization) => customization.groupName === group.name
+    );
+    if (groupCustomization) {
+      return applyLootGroupCustomization(group, groupCustomization);
+    }
+    return group;
+  });
+
+  return filter;
 };
