@@ -156,14 +156,14 @@ type LootTargetCustomization = {
 
 type LootRuleCustomization = {
   lootRule: LootRule;
-  operation: "add" | "remove" | "replace";
+  operation: "add" | "remove";
 };
 
 export type {
   LootFilterCustomization,
   LootGroupCustomization,
-  LootTargetCustomization,
   LootRuleCustomization,
+  LootTargetCustomization,
 };
 
 const applyLootGroupCustomization = (
