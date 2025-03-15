@@ -179,7 +179,7 @@ const ModuleSection: React.FC<{
     const activeConfig = useUiStore(
         (state) => state.filterConfigurations?.[activeFilterId]
     )
-
+    const clearConfiguration = useUiStore((state) => state.clearConfiguration)
     const setEnabledModule = useUiStore((state) => state.setEnabledModule)
 
     let json: string | null = null
@@ -303,6 +303,38 @@ const ModuleSection: React.FC<{
                 </Button>
             </AccordionSummary>
             <AccordionDetails>
+                <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => {
+                        clearConfiguration(
+                            activeFilterId,
+                            module.inputs
+                                .map(
+                                    (input) =>
+                                        input.macroName as
+                                            | string
+                                            | {
+                                                  includes: string
+                                                  excludes: string
+                                              }
+                                )
+                                .reduce<string[]>((acc, macroName) => {
+                                    if (typeof macroName === 'string') {
+                                        return [...acc, macroName]
+                                    } else {
+                                        return [
+                                            ...acc,
+                                            macroName.includes,
+                                            macroName.excludes,
+                                        ]
+                                    }
+                                }, [])
+                        )
+                    }}
+                >
+                    Clear Configuration
+                </Button>
                 <Stack spacing={2} direction="column">
                     <Typography
                         variant="h6"

@@ -29,6 +29,7 @@ export interface FilterConfigurationSlice {
         macroName: string,
         data: Partial<InputDefault<Input>>
     ) => void
+    clearConfiguration: (filterId: FilterId, macros: string[]) => void
     addFilterConfiguration: (
         filterId: FilterId,
         config: ModularFilterConfigurationV2
@@ -149,6 +150,29 @@ const createFilterConfigurationSlice: StateCreator<
                         },
                     },
                 }) as Partial<FilterConfigurationSlice>
+        )
+    },
+    clearConfiguration: (filterId: FilterId, macros: string[]) => {
+        return set(
+            (state) => ({
+                ...state,
+                filterConfigurations: {
+                    ...state.filterConfigurations,
+                    [filterId]: {
+                        ...state.filterConfigurations[filterId],
+                        inputConfigs: {
+                            ...(state.filterConfigurations[filterId]
+                                ?.inputConfigs ?? {}),
+                            ...Object.fromEntries(
+                                macros.map((macro) => {
+                                    return [macro, {}]
+                                })
+                            ),
+                        },
+                    },
+                },
+            }),
+            true
         )
     },
 })
