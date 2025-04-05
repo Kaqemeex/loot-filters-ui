@@ -3,7 +3,7 @@ import { devtools, persist } from 'zustand/middleware'
 import { UiFilterModule } from '../types/ModularFilterSpec'
 
 interface ModuleStoreState {
-    modules: { [key: string]: UiFilterModule }
+    modules: UiFilterModule[]
     setModule: (moudle: UiFilterModule) => void
     removeModule: (id: string) => void
     backfill: (modules: UiFilterModule[]) => void
@@ -14,31 +14,31 @@ export const useModuleStore = create<ModuleStoreState>()(
         persist(
             (set) => {
                 return {
-                    modules: {},
+                    modules: [],
                     backfill: (modules: UiFilterModule[]) => {
                         set((state) => {
                             return {
                                 ...state,
-                                modules: Object.fromEntries(
-                                    modules.map((module) => [module.id, module])
-                                ),
+                                modules: [...state.modules, ...modules],
                             }
                         })
                     },
                     setModule: (module: UiFilterModule) =>
                         set((state) => {
-                            const newMoudles = { ...state.modules }
-                            newMoudles[module.id] = module
+                            const newMoudles = [
+                                ...state.modules.filter(
+                                    (m) => m.id !== module.id
+                                ),
+                                module,
+                            ]
                             return { ...state, modules: newMoudles }
                         }),
                     removeModule: (id: string) =>
                         set((state) => {
                             return {
                                 ...state,
-                                modules: Object.fromEntries(
-                                    Object.entries(state.modules).filter(
-                                        ([key]) => key !== id
-                                    )
+                                modules: state.modules.filter(
+                                    (m) => m.id !== id
                                 ),
                             }
                         }),

@@ -11,14 +11,13 @@ import {
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useModuleStore } from '../store/modules'
-import { UiFilterModule } from '../types/ModularFilterSpec'
 
 const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
     id,
     active,
 }) => {
     const { setModule, modules } = useModuleStore()
-    const module: UiFilterModule = modules[id]
+    const module = modules.find((m) => m.id === id)!!
 
     const undefinedIfEmpty = (str: string) => (str.trim() ? str : undefined)
 
@@ -89,7 +88,7 @@ export const ModuleEditPage: React.FC = () => {
     const id = useParams().id as string
     const { setModule, removeModule, modules, backfill } = useModuleStore()
 
-    const thisModule = modules[id]
+    const thisModule = modules.find((m) => m.id === id)
     if (thisModule === undefined) {
         return (
             <Typography color="secondary" variant="h3">
