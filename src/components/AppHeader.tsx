@@ -1,3 +1,4 @@
+import { ChevronRight } from '@mui/icons-material'
 import {
     Box,
     FormControl,
@@ -5,13 +6,20 @@ import {
     FormGroup,
     Link,
     Switch,
+    Tab,
+    Tabs,
     Typography,
 } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import { useUiStore } from '../store/store'
 import { colors } from '../styles/MuiTheme'
 
-export const Header: React.FC = () => {
+export const Header: React.FC<{
+    primaryNavTab: 'filters' | 'modules' | 'editModule'
+}> = ({ primaryNavTab }) => {
     const { siteConfig, setSiteConfig } = useUiStore()
+
+    const navigate = useNavigate()
 
     return (
         <Box>
@@ -61,6 +69,47 @@ export const Header: React.FC = () => {
                         </FormGroup>
                     </FormControl>
                 ) : null}
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Tabs
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                    value={primaryNavTab}
+                    onChange={(_, value) => {
+                        if (value === 'filters') {
+                            navigate('/')
+                        } else {
+                            navigate('/modules')
+                        }
+                    }}
+                >
+                    <Tab value="filters" label="Filters" />
+                    <Tab value="module" label="Modules" />
+                    <Tab
+                        value="editModule"
+                        style={{
+                            display:
+                                primaryNavTab === 'editModule'
+                                    ? 'block'
+                                    : 'none',
+                        }}
+                        label={
+                            <div style={{ display: 'flex' }}>
+                                <ChevronRight
+                                    sx={{
+                                        color: colors.rsDarkOrange,
+                                    }}
+                                />
+                                <div style={{ alignSelf: 'center' }}>
+                                    {' '}
+                                    Edit Module
+                                </div>
+                            </div>
+                        }
+                    />
+                </Tabs>
             </Box>
         </Box>
     )
