@@ -26,10 +26,10 @@ export const useModuleStore = create<ModuleStoreState>()(
                     setModule: (module: UiFilterModule) =>
                         set((state) => {
                             const newMoudles = [
+                                module,
                                 ...state.modules.filter(
                                     (m) => m.id !== module.id
                                 ),
-                                module,
                             ]
                             return { ...state, modules: newMoudles }
                         }),

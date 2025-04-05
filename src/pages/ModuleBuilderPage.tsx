@@ -106,7 +106,7 @@ export const ModulesNav: React.FC<{
         onSearchChange(search)
     }, [search])
 
-    const { setModule, removeModule, modules, backfill } = useModuleStore()
+    const { setModule, backfill } = useModuleStore()
     const importedFilters: Record<string, UiModularFilter> = useUiStore(
         (state) => state.importedModularFilters
     )

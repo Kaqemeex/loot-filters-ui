@@ -86,7 +86,7 @@ const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
 
 export const ModuleEditPage: React.FC = () => {
     const id = useParams().id as string
-    const { setModule, removeModule, modules, backfill } = useModuleStore()
+    const { setModule, modules } = useModuleStore()
 
     const thisModule = modules.find((m) => m.id === id)
     if (thisModule === undefined) {
