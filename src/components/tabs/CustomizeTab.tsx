@@ -33,7 +33,11 @@ import {
     StyleInput,
     TextInput,
 } from '../../types/InputsSpec'
-import { FilterId, UiFilterModule } from '../../types/ModularFilterSpec'
+import {
+    FilterId,
+    UiFilterModule,
+    UiModularFilter,
+} from '../../types/ModularFilterSpec'
 
 import SettingsIcon from '@mui/icons-material/Settings'
 import { isConfigEmpty } from '../../utils/configUtils'
@@ -477,7 +481,7 @@ export const CustomizeTab: React.FC = () => {
         Record<string, boolean>
     >({})
 
-    const activeFilter = useMemo(
+    const activeFilter: UiModularFilter | undefined = useMemo(
         () =>
             Object.values(importedModularFilters).find(
                 (filter) => filter.active

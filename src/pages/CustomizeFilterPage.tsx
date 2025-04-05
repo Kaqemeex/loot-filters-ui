@@ -10,13 +10,13 @@ import {
 } from '@mui/material'
 import { useMemo, useState } from 'react'
 import { filter } from 'underscore'
+import { BackgroundSelector } from '../components/BackgroundSelector'
+import { FilterSelector } from '../components/FilterSelector'
+import { CustomizeTab } from '../components/tabs/CustomizeTab'
+import { RenderedFilterTab } from '../components/tabs/RenderedFilterTab'
 import { useUiStore } from '../store/store'
-import { BackgroundSelector } from './BackgroundSelector'
-import { FilterSelector } from './FilterSelector'
-import { CustomizeTab } from './tabs/CustomizeTab'
-import { RenderedFilterTab } from './tabs/RenderedFilterTab'
 
-export const FilterTabs: React.FC<{ sha: string }> = ({ sha }) => {
+export const FilterTabs: React.FC = () => {
     const { siteConfig } = useUiStore()
     const [activeTab, setActiveTab] = useState(0)
 
@@ -49,7 +49,7 @@ export const FilterTabs: React.FC<{ sha: string }> = ({ sha }) => {
                 label: 'Preview',
                 disabled: !activeFilter,
                 dev: false,
-                component: <RenderedFilterTab sha={sha} />,
+                component: <RenderedFilterTab />,
             },
         ]
     }, [activeFilter])

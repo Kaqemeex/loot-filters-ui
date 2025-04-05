@@ -32,8 +32,6 @@ const RenderFilterComponent: React.FC = () => {
     )
 }
 
-export const RenderedFilterTab: React.FC<{
-    sha: string
-}> = ({ sha }) => {
+export const RenderedFilterTab: React.FC = () => {
     return <RenderFilterComponent />
 }
