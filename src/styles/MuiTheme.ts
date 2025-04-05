@@ -2,6 +2,7 @@ import { createTheme } from '@mui/material'
 
 export const colors = {
     rsYellow: '#ffff00',
+    rsDarkYellow: '#dcbe2c',
     rsOrange: '#ff9300',
     rsDarkOrange: '#bba990', // '#b2813d',
     rsDarkBrown: '#2c2721',

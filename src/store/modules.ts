@@ -17,18 +17,11 @@ export const useModuleStore = create<ModuleStoreState>()(
                     modules: {},
                     backfill: (modules: UiFilterModule[]) => {
                         set((state) => {
-                            if (Object.keys(state.modules).length === 0) {
-                                return {
-                                    ...state,
-                                    modules: Object.fromEntries(
-                                        modules.map((module) => [
-                                            module.id,
-                                            module,
-                                        ])
-                                    ),
-                                }
-                            } else {
-                                return state
+                            return {
+                                ...state,
+                                modules: Object.fromEntries(
+                                    modules.map((module) => [module.id, module])
+                                ),
                             }
                         })
                     },

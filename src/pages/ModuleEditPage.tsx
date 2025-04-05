@@ -20,7 +20,7 @@ const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
     const { setModule, modules } = useModuleStore()
     const module: UiFilterModule = modules[id]
 
-    const undefinedIfEmpty = (str: string) => (str ? str : undefined)
+    const undefinedIfEmpty = (str: string) => (str.trim() ? str : undefined)
 
     return (
         <Box display={active ? 'block' : 'none'}>
@@ -40,7 +40,7 @@ const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
                         onChange={(event) => {
                             setModule({
                                 ...module,
-                                name: event.target.value.trim(),
+                                name: event.target.value,
                             })
                         }}
                     />
@@ -55,9 +55,7 @@ const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
                         onChange={(event) => {
                             setModule({
                                 ...module,
-                                subtitle: undefinedIfEmpty(
-                                    event.target.value.trim()
-                                ),
+                                subtitle: undefinedIfEmpty(event.target.value),
                             })
                         }}
                     />
@@ -76,7 +74,7 @@ const ModuleDetailsEditor: React.FC<{ id: string; active: boolean }> = ({
                             setModule({
                                 ...module,
                                 description: undefinedIfEmpty(
-                                    event.target.value.trim()
+                                    event.target.value
                                 ),
                             })
                         }}
