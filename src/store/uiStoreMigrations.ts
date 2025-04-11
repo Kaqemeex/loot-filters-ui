@@ -1,7 +1,6 @@
 import { GitHubFilterSource } from '../types/GitHubFilterSource'
 import {
     EnumListInput,
-    IncludeExcludeListInput,
     Input,
     InputConfig,
     MacroName,
@@ -110,23 +109,12 @@ const v1toV2Migration = (
                                     macroName
                                 )
                             )
-                        }) as
-                        | StringListInput
-                        | EnumListInput
-                        | IncludeExcludeListInput
+                        }) as StringListInput | EnumListInput
 
-                    const listDiff =
-                        input.type === 'stringlist' || input.type === 'enumlist'
-                            ? convertToListDiff(
-                                  config as string[],
-                                  input.default
-                              )
-                            : convertToListDiff(
-                                  config as string[],
-                                  input.macroName.includes === macroName
-                                      ? input.default.includes
-                                      : input.default.excludes
-                              )
+                    const listDiff = convertToListDiff(
+                        config as string[],
+                        input.default
+                    )
 
                     return [macroName, listDiff]
                 }

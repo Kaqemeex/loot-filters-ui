@@ -71,29 +71,6 @@ const renderModule = (
                 )
                 break
             }
-            case 'includeExcludeList': {
-                const includes = config?.[input.macroName.includes] as ListDiff
-                const excludes = config?.[input.macroName.excludes] as ListDiff
-
-                const includesList = convertOptionsToStrings(
-                    applyDiff(input.default.includes, includes ?? EMPTY_DIFF)
-                )
-                const excludesList = convertOptionsToStrings(
-                    applyDiff(input.default.excludes, excludes ?? EMPTY_DIFF)
-                )
-
-                updated = updateMacro(
-                    updated,
-                    input.macroName.includes,
-                    renderStringList(includesList)
-                )
-                updated = updateMacro(
-                    updated,
-                    input.macroName.excludes,
-                    renderStringList(excludesList)
-                )
-                break
-            }
 
             case 'style': {
                 const style = config?.[input.macroName] as

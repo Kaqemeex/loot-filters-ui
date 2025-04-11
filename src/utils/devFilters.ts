@@ -84,23 +84,6 @@ const listInputFilter: FilterDefinition = {
                         macroName: 'VAR_TOA_HIGHLIGHT',
                         default: ['example-item'],
                     },
-                    {
-                        type: 'includeExcludeList',
-                        macroName: {
-                            includes: 'VAR_GENERAL_GRAARDOR_UNIQUES_SHOW',
-                            excludes: 'VAR_GENERAL_GRAARDOR_UNIQUES_HIDE',
-                        },
-                        label: 'General Graardor uniques',
-                        default: {
-                            includes: [
-                                'Bandos chestplate',
-                                'Bandos tassets',
-                                'Bandos boots',
-                                'Bandos hilt',
-                            ],
-                            excludes: [],
-                        },
-                    },
                 ],
             },
             moduleRs2fText: '#define STYLE_INPUT_TEST nop;',

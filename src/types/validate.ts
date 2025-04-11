@@ -2,7 +2,6 @@ import { isArray, isObject } from 'underscore'
 import {
     BooleanInput,
     EnumListInput,
-    IncludeExcludeListInput,
     NumberInput,
     StringListInput,
 } from './InputsSpec'
@@ -19,11 +18,6 @@ export const validateModule = (module: FilterModule) => {
                 if (input.macroName.length === 0) {
                     throw new Error(`Module ${module.name} has empty macroName`)
                 }
-            } else if (typeof input.macroName === 'object') {
-                checkObjectProperty(input.macroName, 'includes', 'string') &&
-                    input.macroName.includes.length > 0
-                checkObjectProperty(input.macroName, 'excludes', 'string') &&
-                    input.macroName.excludes.length > 0
             } else {
                 throw new Error(
                     `Module ${module.name} has invalid macroName ${input.macroName} or the macroName is empty`
@@ -45,16 +39,6 @@ export const validateModule = (module: FilterModule) => {
                 break
             case 'enumlist':
                 checkArrayProperty((input as EnumListInput).default, 'string')
-                break
-            case 'includeExcludeList':
-                checkArrayProperty(
-                    (input as IncludeExcludeListInput).default.includes,
-                    'string'
-                )
-                checkArrayProperty(
-                    (input as IncludeExcludeListInput).default.excludes,
-                    'string'
-                )
                 break
             case 'style':
                 if (!isObject(input.default)) {

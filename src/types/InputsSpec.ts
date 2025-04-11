@@ -6,7 +6,6 @@ const filterTypes = {
     number: 'number',
     stringlist: 'stringlist',
     enumlist: 'enumlist',
-    includeExcludeList: 'includeExcludeList',
     style: 'style',
     text: 'text',
 } as const
@@ -17,7 +16,6 @@ export type Input =
     | BooleanInput
     | StringListInput
     | EnumListInput
-    | IncludeExcludeListInput
     | StyleInput
     | TextInput
 export type FilterType = keyof typeof filterTypes
@@ -29,13 +27,11 @@ export type InputDefault<I extends Input> = I extends NumberInput
         ? string[] | ListOption[]
         : I extends EnumListInput
           ? string[]
-          : I extends IncludeExcludeListInput
-            ? IncludeExcludeListInputDefaults
-            : I extends StyleInput
-              ? Partial<StyleConfig>
-              : I extends TextInput
-                ? string
-                : never
+          : I extends StyleInput
+            ? Partial<StyleConfig>
+            : I extends TextInput
+              ? string
+              : never
 
 export type ListDiff = {
     added: string[]
@@ -43,12 +39,9 @@ export type ListDiff = {
 }
 
 export type InputConfig<I extends Input> =
-    I extends Exclude<
-        Input,
-        StringListInput | EnumListInput | IncludeExcludeListInput | StyleInput
-    >
+    I extends Exclude<Input, StringListInput | EnumListInput | StyleInput>
         ? InputDefault<I>
-        : I extends StringListInput | EnumListInput | IncludeExcludeListInput
+        : I extends StringListInput | EnumListInput
           ? ListDiff
           : I extends StyleInput
             ? Partial<StyleConfig>
@@ -91,22 +84,6 @@ export type EnumListInput = {
     default: string[]
     enum: string[] | ListOption[]
 } & Omit<FilterModuleInput<'enumlist'>, 'default'>
-
-export type IncludeExcludeListInputDefaults = {
-    includes: string[] | ListOption[]
-    excludes: string[] | ListOption[]
-}
-
-export type IncludeExcludeListInput = Omit<
-    Omit<FilterModuleInput<'includeExcludeList'>, 'default'>,
-    'macroName'
-> & {
-    macroName: {
-        includes: string
-        excludes: string
-    }
-    default: IncludeExcludeListInputDefaults
-}
 
 /**
  * @see https://github.com/riktenx/loot-filters/blob/bec89ccfee8f85fab8c8b1dc9da49f972c2316fb/src/main/java/com/lootfilters/rule/FontType.java#L15

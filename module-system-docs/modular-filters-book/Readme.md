@@ -222,7 +222,7 @@ Provides a dropdown in the UI where you can put in any number of strings
 }
 ```
 
-### 4.3.3: IncludeExcludeList
+### 4.3.3: [Removed] IncludeExcludeList
 
 A specical input of paired lists, useful for times when you may want to allow both including and excluding values.
 

@@ -27,7 +27,6 @@ import {
     BooleanInput,
     EnumListInput,
     FilterType,
-    IncludeExcludeListInput,
     Input,
     NumberInput,
     StringListInput,
@@ -46,7 +45,6 @@ import { generateId } from '../../utils/idgen'
 import { BooleanInputComponent } from '../inputs/BooleanInputComponent'
 import { DisplayConfigurationInput } from '../inputs/DisplayConfigurationInput'
 import { EnumInputComponent } from '../inputs/EnumInputComponent'
-import { IncludeExcludeListInputComponent } from '../inputs/IncludeExcludeListInputComponent'
 import { NumberInputComponent } from '../inputs/NumberInputComponent'
 import { StringListInputComponent } from '../inputs/StringListInputComponent'
 import { StyleConfig } from '../inputs/StyleInputHelpers'
@@ -102,14 +100,6 @@ const InputComponent: React.FC<{
                     input={input as StyleInput}
                 />
             )
-        case 'includeExcludeList':
-            return (
-                <IncludeExcludeListInputComponent
-                    activeFilterId={activeFilterId}
-                    module={module}
-                    input={input as IncludeExcludeListInput}
-                />
-            )
         case 'text':
             const textInput = input as TextInput
             return (
@@ -137,8 +127,6 @@ const sizeOf = (input: Input) => {
             return 2
         case 'style':
             return 16
-        case 'includeExcludeList':
-            return 12
         default:
             return 4
     }
@@ -231,17 +219,9 @@ const ModuleSection: React.FC<{
                 state.filterConfigurations?.[activeFilterId]?.inputConfigs
         ) || {}
 
-    const moduleMacronames = module.inputs
-        .map((input) => {
-            if (input.type === 'includeExcludeList') {
-                return [
-                    (input as IncludeExcludeListInput).macroName.includes,
-                    (input as IncludeExcludeListInput).macroName.excludes,
-                ]
-            }
-            return [input.macroName]
-        })
-        .reduce((acc, macroName) => [...acc, ...macroName], [])
+    const moduleMacronames = module.inputs.map((input) => {
+        return input.macroName
+    })
 
     const configCount = Object.keys(filterConfig)
         .filter((macroName) => moduleMacronames.includes(macroName))
