@@ -1,4 +1,4 @@
-import { Alert, Container, Snackbar, Typography } from '@mui/material'
+import { Alert, Container, Snackbar } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import { ReactNode, useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { FilterSelector } from './components/FilterSelector'
 import { FilterTabs } from './pages/CustomizeFilterPage'
 import { DebugPage } from './pages/DebugPage'
 import { ImportPage } from './pages/ImportPage'
+import { ParsePage } from './pages/ParsePage'
 import { useAlertStore } from './store/alerts'
 import { useUiStore } from './store/store'
 import { MuiRsTheme } from './styles/MuiTheme'
@@ -86,6 +87,7 @@ export const App = () => {
                             />
                         }
                     />
+                    <Route path="/parser" element={<ParsePage />} />
                     <Route path="/save-me" element={<div />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

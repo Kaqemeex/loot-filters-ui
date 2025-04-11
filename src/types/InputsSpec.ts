@@ -1,7 +1,7 @@
 import { StyleConfig } from '../components/inputs/StyleInputHelpers'
 
 // Don't export this, just use FilterType
-const filterTypes = {
+const inputTypes = {
     boolean: 'boolean',
     number: 'number',
     stringlist: 'stringlist',
@@ -20,7 +20,7 @@ export type Input =
     | IncludeExcludeListInput
     | StyleInput
     | TextInput
-export type FilterType = keyof typeof filterTypes
+export type InputType = keyof typeof inputTypes
 export type InputDefault<I extends Input> = I extends NumberInput
     ? number
     : I extends BooleanInput
@@ -57,7 +57,7 @@ export type InputConfig<I extends Input> =
 export type ModuleName = string
 export type MacroName = string
 
-interface FilterModuleInputBase<T extends FilterType> {
+interface FilterModuleInputBase<T extends InputType> {
     type: T
     // The label of the input in the UI
     label: string
@@ -67,7 +67,7 @@ interface FilterModuleInputBase<T extends FilterType> {
     macroName: string
 }
 
-export interface FilterModuleInput<T extends FilterType>
+export interface FilterModuleInput<T extends InputType>
     extends FilterModuleInputBase<T> {
     // This is overridden by child types
     default: never

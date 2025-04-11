@@ -5,7 +5,6 @@ import {
     AccordionSummary,
     Badge,
     Box,
-    Dialog,
     Divider,
     Grid2,
     IconButton,
@@ -26,9 +25,9 @@ import { colors, MuiRsTheme } from '../../styles/MuiTheme'
 import {
     BooleanInput,
     EnumListInput,
-    FilterType,
     IncludeExcludeListInput,
     Input,
+    InputType,
     NumberInput,
     StringListInput,
     StyleInput,
@@ -43,6 +42,7 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings'
 import { isConfigEmpty } from '../../utils/configUtils'
 import { generateId } from '../../utils/idgen'
+import { GitHubFlavoredMarkdown } from '../GitHubFlavoredMarkdown'
 import { BooleanInputComponent } from '../inputs/BooleanInputComponent'
 import { DisplayConfigurationInput } from '../inputs/DisplayConfigurationInput'
 import { EnumInputComponent } from '../inputs/EnumInputComponent'
@@ -51,16 +51,14 @@ import { NumberInputComponent } from '../inputs/NumberInputComponent'
 import { StringListInputComponent } from '../inputs/StringListInputComponent'
 import { StyleConfig } from '../inputs/StyleInputHelpers'
 import { TextInputComponent } from '../inputs/TextInputComponent'
-import { Option, UISelect } from '../inputs/UISelect'
 import { ItemLabelPreview } from '../Previews'
-import { GitHubFlavoredMarkdown } from '../GitHubFlavoredMarkdown'
 
 const InputComponent: React.FC<{
     activeFilterId: FilterId
     module: UiFilterModule
     input: Input
 }> = ({ activeFilterId, module, input }) => {
-    switch (input.type as FilterType) {
+    switch (input.type as InputType) {
         case 'number':
             const numberInput = input as NumberInput
             return (
