@@ -2,7 +2,7 @@ import { parse } from '../parsing/parse'
 import { Filter } from '../parsing/UiTypesSpec'
 
 export const loadFilterFromUrl = async (url: string): Promise<Filter> => {
-    const response = await fetch(url)
+    const response = await fetch(url, { mode: 'no-cors' })
     const filterText = await response.text()
 
     console.log(filterText.slice(0, 100))
