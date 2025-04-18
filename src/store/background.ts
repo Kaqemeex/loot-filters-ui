@@ -11,7 +11,7 @@ export const useBackgroundStore = create<BackgroundStoreState>()(
     devtools(
         persist(
             (set) => ({
-                background: BackgroundImage.GodWarsDungeon,
+                background: BackgroundImage.Default,
                 updateBackground: (background) =>
                     set((state) => ({ background })),
             }),

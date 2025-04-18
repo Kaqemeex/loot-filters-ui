@@ -25,7 +25,7 @@ import ZulAndraImage from '../images/zul_andra.png'
 
 export const BackgroundImage = {
     Random: 'Random',
-    GodWarsDungeon: 'God Wars Dungeon',
+    Default: 'Default',
     AbyssalNexus: 'Abyssal Nexus',
     Akkha: 'Akkha',
     Baba: 'Ba-Ba',
@@ -34,6 +34,7 @@ export const BackgroundImage = {
     ChambersOfXeric: 'Chambers of Xeric',
     CorruptedGauntlet: 'Corrupted Gauntlet',
     Gauntlet: 'Gauntlet',
+    GodWarsDungeon: 'God Wars Dungeon',
     Grass: 'Grass',
     Kephri: 'Kephri',
     Nightmare: 'Nightmare',
