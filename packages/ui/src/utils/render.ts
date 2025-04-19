@@ -108,7 +108,7 @@ export const applyModule = (
                     | string
                     | undefined
                 if (text !== undefined) {
-                    updated = updateMacro(updated, input.macroName, `"${text}"`) 
+                    updated = updateMacro(updated, input.macroName, `"${text}"`)
                 }
                 break
             }
