@@ -90,6 +90,7 @@ export const StyleConfigSpec = z.object({
     tileFillColor: ArgbHexColorSpec.optional(),
     tileHighlightColor: ArgbHexColorSpec.optional(),
     sound: z.string().optional(),
+    menuSort: z.number().optional(),
 })
 
 export type StyleConfig = z.infer<typeof StyleConfigSpec>

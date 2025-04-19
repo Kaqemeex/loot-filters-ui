@@ -257,6 +257,16 @@ export const DisplayConfigurationInput: React.FC<{
             onChange={onChange}
         />
     )
+    const menuSortInput = (
+        <TextField
+            sx={{ minWidth: '10rem', marginBottom: '-25px' }}
+            placeholder="priority"
+            type="number"
+            value={styleConfig?.menuSort ?? input.default?.menuSort ?? 0}
+            onChange={(e) => onChange({ menuSort: parseInt(e.target.value) })}
+            disabled={readonly}
+        />
+    )
 
     const fontTypeInput = (
         <UISelect<number>
@@ -370,6 +380,8 @@ export const DisplayConfigurationInput: React.FC<{
                         <Grid2 container size={11}>
                             <Label label="Menu Color" />
                             <Grid2 size={1}>{menuColorInput}</Grid2>
+                            <Label label="Menu Sort" />
+                            <Grid2 size={1}>{menuSortInput}</Grid2>
                         </Grid2>
                     </Column>
                     <HeaderCol text="General" />
