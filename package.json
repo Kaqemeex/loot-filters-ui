@@ -11,7 +11,7 @@
         "type-check": "npm run type-check --workspaces",
         "test": "npm run test --workspaces",
         "lint": "npm run lint --workspaces",
-        "format": "prettier --write \"packages/**/*.{ts,tsx}\"",
+        "prettier": "prettier --write \"packages/**/*.{ts,tsx}\"",
         "prettier:check": "prettier --check \"packages/**/*.{ts,tsx}\""
     },
     "devDependencies": {

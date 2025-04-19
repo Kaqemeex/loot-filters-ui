@@ -1,7 +1,7 @@
 import { CircularProgress } from '@mui/material'
 
 import { Typography } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { loadFilterFromUrl } from '../../utils/loaderv2'
 import { useFilterConfigStore } from '../filterConfigurationStore'
 import { useFilterStore } from '../filterStore'
@@ -15,24 +15,43 @@ export const legacyFilterUrls: Record<string, string> = {
         'https://raw.githubusercontent.com/Blooprnt/ClearLoot/refs/heads/main/clearloot.rs2f',
 }
 
+const LAST_MIGRATION_DATE = '2025-04-19'
 export const requiresMigration = () => {
+    console.log('Checking for migration')
+    const legacyData = localStorage.getItem('modular-filter-storage')
+
+    if (!legacyData) {
+        return false
+    }
+
     const migrated = localStorage.getItem('modular-filter-storage-migrated')
-    if (migrated === 'true') {
-        return false
+
+    if (!migrated) {
+        console.log('No migration date found, requiring migration')
+        return true
     }
 
-    const data = localStorage.getItem('modular-filter-storage')
-    if (!data) {
-        localStorage.setItem('modular-filter-storage-migrated', 'true')
-        return false
-    }
+    console.log('Migration date found:', migrated)
 
-    return true
+    try {
+        const date = Date.parse(migrated)
+        if (date < new Date(LAST_MIGRATION_DATE).getTime() || isNaN(date)) {
+            console.log(
+                `Migration date is before ${LAST_MIGRATION_DATE}, requiring migration`
+            )
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error('error checking for migration', error)
+        return true
+    }
 }
 
 export const MigrateLegacyData: React.FC = () => {
+    console.log('Migrating legacy data')
     const { setFilterConfiguration } = useFilterConfigStore()
-    const { updateFilter } = useFilterStore()
+    const { filters, updateFilter } = useFilterStore()
 
     const data = localStorage.getItem('modular-filter-storage')!!
     const legacyData = JSON.parse(data).state
@@ -40,20 +59,35 @@ export const MigrateLegacyData: React.FC = () => {
     const [migrationsStarted, setMigrationsStarted] = useState<string[]>([])
 
     Object.values(legacyData.importedModularFilters).forEach(
-        ({ id, name, active, source: { owner, repo } }: any, index: number) => {
-            const url = legacyFilterUrls[`${owner}:${repo}`]
-            if (!url || migrationsStarted.includes(url)) {
+        ({ id, name, active, source }: any, index: number) => {
+            let url = null
+            if (typeof source === 'string') {
+                url = source
+            } else if (
+                typeof source === 'object' &&
+                source.owner &&
+                source.repo
+            ) {
+                url = legacyFilterUrls[`${source.owner}:${source.repo}`]
+            }
+
+            if (!url || migrationsStarted.includes(id)) {
                 return
             }
-            setMigrationsStarted((prev) => [...prev, url])
+
+            setMigrationsStarted((prev) => [...prev, id])
             const configs = legacyData.filterConfigurations[id] ?? {}
             loadFilterFromUrl(url)
                 .then((filter) => {
                     setMigrationsStarted((prev) =>
-                        prev.filter((url) => url !== url)
+                        prev.filter((id) => id !== id)
                     )
-                    updateFilter({ ...filter, id: id, name, active })
-                    setFilterConfiguration(id, configs)
+                    // Only migrate if the filter doesn't exist yet
+                    // to avoid overwriting any changes
+                    if (filters[id] === undefined) {
+                        updateFilter({ ...filter, id: id, name, active })
+                        setFilterConfiguration(id, configs)
+                    }
                 })
                 .catch((error) => {
                     console.error(error)
@@ -63,7 +97,10 @@ export const MigrateLegacyData: React.FC = () => {
 
     const checkMigrations = () => {
         if (migrationsStarted.length === 0) {
-            localStorage.setItem('modular-filter-storage-migrated', 'true')
+            localStorage.setItem(
+                'modular-filter-storage-migrated',
+                new Date().toISOString()
+            )
             window.location.reload()
         } else {
             setTimeout(checkMigrations, 1000)
@@ -71,15 +108,6 @@ export const MigrateLegacyData: React.FC = () => {
     }
 
     setTimeout(checkMigrations, 1000)
-
-    useEffect(() => {
-        if (migrationsStarted.length === 0) {
-            localStorage.setItem('modular-filter-storage-migrated', 'true')
-            setTimeout(() => {
-                window.location.reload()
-            }, 2000)
-        }
-    }, [migrationsStarted])
 
     return (
         <div
