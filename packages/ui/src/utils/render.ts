@@ -108,7 +108,7 @@ export const applyModule = (
                     | string
                     | undefined
                 if (text !== undefined) {
-                    updated = updateMacro(updated, input.macroName, text)
+                    updated = updateMacro(updated, input.macroName, `"${text}"`) 
                 }
                 break
             }
@@ -153,8 +153,15 @@ const renderStyleInt = (name: string, int: number | undefined): string =>
 const renderStyleBool = (name: string, value: boolean | undefined): string =>
     value !== undefined ? `${name} = ${value};` : ''
 
-const renderStyleString = (name: string, value: string | undefined): string =>
-    value !== undefined ? `${name} = "${value}";` : ''
+const renderStyleString = (
+    name: string,
+    value: string | number | undefined
+): string => {
+    if (typeof value === 'number') {
+        return `${name} = ${value};`
+    }
+    return value !== undefined ? `${name} = "${value}";` : ''
+}
 
 const isTargetMacro = (line: string, target: string): boolean =>
     line.startsWith(`#define ${target} `) || line === `#define ${target}`
