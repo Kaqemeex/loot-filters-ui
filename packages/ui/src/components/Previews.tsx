@@ -161,8 +161,7 @@ export const ItemLabelPreview: React.FC<{
         activeConfig?.textColor ?? input.default?.textColor
     )
 
-    const hidden =
-        activeConfig?.hideOverlay ?? input.default?.hideOverlay ?? false
+    const hidden = activeConfig?.hidden ?? input.default?.hidden ?? false
 
     const fontType = (activeConfig?.fontType ?? input.default?.fontType) as
         | FontType

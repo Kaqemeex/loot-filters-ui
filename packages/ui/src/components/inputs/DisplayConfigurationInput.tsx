@@ -32,7 +32,7 @@ import {
 import { ItemLabelPreview, ItemMenuPreview } from '../Previews'
 import { ColorPickerInput } from './ColorPicker'
 import { CopyInputSettings } from './CopyInputSettings'
-import { UISelect } from './UISelect'
+import { UISelect, Option } from './UISelect'
 
 const parseSoundInput = (value: string): string | number | undefined => {
     if (value.length === 0) {
@@ -107,6 +107,12 @@ const Label: React.FC<{ label: string; sx?: SxProps }> = ({ label, sx }) => {
     )
 }
 
+const displayModeOptions: Option<number>[] = [
+    { label: 'Inherit', value: 1 },
+    { label: 'Show', value: 2 },
+    { label: 'Hide', value: 3 },
+]
+
 export const DisplayConfigurationInput: React.FC<{
     config: FilterConfiguration
     onChange: (style: StyleConfig) => void
@@ -129,6 +135,37 @@ export const DisplayConfigurationInput: React.FC<{
     const [iconType, setIconType] = useState<
         'none' | 'current' | 'file' | 'sprite' | 'itemId'
     >(styleConfig?.icon?.type ?? input.default?.icon?.type ?? 'none')
+
+    let displayModeValue: Option<number> = displayModeOptions[0]
+    if (styleConfig.hidden === false) {
+        displayModeValue = displayModeOptions[1]
+    } else if (styleConfig.hidden === true) {
+        displayModeValue = displayModeOptions[2]
+    }
+    const displayModeInput = (
+        <UISelect<number>
+            sx={{ width: '10rem', marginLeft: 1 }}
+            disabled={readonly}
+            options={displayModeOptions}
+            multiple={false}
+            freeSolo={false}
+            disableClearable={true}
+            value={displayModeValue}
+            onChange={(newValue) => {
+                switch (newValue?.value) {
+                    case 1:
+                        onChange({ hidden: undefined })
+                        break
+                    case 2:
+                        onChange({ hidden: false })
+                        break
+                    case 3:
+                        onChange({ hidden: true })
+                        break
+                }
+            }}
+        />
+    )
 
     const displayLootbeamInput = (
         <Checkbox
@@ -176,16 +213,6 @@ export const DisplayConfigurationInput: React.FC<{
             disabled={readonly}
             checked={styleConfig.notify ?? input.default?.notify ?? false}
             onChange={(e) => onChange({ notify: e.target.checked })}
-        />
-    )
-
-    const hideOverlayComponent = (
-        <Checkbox
-            disabled={readonly}
-            checked={
-                styleConfig.hideOverlay ?? input.default?.hideOverlay ?? false
-            }
-            onChange={(e) => onChange({ hideOverlay: e.target.checked })}
         />
     )
 
@@ -539,6 +566,7 @@ export const DisplayConfigurationInput: React.FC<{
                 expandIcon={<ExpandMore />}
             >
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <Box>{displayModeInput}</Box>
                     <ItemLabelPreview input={input} itemName={input.label} />
                     <ItemMenuPreview input={input} itemName={input.label} />
                 </Box>
@@ -718,8 +746,6 @@ export const DisplayConfigurationInput: React.FC<{
                             <Grid2 size={1} />
                             <Grid2 size={2} />
                             <Grid2 size={1} />
-                            <Label label="Hide Overlay" />
-                            <Grid2 size={1}>{hideOverlayComponent}</Grid2>
                         </Row>
                     </Grid2>
                 </Grid2>
