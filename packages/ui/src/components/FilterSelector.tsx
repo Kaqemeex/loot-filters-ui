@@ -75,8 +75,6 @@ const UpdateAvailableDialog: React.FC<{
     onClose: () => void
     onUpdate: () => void
 }> = ({ open, filterName, filterUrl, onClose, onUpdate }) => {
-    console.log('open', open)
-
     let updateText = (
         <span>
             A new version of the filter is available. Would you like to update?

@@ -6,6 +6,8 @@ import {
     Box,
     Checkbox,
     Grid2,
+    MenuItem,
+    Select,
     SxProps,
     TextField,
     Typography,
@@ -33,6 +35,7 @@ import { ItemLabelPreview, ItemMenuPreview } from '../Previews'
 import { ColorPickerInput } from './ColorPicker'
 import { CopyInputSettings } from './CopyInputSettings'
 import { UISelect } from './UISelect'
+import { EventShield } from '../EventShield'
 
 const Column: React.FC<{
     children: React.ReactNode[] | React.ReactNode
@@ -133,6 +136,40 @@ export const DisplayConfigurationInput: React.FC<{
         'none' | 'soundeffect' | 'fromfile'
     >(inferSoundType(styleConfig?.sound ?? input.default?.sound))
 
+    const isHidden = styleConfig?.hidden ?? input.default?.hidden
+    let displayMode = 1
+    if (isHidden === false) {
+        displayMode = 2
+    } else if (isHidden === true) {
+        displayMode = 3
+    }
+    const displayModeInput = (
+        <EventShield>
+            <Select
+                sx={{ minWidth: '6rem', maxHeight: '3rem' }}
+                value={displayMode}
+                disabled={readonly || input.disableDisplayMode}
+                onChange={(e) => {
+                    switch (e.target.value) {
+                        case 1:
+                            onChange({ hidden: undefined })
+                            break
+                        case 2:
+                            onChange({ hidden: false })
+                            break
+                        case 3:
+                            onChange({ hidden: true })
+                            break
+                    }
+                }}
+            >
+                <MenuItem value={1}>Inherit</MenuItem>
+                <MenuItem value={2}>Show</MenuItem>
+                <MenuItem value={3}>Hide</MenuItem>
+            </Select>
+        </EventShield>
+    )
+
     const displayLootbeamInput = (
         <Checkbox
             disabled={readonly}
@@ -179,16 +216,6 @@ export const DisplayConfigurationInput: React.FC<{
             disabled={readonly}
             checked={styleConfig.notify ?? input.default?.notify ?? false}
             onChange={(e) => onChange({ notify: e.target.checked })}
-        />
-    )
-
-    const hideOverlayComponent = (
-        <Checkbox
-            disabled={readonly}
-            checked={
-                styleConfig.hideOverlay ?? input.default?.hideOverlay ?? false
-            }
-            onChange={(e) => onChange({ hideOverlay: e.target.checked })}
         />
     )
 
@@ -318,6 +345,7 @@ export const DisplayConfigurationInput: React.FC<{
             configField="textColor"
             config={styleConfig}
             input={input}
+            disabled={readonly || styleConfig.hideOverlay}
             onChange={onChange}
         />
     )
@@ -599,31 +627,36 @@ export const DisplayConfigurationInput: React.FC<{
 
     return (
         <Accordion
-            sx={{
-                backgroundColor: colors.rsLightBrown,
-            }}
             slotProps={{ transition: { unmountOnExit: true } }}
-            expanded={expanded}
+            expanded={expanded && !isHidden}
             onChange={() => setExpanded(!expanded)}
         >
             <AccordionSummary
                 sx={{
-                    backgroundColor: colors.rsLighterBrown,
+                    backgroundColor: isHidden
+                        ? colors.rsDarkBrown
+                        : colors.rsLighterBrown,
+                    minHeight: '5rem',
                 }}
-                expandIcon={<ExpandMore />}
+                expandIcon={!isHidden && <ExpandMore />}
             >
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    {displayModeInput}
                     <ItemLabelPreview input={input} itemName={input.label} />
-                    <ItemMenuPreview input={input} itemName={input.label} />
+                    {!isHidden && (
+                        <ItemMenuPreview input={input} itemName={input.label} />
+                    )}
                 </Box>
-                <CopyInputSettings
-                    input={input}
-                    configToCopy={{
-                        ...input.default,
-                        ...styleConfig,
-                    }}
-                    onChange={onChange}
-                />
+                {!isHidden && (
+                    <CopyInputSettings
+                        input={input}
+                        configToCopy={{
+                            ...input.default,
+                            ...styleConfig,
+                        }}
+                        onChange={onChange}
+                    />
+                )}
             </AccordionSummary>
             <AccordionDetails
                 sx={{
@@ -631,7 +664,7 @@ export const DisplayConfigurationInput: React.FC<{
                 }}
             >
                 <Grid2 container columns={12} rowSpacing={4}>
-                    <HeaderCol text="Label" />
+                    <HeaderCol text="Overlay" />
                     <Column>
                         <Row>
                             <Label label="Text Color" />
@@ -825,8 +858,6 @@ export const DisplayConfigurationInput: React.FC<{
                             <Grid2 size={1} />
                             <Grid2 size={2} />
                             <Grid2 size={1} />
-                            <Label label="Hide Overlay" />
-                            <Grid2 size={1}>{hideOverlayComponent}</Grid2>
                         </Row>
                     </Grid2>
                 </Grid2>
