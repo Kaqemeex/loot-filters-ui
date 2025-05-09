@@ -15,6 +15,7 @@ export const colors = {
     rsMediumBrown: '#4a4036',
     rsWhite: '#ffffff',
     rsBlack: '#000000',
+    rsHerbGreen: '#00c000',
 
     rsGrey: '#808080',
 }

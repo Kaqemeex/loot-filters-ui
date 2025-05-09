@@ -37,6 +37,7 @@ import {
     FilterConfigurationSpec,
     FilterId,
 } from '../parsing/UiTypesSpec'
+import { BackgroundSelector } from '../components/BackgroundSelector'
 import { useAlertStore } from '../store/alerts'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
@@ -68,6 +69,16 @@ const updateAvailableFn = (
     }
 }
 
+const isAutoUpdate = (filterUrl?: string): boolean =>
+    filterUrl != null &&
+    filterUrl != undefined &&
+    (filterUrl?.startsWith(
+        'https://raw.githubusercontent.com/riktenx/filterscape'
+    ) ||
+        filterUrl?.startsWith(
+            'https://raw.githubusercontent.com/typical-whack/loot-filters-modules'
+        ))
+
 const UpdateAvailableDialog: React.FC<{
     open: boolean
     filterName: string
@@ -75,23 +86,13 @@ const UpdateAvailableDialog: React.FC<{
     onClose: () => void
     onUpdate: () => void
 }> = ({ open, filterName, filterUrl, onClose, onUpdate }) => {
-    console.log('open', open)
-
     let updateText = (
         <span>
             A new version of the filter is available. Would you like to update?
         </span>
     )
 
-    const autoUpdate =
-        filterUrl != null &&
-        filterUrl != undefined &&
-        (filterUrl?.startsWith(
-            'https://raw.githubusercontent.com/riktenx/filterscape'
-        ) ||
-            filterUrl?.startsWith(
-                'https://raw.githubusercontent.com/typical-whack/loot-filters-modules'
-            ))
+    const autoUpdate = isAutoUpdate(filterUrl)
 
     const [timeoutDone, setTimeoutDone] = useState(false)
 
@@ -266,27 +267,18 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
     const [filterMenuAnchor, setFilterMenuAnchor] =
         useState<HTMLElement | null>(null)
 
-    const importFilterButton = (
-        <Tooltip title="Import a new filter">
-            <IconButton
-                color="primary"
-                onClick={() => {
-                    navigate('/new-filter')
-                }}
-            >
-                <FiberNew style={{ color: colors.rsOrange }} />
-            </IconButton>
-        </Tooltip>
-    )
-
     const copyToClipboardButton = (
         <SmartTooltip
             enabledTitle="Copy filter to clipboard"
             disabledTitle="No filter selected"
             enabled={activeFilter != null}
         >
-            <IconButton
-                color="primary"
+            <Button
+                variant="outlined"
+                sx={{
+                    color: colors.rsHerbGreen,
+                    borderColor: colors.rsHerbGreen,
+                }}
                 disabled={!activeFilter}
                 onClick={() => {
                     if (!activeFilter) {
@@ -317,8 +309,9 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                         })
                 }}
             >
-                <ContentCopyIcon style={{ color: colors.rsOrange }} />
-            </IconButton>
+                <ContentCopyIcon />
+                Import to RuneLite
+            </Button>
         </SmartTooltip>
     )
 
@@ -582,9 +575,8 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                         />
                     </FormControl>
 
-                    {importFilterButton}
                     {copyToClipboardButton}
-                    {updateFilterButton}
+                    {!isAutoUpdate(activeFilter?.source) && updateFilterButton}
                     {shareFilterButton}
                     {menuButton}
                     {menu}
@@ -600,6 +592,9 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                             setUpdatedFilter(null)
                         }}
                     />
+                    <div style={{ marginLeft: 'auto' }}>
+                        <BackgroundSelector />
+                    </div>
                 </Box>
             </Stack>
             <Dialog

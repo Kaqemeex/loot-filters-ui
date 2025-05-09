@@ -98,7 +98,6 @@ const VisualResults: React.FC<{
     } else {
         return (
             <CustomizeTab
-                sx={{ marginTop: '-4rem' }}
                 filter={parsed.filter!!}
                 config={DEFAULT_FILTER_CONFIGURATION}
                 showSettings={false}

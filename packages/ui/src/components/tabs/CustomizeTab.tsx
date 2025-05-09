@@ -9,8 +9,6 @@ import {
     Menu,
     MenuItem,
     Stack,
-    ToggleButton,
-    ToggleButtonGroup,
     Tooltip,
     Typography,
     useMediaQuery,
@@ -19,7 +17,6 @@ import React, { CSSProperties, useEffect, useState } from 'react'
 import { groupBy, isObject } from 'underscore'
 import { colors, MuiRsTheme } from '../../styles/MuiTheme'
 
-import { ExpandLess } from '@mui/icons-material'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useSearchParams } from 'react-router-dom'
 import { parseModules } from '../../parsing/parse'
@@ -41,7 +38,6 @@ import {
 import { useFilterConfigStore } from '../../store/filterConfigurationStore'
 import { useFilterStore } from '../../store/filterStore'
 import { countConfigChanges } from '../../utils/configUtils'
-import { BackgroundSelector } from '../BackgroundSelector'
 import { GitHubFlavoredMarkdown } from '../GitHubFlavoredMarkdown'
 import { BooleanInputComponent } from '../inputs/BooleanInputComponent'
 import { DisplayConfigurationInput } from '../inputs/DisplayConfigurationInput'
@@ -568,54 +564,6 @@ export const CustomizeTab: React.FC<{
 
     return (
         <div style={{ ...sx }}>
-            <div
-                style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    marginBottom: '1rem',
-                }}
-            >
-                {extraComponent}
-                <div
-                    style={{
-                        marginLeft: 'auto',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        gap: '1rem',
-                        alignItems: 'center',
-                    }}
-                >
-                    <BackgroundSelector />
-                    <ToggleButtonGroup
-                        size="small"
-                        exclusive={false}
-                        sx={{ height: 'fit-content' }}
-                    >
-                        <ToggleButton
-                            value="expand"
-                            onClick={() => {
-                                const event = new CustomEvent('expandAll', {
-                                    detail: true,
-                                })
-                                window.dispatchEvent(event)
-                            }}
-                        >
-                            <ExpandMore />
-                        </ToggleButton>
-                        <ToggleButton
-                            value="collapse"
-                            onClick={() => {
-                                const event = new CustomEvent('expandAll', {
-                                    detail: false,
-                                })
-                                window.dispatchEvent(event)
-                            }}
-                        >
-                            <ExpandLess />
-                        </ToggleButton>
-                    </ToggleButtonGroup>
-                </div>
-            </div>
             <Stack>
                 {modules
                     .filter((m) => !m.hidden)
