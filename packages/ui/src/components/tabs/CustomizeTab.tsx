@@ -232,6 +232,44 @@ const getPreviews = ({ module }: { module: Module }) => {
     })
 }
 
+const getPreviewsForGroup = ({
+    module,
+    groupName,
+}: {
+    module: Module
+    groupName: string
+}) => {
+    const styleInputs: StyleInput[] = module.inputs.filter(
+        (input) => input.type === 'style' && input.group === groupName
+    ) as StyleInput[]
+
+    const activeFilterId = useFilterStore(
+        (state) =>
+            Object.keys(state.filters).find((id) => state.filters[id].active)!!
+    )
+    const configForModule = useFilterConfigStore(
+        (state) => state.filterConfigurations?.[activeFilterId]?.inputConfigs
+    )
+
+    const visibleStyleInputs = styleInputs.filter((input) => {
+        const config = StyleConfigSpec.optional()
+            .default({})
+            .parse(configForModule?.[input.macroName])
+        return !(config?.hideOverlay ?? input.default?.hideOverlay ?? false)
+    })
+
+    return visibleStyleInputs.slice(0, 4).map((input) => {
+        const macroName = (input as StyleInput).macroName
+        return (
+            <ItemLabelPreview
+                key={macroName}
+                itemName={input.label}
+                input={input}
+            />
+        )
+    })
+}
+
 const ModuleSection: React.FC<{
     activeFilterId: FilterId
     expanded: boolean
@@ -438,6 +476,10 @@ const ModuleSection: React.FC<{
                                 const groupExpanded = module.groups.find(
                                     (g) => g.name === groupName
                                 )?.expanded
+                                const groupPreviews = getPreviewsForGroup({
+                                    module,
+                                    groupName,
+                                })
 
                                 return (
                                     <Accordion
@@ -460,7 +502,23 @@ const ModuleSection: React.FC<{
                                                     colors.rsLighterBrown,
                                             }}
                                         >
-                                            <Typography>{group}</Typography>
+                                            <Typography
+                                                sx={{ alignSelf: 'center' }}
+                                            >
+                                                {group}
+                                            </Typography>
+                                            <Stack
+                                                direction="row"
+                                                sx={{
+                                                    flex: '1',
+                                                    flexWrap: 'wrap',
+                                                    justifyContent: 'flex-end',
+                                                    gap: '8px',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                {groupPreviews}
+                                            </Stack>
                                         </AccordionSummary>
                                         <AccordionDetails
                                             sx={{
