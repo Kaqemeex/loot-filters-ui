@@ -345,7 +345,7 @@ export const DisplayConfigurationInput: React.FC<{
             configField="textColor"
             config={styleConfig}
             input={input}
-            disabled={readonly || styleConfig.hideOverlay}
+            disabled={readonly}
             onChange={onChange}
         />
     )
