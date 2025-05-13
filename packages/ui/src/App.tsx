@@ -10,6 +10,7 @@ import { CustomizeFilterPageBody } from './pages/CustomizeFilterPage'
 import { DebugPage } from './pages/DebugPage'
 import { EditorLoadedFilterPage } from './pages/EditLoadedFilterPage'
 import { ImportPage } from './pages/ImportPage'
+import { HelpPage } from './pages/HelpPage'
 import { useAlertStore } from './store/alerts'
 import {
     MigrateLegacyData,
@@ -107,6 +108,10 @@ export const App = () => {
                     <Route
                         path="/import"
                         element={<Page component={<ImportPage />} />}
+                    />
+                    <Route
+                        path="/help"
+                        element={<Page component={<HelpPage />} />}
                     />
                     <Route path="/save-me" element={<div />} />
                     <Route path="*" element={<Navigate to="/" replace />} />

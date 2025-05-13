@@ -28,19 +28,11 @@ export const CustomizeFilterPageBody: React.FC = () => {
     )
 
     if (!activeFilter) {
-        return (
-            <Box>
-                <FilterSelector />
-            </Box>
-        )
+        return <Box />
     }
 
     return (
         <Box>
-            <Box>
-                <FilterSelector />
-            </Box>
-
             <Box sx={{ mt: 2 }}>
                 <CustomizeTab
                     readonly={false}

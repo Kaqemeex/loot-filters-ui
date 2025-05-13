@@ -1,5 +1,5 @@
 import { Editor } from '@monaco-editor/react'
-import { ArrowBack } from '@mui/icons-material'
+import { Delete, Download, Upload } from '@mui/icons-material'
 import { Box, Button, Container, Tab, Tabs } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -79,17 +79,6 @@ export const DebugPage = () => {
                 }}
             >
                 <Button
-                    color="secondary"
-                    variant="outlined"
-                    sx={{ fontFamily: 'RuneScape' }}
-                    onClick={() => {
-                        navigator('/')
-                    }}
-                >
-                    <ArrowBack />
-                    Back to Customizer
-                </Button>
-                <Button
                     sx={{ width: '250px' }}
                     variant="outlined"
                     onClick={() => {
@@ -107,6 +96,7 @@ export const DebugPage = () => {
                         downloadFile(file)
                     }}
                 >
+                    <Download sx={{ fontSize: '20px' }} />
                     Download Local State
                 </Button>
 
@@ -115,6 +105,7 @@ export const DebugPage = () => {
                     variant="outlined"
                     component="label"
                 >
+                    <Upload sx={{ fontSize: '20px' }} />
                     Upload Local State
                     <input
                         type="file"
@@ -150,6 +141,7 @@ export const DebugPage = () => {
                         window.location.href = `${window.location.protocol}://${window.location.host}`
                     }}
                 >
+                    <Delete sx={{ fontSize: '20px' }} />
                     Delete All Stored Data
                 </Button>
             </Box>
