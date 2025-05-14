@@ -75,6 +75,7 @@ export const ArgbHexColorSpec = z
     .catch('#FF000000')
 
 export const StyleConfigSpec = z.object({
+    hidden: z.boolean().optional(),
     textColor: ArgbHexColorSpec.optional(),
     backgroundColor: ArgbHexColorSpec.optional(),
     borderColor: ArgbHexColorSpec.optional(),
@@ -107,6 +108,7 @@ export const StyleInputSpec = InputSpec.extend({
         .optional(),
     exampleItem: z.string().optional(),
     exampleItemId: z.number().optional(),
+    disableDisplayMode: z.boolean().optional(),
 })
 
 export const TextInputDefaultSpec = z.string().optional().default('')

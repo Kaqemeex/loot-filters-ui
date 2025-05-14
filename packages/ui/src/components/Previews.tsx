@@ -161,9 +161,6 @@ export const ItemLabelPreview: React.FC<{
         activeConfig?.textColor ?? input.default?.textColor
     )
 
-    const hidden =
-        activeConfig?.hideOverlay ?? input.default?.hideOverlay ?? false
-
     const fontType = (activeConfig?.fontType ?? input.default?.fontType) as
         | FontType
         | undefined
@@ -264,6 +261,8 @@ export const ItemLabelPreview: React.FC<{
         activeBackgroundImage = imageFromBackgroundImage(activeBackground)
     }
 
+    const isHidden = activeConfig?.hidden ?? input.default?.hidden
+
     return (
         <div
             style={{
@@ -275,28 +274,6 @@ export const ItemLabelPreview: React.FC<{
                 alignItems: 'center',
             }}
         >
-            {hidden && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(0,0,0,0.3)',
-                        color: '#ffffff',
-                        fontFamily: 'RuneScapeSmall',
-                        fontSize: '20px',
-                        pointerEvents: 'none',
-                        zIndex: 1,
-                    }}
-                >
-                    Hidden
-                </div>
-            )}
             {icon && (
                 <img
                     style={{
@@ -312,10 +289,10 @@ export const ItemLabelPreview: React.FC<{
                     margin: '6px',
                     display: 'flex',
                     alignItems: 'center',
-                    backgroundColor: backgroundColor,
+                    backgroundColor: isHidden ? undefined : backgroundColor,
                     // background:
                     //     'linear-gradient(45deg,rgb(255, 255, 255) 0%, rgb(0, 0, 0) 100%)',
-                    border: `1px solid ${borderColor}`,
+                    border: isHidden ? undefined : `1px solid ${borderColor}`,
                     ...textAccentStyle,
                 }}
             >
@@ -323,7 +300,9 @@ export const ItemLabelPreview: React.FC<{
                     <span
                         style={{
                             padding: '2px',
-                            color: foregroundColor ?? '#ffffff',
+                            color: isHidden
+                                ? '#808080'
+                                : (foregroundColor ?? '#ffffff'),
                             fontSize: '24px',
                             fontFamily: fontFamily,
 

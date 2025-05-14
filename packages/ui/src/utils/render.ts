@@ -123,7 +123,12 @@ const renderStringList = (list: string[]): string =>
 const quote = (v: string): string => `"${v}"`
 
 const renderStyle = (style: StyleConfig): string => {
+    if (style.hidden) {
+        return 'hidden = true;' // save space, nothing else matters
+    }
+
     return [
+        renderStyleBool('hidden', style.hidden), // may still be explicitly UN-hiding
         renderStyleColor('textColor', style.textColor),
         renderStyleColor('backgroundColor', style.backgroundColor),
         renderStyleColor('borderColor', style.borderColor),
@@ -138,7 +143,6 @@ const renderStyle = (style: StyleConfig): string => {
         renderStyleBool('showValue', style.showValue),
         renderStyleBool('showDespawn', style.showDespawn),
         renderStyleBool('notify', style.notify),
-        renderStyleBool('hideOverlay', style.hideOverlay),
         renderStyleBool('highlightTile', style.highlightTile),
         renderStyleString('sound', style.sound),
         renderStyleInt('menuSort', style.menuSort),

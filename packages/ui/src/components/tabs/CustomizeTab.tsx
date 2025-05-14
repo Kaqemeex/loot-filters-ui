@@ -214,7 +214,7 @@ const getPreviews = ({ module }: { module: Module }) => {
         const config = StyleConfigSpec.optional()
             .default({})
             .parse(configForModule?.[input.macroName])
-        return !(config?.hideOverlay ?? input.default?.hideOverlay ?? false)
+        return !(config?.hidden ?? input.default?.hidden)
     })
 
     return visibleStyleInputs.slice(0, 4).map((input) => {

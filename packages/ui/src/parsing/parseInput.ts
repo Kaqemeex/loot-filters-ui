@@ -78,7 +78,7 @@ const parseStyle = (tokens: TokenStream): StyleConfig => {
                 style.borderColor = tokens.takeString()
                 break
             case 'hidden':
-                /* style.hidden = */ tokens.takeBool()
+                style.hidden = tokens.takeBool()
                 break
             case 'showLootbeam':
             case 'showLootBeam':
@@ -119,7 +119,8 @@ const parseStyle = (tokens: TokenStream): StyleConfig => {
                 style.tileFillColor = tokens.takeString()
                 break
             case 'hideOverlay':
-                style.hideOverlay = tokens.takeBool()
+                // we recognize this but the site doesn't support it
+                tokens.takeBool()
                 break
             case 'sound':
                 const value = tokens.peek()
