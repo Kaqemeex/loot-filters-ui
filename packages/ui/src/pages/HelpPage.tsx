@@ -360,7 +360,13 @@ const HelpContent = () => {
                                 <strong>6765:</strong> Muspah unique loot
                             </li>
                             <li>
-                                <strong>10224:</strong> TOA dung jungle
+                                <strong>10224:</strong> TOA dung jingle
+                            </li>
+                            <li>
+                                <strong>10241</strong> Yama drop
+                            </li>
+                            <li>
+                                <strong>10224</strong> Yama drop strong
                             </li>
                             <li>
                                 <strong>2380:</strong> Bell
