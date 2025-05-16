@@ -1,0 +1,17 @@
+.help-content h3,
+.help-content h4,
+.help-content h5 {
+    scroll-margin-top: 70px;
+}
+
+.help-content h3 {
+    color: --color-rs-orange
+}
+
+.help-content h4 {
+    color: --color-rs-yellow
+}
+
+.help-content h5 {
+    color: --color-rs-light-brown
+}
