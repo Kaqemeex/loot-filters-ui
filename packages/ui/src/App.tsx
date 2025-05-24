@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppHeader } from './components/AppHeader'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { FilterSelector } from './components/FilterSelector'
+import { InfoDialog } from './components/InfoDialog'
 import { initImages } from './images/osrs/imageUtils'
 import { CustomizeFilterPageBody } from './pages/CustomizeFilterPage'
 import { DebugPage } from './pages/DebugPage'
@@ -117,6 +118,7 @@ export const App = () => {
                     <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
+            <InfoDialog />
         </ThemeProvider>
     )
 }
