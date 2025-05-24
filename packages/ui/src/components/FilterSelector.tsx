@@ -29,6 +29,7 @@ import {
 import ListItemIcon from '@mui/material/ListItemIcon'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { SearchBar } from '../components/SearchBar'
 import { BackgroundSelector } from '../components/BackgroundSelector'
 import {
     DEFAULT_FILTER_CONFIGURATION,
@@ -598,8 +599,9 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                         }}
                     />
                     <div style={{ marginLeft: 'auto' }}>
-                        <BackgroundSelector />
+                        <SearchBar />
                     </div>
+                    <BackgroundSelector />
                 </Box>
             </Stack>
             <Dialog

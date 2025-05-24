@@ -13,6 +13,7 @@ import {
     Typography,
     useMediaQuery,
 } from '@mui/material'
+import { SxProps } from '@mui/system'
 import React, { CSSProperties, useEffect, useState } from 'react'
 import { groupBy, isObject } from 'underscore'
 import { colors, MuiRsTheme } from '../../styles/MuiTheme'
@@ -38,6 +39,7 @@ import {
 } from '../../parsing/UiTypesSpec'
 import { useFilterConfigStore } from '../../store/filterConfigurationStore'
 import { useFilterStore } from '../../store/filterStore'
+import { useSearchStore } from '../../store/search'
 import { countConfigChanges } from '../../utils/configUtils'
 import { GitHubFlavoredMarkdown } from '../GitHubFlavoredMarkdown'
 import { BooleanInputComponent } from '../inputs/BooleanInputComponent'
@@ -47,6 +49,11 @@ import { NumberInputComponent } from '../inputs/NumberInputComponent'
 import { StringListInputComponent } from '../inputs/StringListInputComponent'
 import { TextInputComponent } from '../inputs/TextInputComponent'
 import { ItemLabelPreview } from '../Previews'
+import {
+    searchModule,
+    GroupSearchResult,
+    InputSearchResult,
+} from '../../utils/search'
 
 const MAX_GROUPCOUNT_AUTOEXPAND = 3
 
@@ -151,13 +158,20 @@ const InputGroup: React.FC<{
     module: Module
     inputs: Input[]
     readonly: boolean
+    searchResult: GroupSearchResult
     onChange: (config: FilterConfiguration) => void
-}> = ({ key, config, module, inputs, readonly, onChange }) => {
+}> = ({ key, config, module, inputs, readonly, searchResult, onChange }) => {
     const sorted = inputs.sort((a: Input, b: Input) => sizeOf(a) - sizeOf(b))
     return (
         <Grid2 key={key} container spacing={2}>
             {sorted.map((input, index) => (
-                <Grid2 key={index} size={sizeOf(input)}>
+                <Grid2
+                    sx={{
+                        ...inputSearchStyle(searchResult.inputs[input.label]),
+                    }}
+                    key={index}
+                    size={sizeOf(input)}
+                >
                     <InputComponent
                         config={config}
                         module={module}
@@ -183,6 +197,14 @@ const InputGroup: React.FC<{
         </Grid2>
     )
 }
+
+const inputSearchStyle = (result: InputSearchResult): SxProps =>
+    result.state === 'expand'
+        ? {
+              border: 2,
+              borderColor: colors.rsDarkYellow,
+          }
+        : {}
 
 const sizeOf = (input: Input) => {
     switch (input.type) {
@@ -275,6 +297,7 @@ const ModuleGroup: React.FC<{
     inputs: Input[]
     module: Module
     readonly: boolean
+    searchResult: GroupSearchResult
     onChange: (config: FilterConfiguration) => void
 }> = ({
     module,
@@ -284,6 +307,7 @@ const ModuleGroup: React.FC<{
     inputs,
     index,
     config,
+    searchResult,
     onChange,
 }) => {
     const groupName = group || 'Default Group'
@@ -322,8 +346,10 @@ const ModuleGroup: React.FC<{
             defaultExpanded={
                 groupExpanded ?? groupCount <= MAX_GROUPCOUNT_AUTOEXPAND
             }
+            expanded={searchResult.state === 'expand' ? true : undefined}
             sx={{
                 '::before': { display: 'none' },
+                display: searchResult.state === 'hide' ? 'none' : undefined,
             }}
             slotProps={{ transition: { unmountOnExit: true } }}
         >
@@ -384,6 +410,7 @@ const ModuleGroup: React.FC<{
                     module={module}
                     inputs={inputs}
                     readonly={readonly}
+                    searchResult={searchResult}
                     onChange={onChange}
                 />
             </AccordionDetails>
@@ -445,6 +472,10 @@ const ModuleSection: React.FC<{
     const configCount = countConfigChanges(config, moduleMacronames)
 
     const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
+
+    const { search } = useSearchStore()
+    const searchResult = searchModule(module, search)
+
     return (
         <>
             <Menu
@@ -492,13 +523,20 @@ const ModuleSection: React.FC<{
             </Menu>
             <Accordion
                 slotProps={{ transition: { unmountOnExit: true } }}
-                expanded={expanded && enabled}
-                onChange={() => setExpanded(!expanded)}
+                expanded={
+                    (expanded || searchResult.state === 'expand') && enabled
+                }
+                onChange={() => {
+                    if (searchResult.state !== 'expand') {
+                        setExpanded(!expanded)
+                    }
+                }}
                 sx={{
                     '&::before': {
                         backgroundColor: colors.rsDarkBrown,
                     },
                     filter: !enabled ? 'grayscale(0.75)' : 'none',
+                    display: searchResult.state === 'hide' ? 'none' : undefined,
                 }}
             >
                 <AccordionSummary
@@ -586,6 +624,7 @@ const ModuleSection: React.FC<{
                             module={module}
                             inputs={defaultGroup}
                             readonly={readonly}
+                            searchResult={searchResult.groups['_']}
                             onChange={onChange}
                         />
                         {Object.entries(groupedInputs).map(
@@ -599,6 +638,7 @@ const ModuleSection: React.FC<{
                                     groupCount={groupCount}
                                     inputs={inputs}
                                     readonly={readonly}
+                                    searchResult={searchResult.groups[group]}
                                     onChange={onChange}
                                 />
                             )

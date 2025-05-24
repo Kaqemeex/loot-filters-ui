@@ -160,3 +160,6 @@ export const FilterConfigurationSpec = z.object({
 export type FilterConfiguration = z.infer<typeof FilterConfigurationSpec>
 
 export type MacroName = string
+
+export const isEnumListInput = (v: Input): v is EnumListInput =>
+    v.type === 'enumlist'

@@ -18,6 +18,7 @@
         "@mui/icons-material": "^6.4.4",
         "@mui/material": "^6.4.4",
         "@types/react-router-dom": "^5.3.3",
+        "fuse.js": "^7.1.0",
         "install": "^0.13.0",
         "lz-string": "^1.5.0",
         "monaco-editor": "^0.52.2",
