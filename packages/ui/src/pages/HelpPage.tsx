@@ -113,13 +113,12 @@ const HelpContent = () => {
                         config, pictured below).
                         <br />
                         <br />
-                        There are some default filters pre-installed, and
-                        more/custom ones can be added by either importing a
-                        filter from the clipboard, or adding the .rs2f filter
-                        file to the filters folder, accessible through the
-                        folder icon. The two defaults are slightly different
-                        from one another, try dropping some items and flipping
-                        between them to see which you prefer.
+                        There are a couple default filters pre-installed, which
+                        give a good experience out of the box. If you want to
+                        further customize or change things, that is what the
+                        filterscape website is for. The two defaults are
+                        slightly different from one another, and can both be
+                        extensively customized if desired.
                     </Typography>
 
                     <Typography
@@ -192,39 +191,35 @@ const HelpContent = () => {
                     </Typography>
                     <Typography>
                         To get the plugin running, at a basic level, all you
-                        have to do is install it and enable it. It should
+                        have to do is install it and enable it. It will
                         immediately be using the default FilterScape filter, and
-                        GroundItems should be disabled. If you had already
-                        customized ground items significantly, I would make sure
-                        to copy your hide/highlight lists over, and make sure
-                        things like the despawn timer and value display are what
-                        you want them to be. Don't forget that the items can be
-                        toggled on and off via the hotkey, which by default is
-                        alt, so if things aren't showing, try hitting that. 2
-                        taps will disable the overlay, and one will turn it back
-                        on. While holding it, you can also right/left click
-                        items to hide/highlight them.
+                        GroundItems will be disabled. Don't forget that the
+                        items can be toggled on and off via the hotkey, which by
+                        default is alt, so if things aren't showing, try hitting
+                        that. 2 taps will disable the overlay, and one will turn
+                        it back on. While holding it, you can also right/left
+                        click items to hide/highlight them.
                         <br />
                         <br />
-                        There are 2 default filters, Filterscape and Joe's
-                        Filter, which you can select by opening the Loot Filters
-                        side panel (Not the config panel, this is a distinct
-                        panel on the sidebar). These each have slightly
-                        different styling and setups. I would suggest that you
-                        try each of them with some example drops and decide
-                        which you prefer, or refer to the “Picking A Filter”
-                        section.
+                        You can select which filter you're using in the loot
+                        filters side panel (Not the config panel, this is a
+                        distinct panel on the sidebar). There are two default
+                        filters, and any additional filters you add will be
+                        avaliable here. If you want more details on what
+                        differentiates the two default filters, check the
+                        “Picking A Filter” section.
                         <br />
                         <br />
-                        While you can use the ownership filter here to hide
-                        items that you don't own or are natural ground spawns, I
-                        would advise leaving those off and instead using the
-                        ownership filter on FilterScape, since that can let
-                        specific items through for situations like raids.
+                        While you can use the ownership filter in the config to
+                        hide items that you don't own or are natural ground
+                        spawns, I would advise leaving those off and instead
+                        using the ownership filters on the FilterScape website
+                        editor, since that can let specific items through for
+                        situations like raids.
                         <br />
                         <br />
                         You may also notice that the value tiers from ground
-                        items are missing from the config file. This is because
+                        items are not included in config here. This is because
                         this functionality is handled by the filter itself. If
                         you wish to see or modify these, refer to the section on
                         filter editing via FilterScape
@@ -237,16 +232,6 @@ const HelpContent = () => {
                         gutterBottom
                     >
                         Customizing Filters on FilterScape
-                    </Typography>
-                    <Typography>
-                        <a href="https://filterscape.xyz">
-                            https://filterscape.xyz
-                        </a>{' '}
-                        is the primary way to create and edit the .rs2f files
-                        that the plugin uses to decide which items to highlight,
-                        show, or hide. Any changes you make to the filters will
-                        be saved to the browser's cache instantly, so refreshing
-                        or leaving the page won't lose the progress you've made.
                     </Typography>
 
                     {/* Subsections under Customizing */}
@@ -270,17 +255,17 @@ const HelpContent = () => {
                         Configuring The Filter
                     </Typography>
                     <Typography>
-                        There are a massive amount of options that you can edit
-                        on each filter, but you don't need to change every
-                        single one. If you have some option or setting you want
-                        to change, you can look for it, and enter the “module”.
-                        Filters are a collection of modules, with each module
-                        essentially being its own thing. If you want to change
-                        something specific, look for the module that would be
-                        relevant. If you ever mess up a module and want to
-                        restore it, you can use the gear on the side to reset a
-                        module back to default values. This can also be used to
-                        disable specific modules.
+                        The filters are both designed to give a good experience
+                        out-of-the-box with no tweaking, so you can get started
+                        using them immediately. If you find things that you want
+                        to change, that's when you can look into modifying their
+                        behavior. If you have a behavior you want to change, try
+                        searching for it using the search bar. Otherwise, the
+                        module names and descriptions can point you in the right
+                        direction for where to look. If you ever mess up a
+                        module and want to restore it, you can use the gear on
+                        the side to reset a module back to default values. This
+                        can also be used to disable specific modules.
                         <br />
                         <br />
                         Example: You want to change the highest value tier to
@@ -352,47 +337,6 @@ const HelpContent = () => {
                             files in the discord, or ask about how to obtain
                             them.
                         </b>
-                        <br />
-                        <br />
-                        Some interesting sound files:
-                        <ul>
-                            <li>
-                                <strong>6765:</strong> Muspah unique loot
-                            </li>
-                            <li>
-                                <strong>10224:</strong> TOA dung jingle
-                            </li>
-                            <li>
-                                <strong>10241</strong> Yama drop
-                            </li>
-                            <li>
-                                <strong>10224</strong> Yama drop strong
-                            </li>
-                            <li>
-                                <strong>2380:</strong> Bell
-                            </li>
-                            <li>
-                                <strong>2310:</strong> Quiz select sound
-                            </li>
-                            <li>
-                                <strong>5316:</strong> Leagues 3 fragment drop
-                            </li>
-                            <li>
-                                <strong>4218:</strong> League trophy ding
-                            </li>
-                            <li>
-                                <strong>413:</strong> Quack
-                            </li>
-                            <li>
-                                <strong>3385:</strong> Fossil island bell
-                            </li>
-                            <li>
-                                <strong>1299-1307:</strong> Light beam sounds
-                            </li>
-                            <li>
-                                <strong>5306:</strong> ACB Spec
-                            </li>
-                        </ul>
                     </Typography>
 
                     <Typography variant="h3" id="finishing-up" gutterBottom>
