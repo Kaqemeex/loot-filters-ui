@@ -3,11 +3,13 @@ import {
     Accordion,
     AccordionDetails,
     AccordionSummary,
+    Badge,
     Box,
     Checkbox,
     Grid2,
     SxProps,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material'
 import React, { useState } from 'react'
@@ -165,10 +167,47 @@ export const DisplayConfigurationInput: React.FC<{
     const hasExplicitDisplayMode =
         input.default?.hidden === true || input.default?.hidden === false
 
-    const displayModeInput = (
+    // Helper to wrap an input with a badge if changed from default
+    const inputWithBadge = (child: React.ReactNode, configField: string) => {
+        // Get values for the field from user, theme, and default
+        const userValue = (styleConfig as any)?.[configField]
+        const themeValue = (themeConfig as any)?.[configField] // TODO: handle theme config
+        const filterValue = (input.default as any)?.[configField]
+        // Determine which value is active
+        let isChanged = false
+        let badgeColor: 'success' | 'warning' | undefined = undefined
+        if (userValue !== undefined) {
+            isChanged = true
+            badgeColor = 'success' // user-set (green)
+        } else if (filterValue !== undefined) {
+            isChanged = true
+            badgeColor = 'warning' // filter-set (yellow)
+        }
+        return isChanged && badgeColor ? (
+            <Tooltip
+                title={
+                    badgeColor === 'success'
+                        ? 'Changed by you'
+                        : 'Set by filter/theme'
+                }
+            >
+                <Badge color={badgeColor} variant="dot">
+                    {child}
+                </Badge>
+            </Tooltip>
+        ) : (
+            child
+        )
+    }
+
+    // Now wrap all inputs with inputWithBadge
+    const displayModeInput = inputWithBadge(
         <EventShield>
             <UISelect<number>
-                sx={{ minWidth: '7rem', maxHeight: '3rem' }}
+                sx={{
+                    minWidth: '7rem',
+                    maxHeight: '3rem',
+                }}
                 value={{
                     label:
                         displayMode === 1
@@ -204,7 +243,8 @@ export const DisplayConfigurationInput: React.FC<{
                     }
                 }}
             />
-        </EventShield>
+        </EventShield>,
+        'hidden'
     )
 
     const displayLootbeamInput = (
@@ -288,7 +328,6 @@ export const DisplayConfigurationInput: React.FC<{
             onChange={(e) => onChange({ highlightTile: e.target.checked })}
         />
     )
-
     const hilightTileFillColorInput = (
         <ColorPickerInput
             configField="tileFillColor"
@@ -324,20 +363,20 @@ export const DisplayConfigurationInput: React.FC<{
     )
 
     const soundOpts = [
-        { label: 'None', value: 'none' },
         { label: 'Sound Effect', value: 'soundeffect' },
         { label: 'From File', value: 'fromfile' },
     ]
+
     const soundTypeSelect = (
         <UISelect<string>
-            sx={{ width: '12rem' }}
+            sx={{
+                width: '12rem',
+            }}
             disabled={readonly}
             options={soundOpts}
             multiple={false}
             freeSolo={false}
-            value={
-                soundOpts.find((opt) => opt.value === soundType) || soundOpts[0]
-            }
+            value={soundOpts.find((opt) => opt.value === soundType) ?? null}
             onChange={(newValue) => {
                 switch (newValue?.value) {
                     case 'soundeffect':
@@ -376,6 +415,7 @@ export const DisplayConfigurationInput: React.FC<{
 
     const soundFile =
         styleConfig?.sound ?? themeConfig?.sound ?? input.default?.sound ?? ''
+
     const soundFileInput = (
         <TextField
             sx={{ minWidth: '12rem' }}
@@ -385,6 +425,7 @@ export const DisplayConfigurationInput: React.FC<{
             onChange={(e) => onChange({ sound: e.target.value })}
         />
     )
+
     const soundFileHelpText =
         typeof soundFile === 'string' && soundFile.endsWith('.wav') ? (
             <Typography
@@ -462,16 +503,21 @@ export const DisplayConfigurationInput: React.FC<{
             onChange={onChange}
         />
     )
+
     const menuSortInput = (
         <TextField
-            sx={{ minWidth: '10rem', ml: 1 }}
-            placeholder="priority"
+            sx={{
+                minWidth: '10rem',
+                ml: 1,
+            }}
+            placeholder={
+                styleConfig?.menuSort === undefined
+                    ? 'Enter a number'
+                    : undefined
+            }
             type="number"
             value={
-                styleConfig?.menuSort ??
-                themeConfig?.menuSort ??
-                input.default?.menuSort ??
-                0
+                styleConfig?.menuSort !== undefined ? styleConfig.menuSort : ''
             }
             onChange={(e) =>
                 onChange({
@@ -487,7 +533,10 @@ export const DisplayConfigurationInput: React.FC<{
 
     const fontTypeInput = (
         <UISelect<number>
-            sx={{ width: '15rem', marginLeft: 1 }}
+            sx={{
+                width: '15rem',
+                marginLeft: 1,
+            }}
             disabled={readonly}
             options={fontTypes.map((fontType) => ({
                 label: labelFromFontType(fontType),
@@ -495,19 +544,25 @@ export const DisplayConfigurationInput: React.FC<{
             }))}
             multiple={false}
             freeSolo={false}
-            value={{
-                label: labelFromFontType(
-                    (styleConfig?.fontType as FontType) ??
-                        themeConfig?.fontType ??
-                        input.default?.fontType ??
-                        FontType.Small // Default to small
-                ),
-                value:
-                    styleConfig?.fontType ??
-                    themeConfig?.fontType ??
-                    input.default?.fontType ??
-                    1,
-            }}
+            value={
+                styleConfig?.fontType !== undefined ||
+                themeConfig?.fontType !== undefined ||
+                input.default?.fontType !== undefined
+                    ? {
+                          label: labelFromFontType(
+                              (styleConfig?.fontType as FontType) ??
+                                  themeConfig?.fontType ??
+                                  input.default?.fontType ??
+                                  FontType.Small // fallback, but will never hit if all undefined
+                          ),
+                          value:
+                              styleConfig?.fontType ??
+                              themeConfig?.fontType ??
+                              input.default?.fontType ??
+                              1,
+                      }
+                    : null
+            }
             onChange={(newValue) => {
                 if (newValue === null) {
                     onChange({ fontType: undefined })
@@ -519,9 +574,13 @@ export const DisplayConfigurationInput: React.FC<{
             }}
         />
     )
+
     const textAccentInput = (
         <UISelect<number>
-            sx={{ width: '15rem', marginLeft: 1 }}
+            sx={{
+                width: '15rem',
+                marginLeft: 1,
+            }}
             disabled={readonly}
             options={Object.values(TextAccent).map((textAccent) => ({
                 label: labelFromTextAccent(textAccent),
@@ -529,19 +588,25 @@ export const DisplayConfigurationInput: React.FC<{
             }))}
             multiple={false}
             freeSolo={false}
-            value={{
-                label: labelFromTextAccent(
-                    (styleConfig?.textAccent as TextAccent) ??
-                        themeConfig?.textAccent ??
-                        input.default?.textAccent ??
-                        TextAccent.Shadow // Default to shadow
-                ),
-                value:
-                    styleConfig?.textAccent ??
-                    themeConfig?.textAccent ??
-                    input.default?.textAccent ??
-                    1, // Default to shadow
-            }}
+            value={
+                styleConfig?.textAccent !== undefined ||
+                themeConfig?.textAccent !== undefined ||
+                input.default?.textAccent !== undefined
+                    ? {
+                          label: labelFromTextAccent(
+                              (styleConfig?.textAccent as TextAccent) ??
+                                  themeConfig?.textAccent ??
+                                  input.default?.textAccent ??
+                                  TextAccent.Shadow // fallback
+                          ),
+                          value:
+                              styleConfig?.textAccent ??
+                              themeConfig?.textAccent ??
+                              input.default?.textAccent ??
+                              1,
+                      }
+                    : null
+            }
             onChange={(newValue) => {
                 if (newValue === null) {
                     onChange({ textAccent: undefined })
@@ -553,11 +618,8 @@ export const DisplayConfigurationInput: React.FC<{
             }}
         />
     )
+
     const iconOpts = [
-        {
-            label: 'None',
-            value: 'none',
-        },
         {
             label: 'Current Item',
             value: 'current',
@@ -578,23 +640,16 @@ export const DisplayConfigurationInput: React.FC<{
 
     const itemIconTypeSelect = (
         <UISelect<string>
-            sx={{ width: '15rem' }}
+            sx={{
+                width: '15rem',
+            }}
             disabled={readonly}
             options={iconOpts}
             multiple={false}
             freeSolo={false}
-            value={
-                iconOpts.find((opt) => opt.value === iconType) || {
-                    label: 'None',
-                    value: 'none',
-                }
-            }
+            value={iconOpts.find((opt) => opt.value === iconType) ?? null}
             onChange={(newValue) => {
                 switch (newValue?.value) {
-                    case 'none':
-                        setIconType('none')
-                        onChange({ icon: { type: 'none' } })
-                        break
                     case 'current':
                         setIconType('current')
                         onChange({ icon: { type: 'current' } })
@@ -788,17 +843,52 @@ export const DisplayConfigurationInput: React.FC<{
                     <HeaderCol text="Overlay" />
                     <Column>
                         <Row>
-                            <Label label="Text Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Text Color',
+                                        'textColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{textColorInput}</Grid2>
-                            <Label label="Font Type" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Font Type',
+                                        'fontType'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={2}>{fontTypeInput}</Grid2>
-                            <Label label="Item Icon" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Item Icon',
+                                        'icon'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={2}>{itemIconTypeSelect}</Grid2>
                         </Row>
                         <Row>
-                            <Label label="Background Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Background Color',
+                                        'backgroundColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{backgroundColorInput}</Grid2>
-                            <Label label="Text Accent" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Text Accent',
+                                        'textAccent'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={4}>{textAccentInput}</Grid2>
                             <Grid2 size={3}>
                                 {iconType === 'itemId' && iconItemIdInput}
@@ -807,9 +897,23 @@ export const DisplayConfigurationInput: React.FC<{
                             </Grid2>
                         </Row>
                         <Row>
-                            <Label label="Border Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Border Color',
+                                        'borderColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{borderColorInput}</Grid2>
-                            <Label label="Text Accent Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Text Accent Color',
+                                        'textAccentColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{textAccentColorInput}</Grid2>
                             <Grid2 size={3} />
                             <Grid2 size={3}>
@@ -904,30 +1008,93 @@ export const DisplayConfigurationInput: React.FC<{
                     <HeaderCol text="Menu" />
                     <Column>
                         <Grid2 container size={11}>
-                            <Label label="Menu Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Menu Color',
+                                        'menuTextColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{menuColorInput}</Grid2>
-                            <Label label="Menu Sort" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Menu Sort',
+                                        'menuSort'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{menuSortInput}</Grid2>
                         </Grid2>
                     </Column>
                     <HeaderCol text="General" />
                     <Grid2 rowSpacing={0} container size={10}>
                         <Row>
-                            <Label label="Lootbeam" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Lootbeam',
+                                        'showLootbeam'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{displayLootbeamInput}</Grid2>
-                            <Label label="Highlight Tile" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Highlight Tile',
+                                        'highlightTile'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{highlightTileComponent}</Grid2>
-                            <Label label="Show Item Value" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Show Item Value',
+                                        'showValue'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{valueComponent}</Grid2>
-                            <Label label="Drop Sound" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Drop Sound',
+                                        'sound'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{soundTypeSelect}</Grid2>
                         </Row>
                         <Row>
-                            <Label label="Lootbeam Color" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Lootbeam Color',
+                                        'lootbeamColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{lootbeamColorInput}</Grid2>
-                            <Label label="Tile Fill" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Tile Fill',
+                                        'tileFillColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{hilightTileFillColorInput}</Grid2>
-                            <Label label="Show Despawn Timer" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Show Despawn Timer',
+                                        'showDespawn'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{despawnComponent}</Grid2>
                             <Grid2 size={2} />
                             <Grid2 size={1}>
@@ -939,11 +1106,25 @@ export const DisplayConfigurationInput: React.FC<{
                         <Row>
                             <Grid2 size={2} />
                             <Grid2 size={1} />
-                            <Label label="Tile Stroke" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Tile Stroke',
+                                        'tileStrokeColor'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>
                                 {hilightTileStrokeColorInput}
                             </Grid2>
-                            <Label label="Notify on Drop" />
+                            <Label
+                                label={
+                                    inputWithBadge(
+                                        'Notify on Drop',
+                                        'notify'
+                                    ) as unknown as string
+                                }
+                            />
                             <Grid2 size={1}>{notifyComponent}</Grid2>
                             <Grid2 size={2} />
                             {soundType === 'soundeffect' && (

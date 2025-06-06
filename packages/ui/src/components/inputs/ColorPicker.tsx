@@ -49,10 +49,16 @@ const Swatch: React.FC<{
 
         // Create checkerboard pattern
         const size = 10
-        for (let x = 0; x < canvas.width; x += size) {
-            for (let y = 0; y < canvas.height; y += size) {
-                ctx.fillStyle = ((x + y) / size) % 2 ? '#CCCCCC' : '#FFFFFF'
-                ctx.fillRect(x, y, size, size)
+        if (color === null) {
+            // clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+        }
+        if (color !== null) {
+            for (let x = 0; x < canvas.width; x += size) {
+                for (let y = 0; y < canvas.height; y += size) {
+                    ctx.fillStyle = ((x + y) / size) % 2 ? '#CCCCCC' : '#FFFFFF'
+                    ctx.fillRect(x, y, size, size)
+                }
             }
         }
 
@@ -67,15 +73,36 @@ const Swatch: React.FC<{
     }, [color])
 
     return (
-        <canvas
-            ref={canvasRef}
-            width={50}
-            height={30}
-            style={{
-                borderRadius: '4px',
-                border: '1px solid #564e43',
-            }}
-        />
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+            <canvas
+                ref={canvasRef}
+                width={50}
+                height={30}
+                style={{
+                    borderRadius: '4px',
+                    border: '1px solid #564e43',
+                    display: 'block',
+                }}
+            />
+            {color === null && (
+                <span
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        pointerEvents: 'none',
+                        fontFamily: 'RuneScape',
+                    }}
+                >
+                    Unset
+                </span>
+            )}
+        </div>
     )
 }
 

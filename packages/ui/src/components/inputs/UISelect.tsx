@@ -127,6 +127,7 @@ export const UISelect = <T = string,>({
                     label={label}
                     error={error}
                     helperText={helperText}
+                    placeholder="Select an option"
                 />
             )}
         />
