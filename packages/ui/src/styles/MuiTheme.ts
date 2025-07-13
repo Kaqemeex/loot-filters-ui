@@ -31,6 +31,30 @@ export const MuiRsTheme = createTheme({
                 size: 'small',
             },
         },
+        MuiTypography: {
+            variants: [
+                {
+                    props: { variant: 'subtitle2' },
+                    style: {
+                        color: colors.rsGrey,
+                    },
+                },
+            ],
+        },
+        MuiButton: {
+            variants: [
+                {
+                    props: { variant: 'main-action' },
+                    style: {
+                        borderWidth: 1,
+                        borderStyle: 'solid',
+                        color: colors.rsHerbGreen,
+                        borderColor: colors.rsHerbGreen,
+                        backgroundColor: colors.rsDarkBrown,
+                    },
+                },
+            ],
+        },
     },
     typography: {
         fontFamily: 'RuneScape',

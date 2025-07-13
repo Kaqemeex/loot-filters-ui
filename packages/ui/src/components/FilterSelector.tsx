@@ -277,12 +277,7 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
             enabled={activeFilter != null}
         >
             <Button
-                variant="outlined"
-                sx={{
-                    color: colors.rsHerbGreen,
-                    borderColor: colors.rsHerbGreen,
-                    backgroundColor: colors.rsDarkBrown,
-                }}
+                variant="main-action"
                 disabled={!activeFilter}
                 onClick={() => {
                     if (!activeFilter) {
