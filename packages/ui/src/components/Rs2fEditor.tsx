@@ -160,8 +160,7 @@ export const Rs2fEditor: React.FC<{
             >
                 <Button
                     color="primary"
-                    variant="outlined"
-                    sx={{ fontFamily: 'RuneScape' }}
+                    variant="main-action"
                     onClick={() => {
                         navigator('/')
                     }}
