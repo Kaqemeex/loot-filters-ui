@@ -37,27 +37,3 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   command: pages deploy packages/ui/dist --project-name=loot-filters-ui --branch="${{ github.ref == 'refs/heads/main' && 'main' ||github.actor }}"
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-
-    buildAndDeployAPI:
-        runs-on: ubuntu-latest
-        if: github.ref == 'refs/heads/main'
-        environment:
-            name: actions
-        steps:
-            - uses: actions/checkout@v4
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: '18'
-            - name: Install dependencies
-              run: npm install
-            - name: Type check API
-              run: cd packages/api && npm run type-check
-            - name: Deploy API
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: deploy
-                  workingDirectory: packages/api
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
