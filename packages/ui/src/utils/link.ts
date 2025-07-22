@@ -9,9 +9,7 @@ type CreateLinkRequest = {
         expectedRs2fHash: string
         sourceUrl: string
     }
-    config: {
-        data?: object
-    }
+    config?: object
 }
 export const createLink = (
     filterOrUrl: Filter | string,
@@ -29,9 +27,7 @@ export const createLink = (
             expectedRs2fHash: filter.rs2fHash,
             sourceUrl: filter.source ?? '',
         },
-        config: {
-            data: config,
-        },
+        config,
     }
 
     return fetch('https://api.kaqemeex.net/save', {

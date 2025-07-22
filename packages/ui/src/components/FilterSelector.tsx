@@ -248,6 +248,8 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
         return result
     }, [activeFilter, updatedFilter])
 
+    const [creatingLink, setCreatingLink] = useState(false)
+
     useEffect(() => {
         if (
             activeFilter != null &&
@@ -365,13 +367,19 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
     const shareFilterButton = (
         <SmartTooltip
             enabledTitle="Share filter link"
-            disabledTitle="Filters without a source URL cannot be shared"
-            enabled={activeFilter?.source != null}
+            disabledTitle={
+                creatingLink
+                    ? 'Creating link...'
+                    : 'Filters without a source URL cannot be shared'
+            }
+            enabled={activeFilter?.source != null && !creatingLink}
         >
             <span>
                 <Button
                     variant="outlined"
-                    disabled={!activeFilter || !activeFilter.source}
+                    disabled={
+                        !activeFilter || !activeFilter.source || creatingLink
+                    }
                     onClick={() => {
                         if (!activeFilter) {
                             return
@@ -386,6 +394,7 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                             return
                         }
 
+                        setCreatingLink(true)
                         createLink(activeFilter, activeFilterConfig)
                             .then((link) => {
                                 return navigator.clipboard
@@ -398,7 +407,11 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                                         })
                                     })
                             })
+                            .finally(() => {
+                                setCreatingLink(false)
+                            })
                             .catch((error) => {
+                                setCreatingLink(false)
                                 console.error(error)
                                 addAlert({
                                     children: `Failed to copy filter link to clipboard: ${error instanceof Error ? error.message : 'Unknown error'}`,
