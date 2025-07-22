@@ -1,0 +1,7 @@
+name = "loot-filters-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[[r2_buckets]]
+binding = "FILTERS_BUCKET"
+bucket_name = "loot-filters" 

@@ -18,9 +18,22 @@ import { useFilterStore } from '../store/filterStore'
 import { colors } from '../styles/MuiTheme'
 import { parseComponent } from '../utils/link'
 
+type SavedFilter = {
+    rs2f: string
+    expectedRs2fHash: string
+    sourceUrl: string
+}
+
+type LoadFilterResponse = {
+    filter: SavedFilter
+    config: FilterConfiguration | null
+}
+
 export const ImportPage: React.FC = () => {
     const [searchParams] = useSearchParams()
     const importData = searchParams.get('importData')
+    const filterId = searchParams.get('filterId')
+
     const { updateFilter } = useFilterStore()
     const { setActiveFilter } = useFilterStore()
     const { setFilterConfiguration } = useFilterConfigStore()
@@ -36,35 +49,63 @@ export const ImportPage: React.FC = () => {
         useState<FilterConfiguration | null>(null)
 
     useEffect(() => {
-        if (!importData) {
+        if (!importData && !filterId) {
             setError(new Error('No import data'))
             return
         }
         setLoadingFilter(true)
 
-        parseComponent(importData)
-            .then(({ filterUrl, config }) => {
-                setFilterUrl(filterUrl)
-                setFilterConfig(config)
+        if (importData) {
+            parseComponent(importData)
+                .then(({ filterUrl, config }) => {
+                    setFilterUrl(filterUrl)
+                    setFilterConfig(config)
 
-                return fetch(filterUrl)
-            })
-            .then((res) => {
-                return res.text()
-            })
-            .then((text: string) => {
-                return parse(text)
-            })
-            .then((parsed: ParseResult) => {
-                setParsedFilter(parsed)
-                setError(null)
-                setLoadingFilter(false)
-            })
-            .catch((err) => {
-                setParsedFilter(null)
-                setError(err)
-                setLoadingFilter(false)
-            })
+                    return fetch(filterUrl)
+                })
+                .then((res) => {
+                    return res.text()
+                })
+                .then((text: string) => {
+                    return parse(text)
+                })
+                .then((parsed: ParseResult) => {
+                    setParsedFilter(parsed)
+                    setError(null)
+                    setLoadingFilter(false)
+                })
+                .catch((err) => {
+                    setParsedFilter(null)
+                    setError(err)
+                    setLoadingFilter(false)
+                })
+        }
+
+        if (filterId) {
+            fetch(`http://localhost:8787/filter/${filterId}`)
+                .then((res) => res.json())
+                .then(
+                    ({
+                        filter: { rs2f, sourceUrl },
+                        config,
+                    }: LoadFilterResponse) => {
+                        setFilterUrl(sourceUrl)
+                        setFilterConfig(config)
+                        return parse(rs2f)
+                    }
+                )
+                .then((parsed: ParseResult) => {
+                    setParsedFilter(parsed)
+                    setError(null)
+                    setLoadingFilter(false)
+                })
+                .catch((err) => {
+                    console.error(err)
+                    setParsedFilter(null)
+                    setError(err)
+                    setLoadingFilter(false)
+                })
+        }
     }, [])
 
     const errorComponent = error ? (

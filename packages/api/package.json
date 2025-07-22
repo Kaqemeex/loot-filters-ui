@@ -3,27 +3,26 @@
     "version": "1.0.0",
     "private": true,
     "main": "dist/index.js",
-    "types": "dist/index.d.ts",
     "scripts": {
-        "build": "tsc",
+        "build": "wrangler deploy",
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy",
         "type-check": "tsc --noEmit",
         "test": "jest",
         "lint": "eslint src --ext .ts,.tsx --fix"
     },
     "dependencies": {
-        "@loot-filters/core": "*",
-        "express": "^4.18.2",
-        "cors": "^2.8.5"
+        "zod": "^3.24.2"
     },
     "devDependencies": {
-        "@types/cors": "^2.8.17",
-        "@types/express": "^4.17.21",
+        "@cloudflare/workers-types": "^4.20231218.0",
         "@types/jest": "^29.5.12",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
         "eslint": "^8.0.0",
         "jest": "^29.7.0",
         "ts-jest": "^29.1.2",
-        "typescript": "^4.9.5"
+        "typescript": "^4.9.5",
+        "wrangler": "^4.25.0"
     }
 }
