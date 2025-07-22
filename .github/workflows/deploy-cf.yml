@@ -27,7 +27,7 @@ jobs:
             - name: Prettier Check
               run: npm run prettier:check
             - name: Build UI
-              run: npm run build
+              run: npm run build-ui
               env:
                   NODE_ENV: production
             - name: Deploy UI
