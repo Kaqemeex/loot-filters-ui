@@ -367,8 +367,12 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
     const shareFilterButton = (
         <SmartTooltip
             enabledTitle="Share filter link"
-            disabledTitle="Filters without a source URL cannot be shared"
-            enabled={activeFilter?.source != null}
+            disabledTitle={
+                creatingLink
+                    ? 'Creating link...'
+                    : 'Filters without a source URL cannot be shared'
+            }
+            enabled={activeFilter?.source != null && !creatingLink}
         >
             <span>
                 <Button
