@@ -31,7 +31,13 @@ export const AppHeader: React.FC = () => {
                 <Typography variant="h4" color="primary">
                     FilterScape.xyz
                 </Typography>
-                <Tabs value={location.pathname}>
+                <Tabs
+                    value={
+                        location.pathname === '/import'
+                            ? '/'
+                            : location.pathname
+                    }
+                >
                     <Tab
                         label="New filter"
                         value="/new-filter"

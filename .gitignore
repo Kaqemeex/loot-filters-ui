@@ -1,3 +1,8 @@
 node_modules
 src/default-local-state.json
 scratch/
+
+# Build outputs
+dist/
+packages/*/dist/
+**/.wrangler/*

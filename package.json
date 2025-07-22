@@ -7,7 +7,7 @@
     ],
     "scripts": {
         "start": "npm run start --workspace=packages/ui",
-        "build": "npm run build --workspaces",
+        "build-ui": "npm run build --workspace=packages/ui",
         "type-check": "npm run type-check --workspaces",
         "test": "npm run test --workspaces",
         "lint": "npm run lint --workspaces",

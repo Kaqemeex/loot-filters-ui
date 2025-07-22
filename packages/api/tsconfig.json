@@ -1,12 +1,18 @@
 {
-    "extends": "../../tsconfig.base.json",
-    "compilerOptions": {
-        "outDir": "./dist",
-        "baseUrl": ".",
-        "paths": {
-            "@loot-filters/core": ["../core/src"]
-        }
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist"]
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022"],
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["@cloudflare/workers-types"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 } 
