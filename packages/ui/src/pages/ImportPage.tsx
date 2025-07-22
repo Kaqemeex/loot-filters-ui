@@ -82,7 +82,7 @@ export const ImportPage: React.FC = () => {
         }
 
         if (filterId) {
-            fetch(`http://localhost:8787/filter/${filterId}`)
+            fetch(`https://api.kaqemeex.net/filter/${filterId}`)
                 .then((res) => res.json())
                 .then(
                     ({

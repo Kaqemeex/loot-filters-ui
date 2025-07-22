@@ -46,7 +46,7 @@ export const save = async (
         }
 
         // Upsert the rs2f if it doesn't exist
-        const filterKey = `filters/${id}.json.gz`
+        const filterKey = `filters/${rs2fHash}.json.gz`
         const filterExists = await env.FILTERS_BUCKET.head(filterKey)
         if (!filterExists) {
             // store filter, with source url and expected hash

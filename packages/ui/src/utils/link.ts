@@ -34,7 +34,7 @@ export const createLink = (
         },
     }
 
-    return fetch('http://localhost:8787/save', {
+    return fetch('https://api.kaqemeex.net/save', {
         method: 'POST',
         body: JSON.stringify(data),
     })
