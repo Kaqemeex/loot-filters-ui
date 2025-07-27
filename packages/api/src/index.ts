@@ -20,6 +20,49 @@ export default {
             })
         }
 
+        // Handle /stats endpoint
+        if (path === '/stats' && request.method === 'GET') {
+            try {
+                // Count files in filters/ folder
+                const filtersList = await env.FILTERS_BUCKET.list({
+                    prefix: 'filters/',
+                })
+                const filtersCount = filtersList.objects.length
+
+                // Count files in configs/ folder
+                const configsList = await env.FILTERS_BUCKET.list({
+                    prefix: 'configs/',
+                })
+                const configsCount = configsList.objects.length
+
+                return new Response(
+                    JSON.stringify({
+                        filterVariants: filtersCount,
+                        configVariants: configsCount
+                    }),
+                    {
+                        status: 200,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                        },
+                    }
+                )
+            } catch (error) {
+                console.error('Error fetching stats:', error)
+                return new Response(
+                    JSON.stringify({ error: 'Internal server error' }),
+                    {
+                        status: 500,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                        },
+                    }
+                )
+            }
+        }
+
         // Handle /filter/{id} endpoint
         const filterMatch = path.match(/^\/filter\/([^\/]+)$/)
         if (filterMatch && request.method === 'GET') {
