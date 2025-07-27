@@ -10,7 +10,7 @@ import {
     applyDiff,
     convertToListDiff,
     EMPTY_DIFF,
-} from '../../utils/ListDiffUtils'
+} from '@loot-filters/core'
 import { Option, UISelect } from './UISelect'
 
 export const EnumInputComponent: React.FC<{

@@ -7,7 +7,7 @@ import { parse, parseModules, FilterConfiguration } from '@loot-filters/core'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
 import { colors } from '../styles/MuiTheme'
-import { applyModule } from '../utils/render'
+import { applyModule } from '@loot-filters/core'
 
 const DOC_LINK_COMMENT =
     '// For docs visit https://github.com/Kaqemeex/loot-filters-ui/blob/main/module-system-docs/modular-filters-book/Readme.md'

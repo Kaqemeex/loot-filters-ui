@@ -1,7 +1,7 @@
+import { renderFilter } from '@loot-filters/core'
 import { Editor } from '@monaco-editor/react'
 import { useFilterConfigStore } from '../../store/filterConfigurationStore'
 import { useFilterStore } from '../../store/filterStore'
-import { renderFilter } from '../../utils/render'
 export const RenderedFilterTab: React.FC<{
     extraComponent?: React.ReactNode
 }> = ({ extraComponent }) => {

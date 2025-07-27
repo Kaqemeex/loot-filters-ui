@@ -1,15 +1,16 @@
-import { 
-    Icon, 
-    parseModules, 
+import {
     Filter,
     FilterConfiguration,
+    Icon,
     ListDiff,
     MacroName,
     Module,
+    parseModules,
     StyleConfig,
     Theme,
-} from '@loot-filters/core'
+} from './index'
 import { applyDiff, convertOptionsToStrings, EMPTY_DIFF } from './ListDiffUtils'
+
 export const renderFilter = (
     filter: Filter,
     activeConfig: FilterConfiguration | undefined
@@ -124,7 +125,7 @@ export const applyModule = (
             }
             case 'text': {
                 const text = (config?.[input.macroName] ??
-                    theme?.config?.inputConfigs?.[input.macroName] ??
+                    theme?.config?.inputConfigs[input.macroName] ??
                     input.default) as string | undefined
                 if (text !== undefined) {
                     updated = updateMacro(updated, input.macroName, `"${text}"`)
@@ -183,7 +184,7 @@ const renderStyleIcon = (icon: Icon | undefined): string => {
         case 'sprite':
             return `icon = Sprite(${icon.spriteId ?? 0}, ${icon.spriteIndex ?? 0});`
         case 'file':
-            return `icon = File("${icon.path}");`
+            return `icon = File("${icon.filePath}");`
         case 'itemId':
             return `icon = Item(${icon.itemId ?? 0});`
         case 'current':

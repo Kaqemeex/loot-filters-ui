@@ -3,6 +3,7 @@ import {
     Filter,
     FilterConfigurationSpec,
     FilterId,
+    renderFilter,
 } from '@loot-filters/core'
 import {
     CopyAll,
@@ -48,7 +49,6 @@ import { downloadFile } from '../utils/file'
 import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
-import { renderFilter } from '../utils/render'
 import { Option, UISelect } from './inputs/UISelect'
 import { SmartTooltip } from './SmartTooltip'
 

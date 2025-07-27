@@ -7,7 +7,7 @@ import { Input, ListOption } from '@loot-filters/core'
 import { useAlertStore } from '../../store/alerts'
 import { useSettingsCopyStore } from '../../store/settingsCopyStore'
 import { colors } from '../../styles/MuiTheme'
-import { convertToListDiff } from '../../utils/ListDiffUtils'
+import { convertToListDiff } from '@loot-filters/core'
 import { SmartTooltip } from '../SmartTooltip'
 
 export const CopyInputSettings: React.FC<{

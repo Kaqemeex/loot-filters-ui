@@ -27,3 +27,7 @@ export * from './parse'
 export * from './parseGroup'
 export * from './parseInput'
 export * from './parseStructuredComment'
+
+// Export utility functions
+export * from './ListDiffUtils'
+export * from './render'

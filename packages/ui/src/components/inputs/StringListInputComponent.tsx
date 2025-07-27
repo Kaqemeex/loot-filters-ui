@@ -11,7 +11,7 @@ import {
     applyDiff,
     convertToListDiff,
     EMPTY_DIFF,
-} from '../../utils/ListDiffUtils'
+} from '@loot-filters/core'
 import { CopyInputSettings } from './CopyInputSettings'
 import { Option, UISelect } from './UISelect'
 
