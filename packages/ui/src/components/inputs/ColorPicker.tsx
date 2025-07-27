@@ -12,7 +12,7 @@ import {
     ArgbHexColorSpec,
     StyleConfig,
     StyleInput,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import {
     ArgbHexColor,
     argbHexColorToRGBColor,

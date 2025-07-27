@@ -1,10 +1,10 @@
-import { Checkbox, Typography } from '@mui/material'
 import {
     BooleanInput,
     BooleanInputDefaultSpec,
     FilterConfiguration,
     Theme,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
+import { Checkbox, Typography } from '@mui/material'
 
 export const BooleanInputComponent: React.FC<{
     input: BooleanInput

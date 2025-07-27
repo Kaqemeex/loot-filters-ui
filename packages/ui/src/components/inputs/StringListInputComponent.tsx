@@ -5,7 +5,7 @@ import {
     ListOption,
     StringListInput,
     Theme,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import { Typography } from '@mui/material'
 import {
     applyDiff,

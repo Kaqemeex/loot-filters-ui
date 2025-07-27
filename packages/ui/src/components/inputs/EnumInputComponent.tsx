@@ -5,7 +5,7 @@ import {
     ListDiff,
     ListDiffSpec,
     Theme,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import {
     applyDiff,
     convertToListDiff,

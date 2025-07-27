@@ -1,5 +1,5 @@
+import { Filter_ThemeSpec, FilterConfiguration } from '@loot-filters/core'
 import yaml from 'yaml'
-import { Filter_ThemeSpec, FilterConfiguration } from '@loot-filters/models'
 import { generateId } from './idgen'
 
 export const toThemeStructuredComment = (

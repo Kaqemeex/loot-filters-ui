@@ -8,7 +8,7 @@ import {
     Module,
     StyleConfig,
     Theme,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import { applyDiff, convertOptionsToStrings, EMPTY_DIFF } from './ListDiffUtils'
 export const renderFilter = (
     filter: Filter,

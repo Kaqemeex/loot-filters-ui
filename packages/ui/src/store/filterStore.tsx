@@ -1,4 +1,4 @@
-import { Filter } from '@loot-filters/models'
+import { Filter } from '@loot-filters/core'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { migrateFilterStore } from './migrations/filterStore'

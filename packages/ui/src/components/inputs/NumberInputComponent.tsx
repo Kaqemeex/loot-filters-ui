@@ -3,7 +3,7 @@ import {
     NumberInput,
     NumberInputDefaultSpec,
     Theme,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import { TextField, Typography } from '@mui/material'
 
 export const NumberInputComponent: React.FC<{

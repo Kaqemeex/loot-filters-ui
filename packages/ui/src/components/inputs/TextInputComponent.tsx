@@ -1,9 +1,5 @@
+import { FilterConfiguration, TextInput, Theme } from '@loot-filters/core'
 import { TextField, Typography } from '@mui/material'
-import {
-    FilterConfiguration,
-    TextInput,
-    Theme,
-} from '@loot-filters/models'
 
 export const TextInputComponent: React.FC<{
     input: TextInput

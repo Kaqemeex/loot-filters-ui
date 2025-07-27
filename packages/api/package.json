@@ -12,7 +12,7 @@
         "lint": "eslint src --ext .ts,.tsx --fix"
     },
     "dependencies": {
-        "@loot-filters/models": "*",
+        "@loot-filters/core": "*",
         "zod": "^3.24.2"
     },
     "devDependencies": {

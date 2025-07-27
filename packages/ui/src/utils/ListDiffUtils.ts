@@ -1,4 +1,4 @@
-import { ListDiff, ListOption } from '@loot-filters/models'
+import { ListDiff, ListOption } from '@loot-filters/core'
 
 export const EMPTY_DIFF: ListDiff = {
     added: [],

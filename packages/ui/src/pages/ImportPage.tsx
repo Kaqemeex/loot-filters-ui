@@ -3,7 +3,7 @@ import {
     FilterConfiguration,
     parseAsync as parse,
     ParseResult,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import {
     Button,
     CircularProgress,

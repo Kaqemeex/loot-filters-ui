@@ -3,7 +3,7 @@ import {
     Filter,
     FilterConfigurationSpec,
     FilterId,
-} from '@loot-filters/models'
+} from '@loot-filters/core'
 import {
     CopyAll,
     Edit,

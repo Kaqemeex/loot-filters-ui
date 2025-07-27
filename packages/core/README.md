@@ -1,11 +1,11 @@
-# @loot-filters/models
+# @loot-filters/core
 
 This package contains shared data models and validation schemas for the loot-filters project. It uses Zod for runtime type validation and provides TypeScript types for all models.
 
 ## Usage
 
 ```typescript
-import { FilterSchema, Filter, schemas } from '@loot-filters/models'
+import { FilterSchema, Filter, schemas } from '@loot-filters/core'
 
 // Validate data
 const filterData = FilterSchema.parse(rawData)

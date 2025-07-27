@@ -1,4 +1,4 @@
-import { DEFAULT_FILTER_CONFIGURATION, FilterSpec } from '@loot-filters/models'
+import { DEFAULT_FILTER_CONFIGURATION, FilterSpec } from '@loot-filters/core'
 import {
     Box,
     Button,

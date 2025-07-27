@@ -1,4 +1,4 @@
-import { Filter, FilterConfiguration } from '@loot-filters/models'
+import { Filter, FilterConfiguration } from '@loot-filters/core'
 import {
     compressToEncodedURIComponent,
     decompressFromEncodedURIComponent,
