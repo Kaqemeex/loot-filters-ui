@@ -1,7 +1,7 @@
 import { parse as parseYaml } from 'yaml'
 import {
-    ModuleSpec as FilterSpecModule,
-    ThemeSpec as FilterSpecTheme,
+    Filter_ModuleSpec,
+    Filter_ThemeSpec as FilterSpecTheme,
 } from './FilterTypesSpec'
 import { Module, ModuleSpec, ThemeSpec } from './UiTypesSpec'
 
@@ -12,7 +12,7 @@ export const parseModule = (moduleId: string, comment: string): Module => {
     )
     const module = parseYaml(declarationContent)
     return ModuleSpec.parse({
-        ...FilterSpecModule.parse(module),
+        ...Filter_ModuleSpec.parse(module),
         id: moduleId,
         rs2f: '',
     })

@@ -1,7 +1,7 @@
-import { ThemeSpec } from '../parsing/FilterTypesSpec'
+import yaml from 'yaml'
+import { Filter_ThemeSpec } from '../parsing/FilterTypesSpec'
 import { FilterConfiguration } from '../parsing/UiTypesSpec'
 import { generateId } from './idgen'
-import yaml from 'yaml'
 
 export const toThemeStructuredComment = (
     name: string,
@@ -9,7 +9,7 @@ export const toThemeStructuredComment = (
     subtitle?: string,
     description?: string
 ): string => {
-    const theme = ThemeSpec.parse({
+    const theme = Filter_ThemeSpec.parse({
         name,
         subtitle,
         description,

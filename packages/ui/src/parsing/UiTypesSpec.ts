@@ -1,30 +1,30 @@
 import { z } from 'zod'
 import { backgroundImages } from '../types/Images'
 import {
-    InputSpec as FilterSpecInput,
-    ModuleSpec as FilterSpecModule,
-    GroupSpec,
-    ThemeSpec as FilterSpecTheme,
+    Filter_InputSpec,
+    Filter_ThemeSpec,
+    Filter_GroupSpec,
+    Filter_ModuleSpec,
 } from './FilterTypesSpec'
 import { IconSpec } from './IconSpec'
 
-export const ThemeSpec = FilterSpecTheme.extend({
+export const ThemeSpec = Filter_ThemeSpec.extend({
     id: z.string().nonempty(),
 })
 
 export type Theme = z.infer<typeof ThemeSpec>
 
-export const InputSpec = FilterSpecInput.extend({
+export const InputSpec = Filter_InputSpec.extend({
     macroName: z.string().nonempty(),
     default: z.any().optional(),
 }).catchall(z.any())
 
 export type Input = z.infer<typeof InputSpec>
 
-export const ModuleSpec = FilterSpecModule.extend({
+export const ModuleSpec = Filter_ModuleSpec.extend({
     id: z.string().nonempty(),
     inputs: z.array(InputSpec).default([]),
-    groups: z.array(GroupSpec).default([]),
+    groups: z.array(Filter_GroupSpec).default([]),
     rs2f: z.string(),
 })
 

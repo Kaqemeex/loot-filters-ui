@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { IconSpec } from './IconSpec'
 
-export const ModuleSpec = z.object({
+export const Filter_ModuleSpec = z.object({
     name: z.string().nonempty(),
     subtitle: z.string().optional(),
     description: z.string().optional(),
@@ -9,18 +9,18 @@ export const ModuleSpec = z.object({
     hidden: z.boolean().optional().default(false),
 })
 
-export type Module = z.infer<typeof ModuleSpec>
+export type Filter_Module = z.infer<typeof Filter_ModuleSpec>
 
-export const GroupSpec = z.object({
+export const Filter_GroupSpec = z.object({
     name: z.string().nonempty(),
     icon: IconSpec.optional(),
     description: z.string().optional(),
     expanded: z.boolean().optional(),
 })
 
-export type Group = z.infer<typeof GroupSpec>
+export type Filter_Group = z.infer<typeof Filter_GroupSpec>
 
-export const InputSpec = z
+export const Filter_InputSpec = z
     .object({
         type: z.enum([
             'boolean',
@@ -35,9 +35,9 @@ export const InputSpec = z
     })
     .catchall(z.any())
 
-export type Input = z.infer<typeof InputSpec>
+export type Filter_Input = z.infer<typeof Filter_InputSpec>
 
-export const ThemeSpec = z.object({
+export const Filter_ThemeSpec = z.object({
     name: z.string().nonempty(),
     subtitle: z.string().optional(),
     description: z.string().optional(),
@@ -52,4 +52,4 @@ export const ThemeSpec = z.object({
         .optional(),
 })
 
-export type Theme = z.infer<typeof ThemeSpec>
+export type Filter_Theme = z.infer<typeof Filter_ThemeSpec>

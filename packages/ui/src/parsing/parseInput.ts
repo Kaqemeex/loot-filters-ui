@@ -1,5 +1,5 @@
 import { parse as parseYaml } from 'yaml'
-import { InputSpec as FilterSpecInput } from './FilterTypesSpec'
+import { Filter_InputSpec as FilterSpecInput } from './FilterTypesSpec'
 import { Icon } from './IconSpec'
 import {
     BooleanInputSpec,

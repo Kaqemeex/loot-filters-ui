@@ -4,7 +4,7 @@
     "private": true,
     "main": "dist/index.js",
     "scripts": {
-        "build": "wrangler deploy",
+        "build": "tsc",
         "dev": "wrangler dev",
         "deploy": "wrangler deploy",
         "type-check": "tsc --noEmit",
@@ -12,6 +12,7 @@
         "lint": "eslint src --ext .ts,.tsx --fix"
     },
     "dependencies": {
+        "@loot-filters/models": "*",
         "zod": "^3.24.2"
     },
     "devDependencies": {
