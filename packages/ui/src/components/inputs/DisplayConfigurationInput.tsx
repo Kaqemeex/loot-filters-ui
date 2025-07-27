@@ -21,7 +21,7 @@ import {
     StyleConfigSpec,
     StyleInput,
     Theme,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 import { useAlertStore } from '../../store/alerts'
 import { useSettingsCopyStore } from '../../store/settingsCopyStore'
 import { colors } from '../../styles/MuiTheme'

@@ -3,12 +3,7 @@ import { ArrowBack } from '@mui/icons-material'
 import { Button, Tab, Tabs, Typography } from '@mui/material'
 import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { parse, ParseResult } from '../parsing/parse'
-import {
-    DEFAULT_FILTER_CONFIGURATION,
-    FilterConfiguration,
-    FilterId,
-} from '../parsing/UiTypesSpec'
+import { parse, ParseResult, DEFAULT_FILTER_CONFIGURATION, FilterConfiguration, FilterId } from '@loot-filters/models'
 import { colors } from '../styles/MuiTheme'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Option, UISelect } from './inputs/UISelect'

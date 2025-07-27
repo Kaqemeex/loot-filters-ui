@@ -4,7 +4,7 @@ import {
     BooleanInputDefaultSpec,
     FilterConfiguration,
     Theme,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 
 export const BooleanInputComponent: React.FC<{
     input: BooleanInput

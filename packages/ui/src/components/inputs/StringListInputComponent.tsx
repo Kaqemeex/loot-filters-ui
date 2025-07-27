@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material'
 import {
     FilterConfiguration,
     ListDiff,
@@ -6,7 +5,8 @@ import {
     ListOption,
     StringListInput,
     Theme,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
+import { Typography } from '@mui/material'
 import {
     applyDiff,
     convertToListDiff,

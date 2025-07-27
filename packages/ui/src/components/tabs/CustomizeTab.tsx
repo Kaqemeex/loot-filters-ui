@@ -21,23 +21,7 @@ import { colors, MuiRsTheme } from '../../styles/MuiTheme'
 import SettingsIcon from '@mui/icons-material/Settings'
 import { useSearchParams } from 'react-router-dom'
 import { getIcon, getSprite } from '../../images/osrs/imageUtils'
-import { parseModules } from '../../parsing/parse'
-import {
-    BooleanInput,
-    DEFAULT_FILTER_CONFIGURATION,
-    EnumListInput,
-    Filter,
-    FilterConfiguration,
-    FilterId,
-    Input,
-    Module,
-    NumberInput,
-    StringListInput,
-    StyleConfigSpec,
-    StyleInput,
-    TextInput,
-    Theme,
-} from '../../parsing/UiTypesSpec'
+import { parseModules, BooleanInput, DEFAULT_FILTER_CONFIGURATION, EnumListInput, Filter, FilterConfiguration, FilterId, Input, Module, NumberInput, StringListInput, StyleConfigSpec, StyleInput, TextInput, Theme } from '@loot-filters/models'
 import { useFilterConfigStore } from '../../store/filterConfigurationStore'
 import { useFilterStore } from '../../store/filterStore'
 import { useSearchStore } from '../../store/search'

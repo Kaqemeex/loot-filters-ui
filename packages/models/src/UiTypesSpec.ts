@@ -1,12 +1,15 @@
 import { z } from 'zod'
-import { backgroundImages } from '../types/Images'
 import {
-    Filter_InputSpec,
-    Filter_ThemeSpec,
     Filter_GroupSpec,
+    Filter_InputSpec,
     Filter_ModuleSpec,
+    Filter_ThemeSpec,
 } from './FilterTypesSpec'
 import { IconSpec } from './IconSpec'
+
+// Note: backgroundImages will need to be imported from the UI package or moved here
+// For now, we'll define it as a type that can be extended
+export type BackgroundImages = string[]
 
 export const ThemeSpec = Filter_ThemeSpec.extend({
     id: z.string().nonempty(),
@@ -110,9 +113,7 @@ export type StyleConfig = z.infer<typeof StyleConfigSpec>
 export const StyleInputSpec = InputSpec.extend({
     type: z.literal('style'),
     default: StyleConfigSpec.optional(),
-    backgroundImage: z
-        .enum(backgroundImages as [string, ...string[]])
-        .optional(),
+    backgroundImage: z.string().optional(),
     exampleItem: z.string().optional(),
     exampleItemId: z.number().optional(),
     disableDisplayMode: z.boolean().optional(),

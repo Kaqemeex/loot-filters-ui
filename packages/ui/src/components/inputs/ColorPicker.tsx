@@ -12,7 +12,7 @@ import {
     ArgbHexColorSpec,
     StyleConfig,
     StyleInput,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 import {
     ArgbHexColor,
     argbHexColorToRGBColor,

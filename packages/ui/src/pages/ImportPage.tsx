@@ -1,4 +1,10 @@
 import {
+    DEFAULT_FILTER_CONFIGURATION,
+    FilterConfiguration,
+    parseAsync as parse,
+    ParseResult,
+} from '@loot-filters/models'
+import {
     Button,
     CircularProgress,
     Container,
@@ -8,11 +14,6 @@ import {
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { CustomizeTab } from '../components/tabs/CustomizeTab'
-import {
-    DEFAULT_FILTER_CONFIGURATION,
-    FilterConfiguration,
-} from '../parsing/UiTypesSpec'
-import { parseAsync as parse, ParseResult } from '../parsing/parse'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
 import { colors } from '../styles/MuiTheme'

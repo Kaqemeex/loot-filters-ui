@@ -1,3 +1,4 @@
+import { DEFAULT_FILTER_CONFIGURATION, FilterSpec } from '@loot-filters/models'
 import {
     Box,
     Button,
@@ -12,10 +13,6 @@ import {
 } from '@mui/material'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-    DEFAULT_FILTER_CONFIGURATION,
-    FilterSpec,
-} from '../parsing/UiTypesSpec'
 import { useFilterStore } from '../store/filterStore'
 import { useOboardingStore } from '../store/onboarding'
 import { generateId } from '../utils/idgen'

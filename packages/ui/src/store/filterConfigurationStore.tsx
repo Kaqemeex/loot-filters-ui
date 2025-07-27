@@ -1,7 +1,7 @@
 import { isObject } from 'underscore'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { FilterConfiguration } from '../parsing/UiTypesSpec'
+import { FilterConfiguration } from '@loot-filters/models'
 
 export interface FilterConfigurationStoreState {
     filterConfigurations: Record<string, FilterConfiguration>

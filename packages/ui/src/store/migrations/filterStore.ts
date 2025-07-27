@@ -1,5 +1,4 @@
-import { parseAsync as parse } from '../../parsing/parse'
-import { Filter } from '../../parsing/UiTypesSpec'
+import { Filter, parseAsync as parse } from '@loot-filters/models'
 import { FilterStoreState } from '../filterStore'
 import { legacyFilterUrls } from './MigrateLegacyData'
 

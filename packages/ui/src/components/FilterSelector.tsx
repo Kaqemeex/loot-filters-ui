@@ -1,4 +1,10 @@
 import {
+    DEFAULT_FILTER_CONFIGURATION,
+    Filter,
+    FilterConfigurationSpec,
+    FilterId,
+} from '@loot-filters/models'
+import {
     CopyAll,
     Edit,
     FileCopy,
@@ -32,12 +38,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { BackgroundSelector } from '../components/BackgroundSelector'
 import { SearchBar } from '../components/SearchBar'
-import {
-    DEFAULT_FILTER_CONFIGURATION,
-    Filter,
-    FilterConfigurationSpec,
-    FilterId,
-} from '../parsing/UiTypesSpec'
 import { useAlertStore } from '../store/alerts'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
-import { Input } from '../parsing/UiTypesSpec'
+import { Input } from '@loot-filters/models'
 
 interface SettingsCopyStoreState {
     copiedInput: Input | null

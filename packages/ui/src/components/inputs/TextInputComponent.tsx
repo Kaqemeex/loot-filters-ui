@@ -3,7 +3,7 @@ import {
     FilterConfiguration,
     TextInput,
     Theme,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 
 export const TextInputComponent: React.FC<{
     input: TextInput

@@ -1,4 +1,3 @@
-import { generateId } from '../utils/idgen'
 import { Filter, FilterSpec, Module, Theme } from './UiTypesSpec'
 import { Lexer } from './lexer'
 import { parseGroup } from './parseGroup'
@@ -194,10 +193,7 @@ export const parse = (
                 {
                     line: filter,
                     error: new Error(
-                        'Failed to parse filter - do you have a meta block?',
-                        {
-                            cause: e,
-                        }
+                        'Failed to parse filter - do you have a meta block?'
                     ),
                 },
             ],
@@ -227,4 +223,9 @@ export const addRs2fHash = async (filter: Filter) => {
         .join('')
 
     return { ...filter, rs2fHash }
+}
+
+// Helper function to generate IDs - this will need to be implemented or imported
+function generateId(): string {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36)
 }

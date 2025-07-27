@@ -1,4 +1,4 @@
-import { ListDiff, ListOption } from '../parsing/UiTypesSpec'
+import { ListDiff, ListOption } from '@loot-filters/models'
 
 export const EMPTY_DIFF: ListDiff = {
     added: [],

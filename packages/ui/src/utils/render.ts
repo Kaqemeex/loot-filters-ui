@@ -1,6 +1,6 @@
-import { Icon } from '../parsing/IconSpec'
-import { parseModules } from '../parsing/parse'
-import {
+import { 
+    Icon, 
+    parseModules, 
     Filter,
     FilterConfiguration,
     ListDiff,
@@ -8,7 +8,7 @@ import {
     Module,
     StyleConfig,
     Theme,
-} from '../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 import { applyDiff, convertOptionsToStrings, EMPTY_DIFF } from './ListDiffUtils'
 export const renderFilter = (
     filter: Filter,

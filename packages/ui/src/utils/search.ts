@@ -1,7 +1,7 @@
 import Fuse from 'fuse.js'
 import { groupBy } from 'underscore'
 
-import { Input, isEnumListInput, Module } from '../parsing/UiTypesSpec'
+import { Input, isEnumListInput, Module } from '@loot-filters/models'
 
 const MIN_SEARCH_LENGTH = 3
 

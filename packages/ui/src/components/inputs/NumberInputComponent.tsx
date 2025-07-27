@@ -1,10 +1,10 @@
-import { TextField, Typography } from '@mui/material'
 import {
     FilterConfiguration,
     NumberInput,
     NumberInputDefaultSpec,
     Theme,
-} from '../../parsing/UiTypesSpec'
+} from '@loot-filters/models'
+import { TextField, Typography } from '@mui/material'
 
 export const NumberInputComponent: React.FC<{
     config: FilterConfiguration

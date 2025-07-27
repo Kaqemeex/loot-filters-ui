@@ -23,7 +23,7 @@ import ZulAndraImage from '../images/zul_andra.png'
 
 import { useEffect, useState } from 'react'
 import { getIcon, getSprite } from '../images/osrs/imageUtils'
-import { StyleConfig, StyleInput } from '../parsing/UiTypesSpec'
+import { StyleConfig, StyleInput } from '@loot-filters/models'
 import { useBackgroundStore } from '../store/background'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'

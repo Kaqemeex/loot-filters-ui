@@ -2,7 +2,7 @@ import {
     FilterConfiguration,
     ListDiff,
     StyleConfigSpec,
-} from '../parsing/UiTypesSpec'
+} from '@loot-filters/models'
 
 const countChanges = (config: any): number => {
     if (config === undefined || config === null) {

@@ -1,5 +1,4 @@
-import { addRs2fHash, parseAsync as parse } from '../parsing/parse'
-import { Filter } from '../parsing/UiTypesSpec'
+import { addRs2fHash, Filter, parseAsync as parse } from '@loot-filters/models'
 
 const stringifyErrors = (errors: Error[]) => {
     return errors.map((e) => e.message).join('\n')

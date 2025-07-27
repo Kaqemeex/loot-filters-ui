@@ -1,8 +1,8 @@
+import { Filter, FilterConfiguration } from '@loot-filters/models'
 import {
     compressToEncodedURIComponent,
     decompressFromEncodedURIComponent,
 } from 'lz-string'
-import { Filter, FilterConfiguration } from '../parsing/UiTypesSpec'
 type CreateLinkRequest = {
     filter: {
         rs2f: string

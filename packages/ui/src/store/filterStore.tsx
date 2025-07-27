@@ -1,6 +1,6 @@
+import { Filter } from '@loot-filters/models'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { Filter } from '../parsing/UiTypesSpec'
 import { migrateFilterStore } from './migrations/filterStore'
 
 export interface FilterStoreState {
