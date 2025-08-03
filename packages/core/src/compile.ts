@@ -3,6 +3,12 @@ import { TokenType } from './token'
 import { TokenStream } from './tokenstream'
 import { Module } from './UiTypesSpec'
 
+export type PrecompiledFilter = {
+    prefix?: RenderOptimizedRs2f
+    filter: RenderOptimizedRs2f
+    suffix?: RenderOptimizedRs2f
+}
+
 export type RenderOptimizedRs2f = {
     macroBindings: Record<string, string>
     rs2f: string

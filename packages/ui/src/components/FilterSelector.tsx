@@ -4,7 +4,7 @@ import {
     Filter,
     FilterConfigurationSpec,
     FilterId,
-    render,
+    generateId,
     renderFilter,
 } from '@loot-filters/core'
 import {
@@ -48,7 +48,6 @@ import { useOboardingStore } from '../store/onboarding'
 import { colors } from '../styles/MuiTheme'
 import { countConfigChanges } from '../utils/configUtils'
 import { downloadFile } from '../utils/file'
-import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
 import { Option, UISelect } from './inputs/UISelect'
@@ -323,8 +322,23 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                     if (!activeFilter) {
                         return
                     }
-                    const compiled = compile(activeFilter.modules)
-                    const rendered = render(compiled, {})
+
+                    const compiled = compile(
+                        activeFilter.modules.filter((m) => {
+                            return (
+                                activeFilterConfig?.enabledModules?.[m.id] ??
+                                true
+                            )
+                        })
+                    )
+
+                    fetch('/save/compiled', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            filter: compiled,
+                            config: activeFilterConfig,
+                        }),
+                    })
                 }}
             >
                 Compile & Render

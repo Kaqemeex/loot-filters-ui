@@ -73,6 +73,7 @@ module.exports = (env, argv) => {
             hot: true,
             open: true,
             watchFiles: ['packages/ui/src/**/*', 'packages/core/src/**/*'],
+            historyApiFallback: true,
         },
         optimization: {
             splitChunks: {

@@ -1,5 +1,83 @@
-import { Env } from './env'
-import { generateId } from './idgen'
+import { generateId } from '@loot-filters/core/src/idgen'
+import { Env } from '../env'
+import { Route } from '../router'
+
+const getShortLinkHandler = async (
+    _: Request,
+    match: RegExpMatchArray,
+    env: Env
+) => {
+    const filterId = match[1]
+
+    // Get the filter from R2
+    const filterData = await load(filterId, env)
+    return new Response(JSON.stringify(filterData), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+    })
+}
+
+export const getShortLinkRoute: Route = {
+    path: /^\/filter\/([^\/]+)$/,
+    method: 'GET',
+    handler: getShortLinkHandler,
+}
+
+const saveShortLinkHandler = async (
+    request: Request,
+    _: RegExpMatchArray,
+    env: Env
+) => {
+    const filter = (await request.json()) as SaveForLinkRequest
+    const response = await saveForLink(filter, env)
+    return new Response(JSON.stringify({ response: { id: response.id } }), {
+        status: 200,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+        },
+    })
+}
+
+export const saveShortLinkRoute: Route = {
+    path: /^\/filter\/save$/,
+    method: 'POST',
+    handler: saveShortLinkHandler,
+}
+
+const getAndDecompress = async (key: string, env: Env): Promise<string> => {
+    const blob = await env.FILTERS_BUCKET.get(key)
+    if (!blob) {
+        throw new Error(`Blob ${key} not found`)
+    }
+
+    // Get the array buffer and decompress it properly
+    const arrayBuffer = await blob.arrayBuffer()
+    const decompressedStream = new Response(arrayBuffer).body?.pipeThrough(
+        new DecompressionStream('gzip')
+    )
+    const decompressedContent = await new Response(
+        decompressedStream
+    ).arrayBuffer()
+
+    return new TextDecoder().decode(decompressedContent)
+}
+
+export const load = async (id: string, env: Env) => {
+    // CF R2 will automatically decompress the config if it's gzipped
+    const config: SavedConfig = JSON.parse(
+        await getAndDecompress(`configs/${id}.json.gz`, env)
+    )
+    const filter = await getAndDecompress(config.filterKey, env)
+
+    return {
+        filter: JSON.parse(filter) as SavedFilter,
+        config: config.data,
+    }
+}
 
 const compress = async (text: string) => {
     const compressedStream = await new Response(text).body?.pipeThrough(
@@ -25,15 +103,14 @@ export type SavedConfig = {
     data?: object
 }
 
+type SaveForLinkRequest = {
+    filter: SavedFilter
+    config?: object
+}
+
 // We hash and store the rs2f separately to avoid storing multiple copies of the same rs2f
 // Since the majority of users are using Rikten's or Joe's filters this means we're really only ever storing 1 version of each.
-export const save = async (
-    toStore: {
-        filter: SavedFilter
-        config?: object
-    },
-    env: Env
-) => {
+export const saveForLink = async (toStore: SaveForLinkRequest, env: Env) => {
     try {
         const id = generateId()
 

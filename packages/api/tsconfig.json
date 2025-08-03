@@ -13,6 +13,6 @@
     "rootDir": "src",
     "types": ["@cloudflare/workers-types"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../core/src/idgen.ts"],
   "exclude": ["node_modules", "dist"]
 } 

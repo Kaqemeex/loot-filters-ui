@@ -1,4 +1,4 @@
-import { DEFAULT_FILTER_CONFIGURATION, FilterSpec } from '@loot-filters/core'
+import { DEFAULT_FILTER_CONFIGURATION, FilterSpec, generateId } from '@loot-filters/core'
 import {
     Box,
     Button,
@@ -13,7 +13,6 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAlertStore } from '../store/alerts'
 import { useFilterStore } from '../store/filterStore'
-import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
 

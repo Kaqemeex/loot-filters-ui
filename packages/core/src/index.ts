@@ -1,6 +1,5 @@
 // Export all parsing functionality
 export { compile, render } from './compile'
-export type { RenderOptimizedRs2f } from './compile'
 export * from './FilterTypesSpec'
 export * from './IconSpec'
 export * from './rs2fParser'
@@ -12,7 +11,7 @@ export {
     isWhitespace as isTokenWhitespace,
     TokenStream,
     TokenStreamEOFError,
-    TokenStreamError,
+    TokenStreamError
 } from './tokenstream'
 
 // Export from lexer (excluding isWhitespace to avoid conflict)
@@ -21,7 +20,7 @@ export {
     isWhitespace as isCharacterWhitespace,
     isLegalIdent,
     isNumeric,
-    Lexer,
+    Lexer
 } from './lexer'
 
 // Export from parse modules
@@ -33,3 +32,5 @@ export * from './parseStructuredComment'
 // Export utility functions
 export * from './ListDiffUtils'
 export * from './render'
+
+export * from './idgen'
