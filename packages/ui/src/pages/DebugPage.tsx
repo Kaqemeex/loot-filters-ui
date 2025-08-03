@@ -11,7 +11,6 @@ import {
     Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { downloadFile, localState, localStorageKeys } from '../utils/file'
 import { useFeatureFlagStore, FLAG_NAMES } from '../components/FeatureFlagged'
 
@@ -73,7 +72,6 @@ const renderContent = (tab: string, filterStoreTab: string) => {
 }
 
 export const DebugPage = () => {
-    const navigator = useNavigate()
     const [tab, setTab] = useState('filter-store')
     const [filterStoreTab, setFilterStoreTab] = useState('everything')
 

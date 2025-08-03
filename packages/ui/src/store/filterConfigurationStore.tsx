@@ -1,4 +1,3 @@
-import { isObject } from 'underscore'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { FilterConfiguration } from '@loot-filters/core'

@@ -20,10 +20,6 @@ export const colors = {
     rsGrey: '#808080',
 }
 
-const typography = {
-    fontFamily: 'RuneScape',
-}
-
 export const MuiRsTheme = createTheme({
     components: {
         MuiTextField: {

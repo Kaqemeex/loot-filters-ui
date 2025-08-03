@@ -23,7 +23,6 @@ import { MuiRsTheme } from './styles/MuiTheme'
 const Page: React.FC<{
     component?: ReactNode
 }> = ({ component }) => {
-    const params = new URLSearchParams(window.location.search)
     initImages()
 
     const alerts = useAlertStore((state) => state.alerts)

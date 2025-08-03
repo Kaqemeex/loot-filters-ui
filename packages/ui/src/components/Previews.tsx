@@ -1,4 +1,4 @@
-import { Box, SxProps } from '@mui/material'
+import { Box } from '@mui/material'
 import AbyssalNexusImage from '../images/abyssal_nexus.png'
 import AkkhaImage from '../images/akkha.png'
 import BabaImage from '../images/baba.png'
@@ -21,9 +21,9 @@ import WildernessImage from '../images/wilderness.png'
 import ZanarisImage from '../images/zanaris.png'
 import ZulAndraImage from '../images/zul_andra.png'
 
+import { StyleConfig, StyleInput } from '@loot-filters/core'
 import { useEffect, useState } from 'react'
 import { getIcon, getSprite } from '../images/osrs/imageUtils'
-import { StyleConfig, StyleInput } from '@loot-filters/core'
 import { useBackgroundStore } from '../store/background'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
@@ -137,8 +137,7 @@ const backgroundImages = [
 export const ItemLabelPreview: React.FC<{
     itemName: string
     input: StyleInput
-    sx?: SxProps
-}> = ({ itemName, input, sx }) => {
+}> = ({ itemName, input }) => {
     const activeFilterId = useFilterStore(
         (state) =>
             Object.keys(state.filters).find((id) => state.filters[id].active)!!
@@ -247,6 +246,7 @@ export const ItemLabelPreview: React.FC<{
                 clearInterval(interval)
             }
         }
+        return () => {}
     }, [activeBackground])
 
     let activeBackgroundImage = null

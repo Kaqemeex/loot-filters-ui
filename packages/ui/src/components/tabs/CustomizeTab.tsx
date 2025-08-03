@@ -775,6 +775,7 @@ export const CustomizeTab: React.FC<{
                         />
                     ))}
             </Stack>
+            {extraComponent}
         </div>
     )
 }

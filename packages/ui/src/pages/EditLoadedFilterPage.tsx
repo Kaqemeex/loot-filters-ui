@@ -1,20 +1,19 @@
-import { FormControlLabel, Switch, TextField, Typography } from '@mui/material'
+import {
+    applyModule,
+    FilterConfiguration,
+    parse,
+    parseModules,
+} from '@loot-filters/core'
+import { TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { ErrorBoundary } from '../components/ErrorBoundary'
 import { Rs2fEditor } from '../components/Rs2fEditor'
-import { parse, parseModules, FilterConfiguration } from '@loot-filters/core'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
-import { colors } from '../styles/MuiTheme'
-import { applyModule } from '@loot-filters/core'
 
 const DOC_LINK_COMMENT =
     '// For docs visit https://github.com/Kaqemeex/loot-filters-ui/blob/main/module-system-docs/modular-filters-book/Readme.md'
-
-const raise = (error: Error) => {
-    throw error
-}
 
 export const EditorLoadedFilterPage: React.FC = () => {
     const { filterId } = useParams()

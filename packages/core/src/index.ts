@@ -1,4 +1,6 @@
 // Export all parsing functionality
+export { compile, render } from './compile'
+export type { RenderOptimizedRs2f } from './compile'
 export * from './FilterTypesSpec'
 export * from './IconSpec'
 export * from './rs2fParser'

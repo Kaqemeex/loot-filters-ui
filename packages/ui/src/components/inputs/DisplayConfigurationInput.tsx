@@ -1,3 +1,11 @@
+import {
+    FilterConfiguration,
+    Module,
+    StyleConfig,
+    StyleConfigSpec,
+    StyleInput,
+    Theme,
+} from '@loot-filters/core'
 import { ExpandMore } from '@mui/icons-material'
 import {
     Accordion,
@@ -14,16 +22,6 @@ import {
 } from '@mui/material'
 import React, { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import {
-    FilterConfiguration,
-    Module,
-    StyleConfig,
-    StyleConfigSpec,
-    StyleInput,
-    Theme,
-} from '@loot-filters/core'
-import { useAlertStore } from '../../store/alerts'
-import { useSettingsCopyStore } from '../../store/settingsCopyStore'
 import { colors } from '../../styles/MuiTheme'
 import {
     FontType,
@@ -119,11 +117,8 @@ export const DisplayConfigurationInput: React.FC<{
     readonly: boolean
     module: Module
     input: StyleInput
-}> = ({ config, theme, onChange, readonly, module, input }) => {
+}> = ({ config, theme, onChange, readonly, input }) => {
     const [searchParams] = useSearchParams()
-    const { addAlert } = useAlertStore()
-    const { copiedInput, pasteableConfig, setSettingsCopy } =
-        useSettingsCopyStore()
 
     const [expanded, setExpanded] = useState(
         searchParams.get('expanded') === 'true'
@@ -171,7 +166,6 @@ export const DisplayConfigurationInput: React.FC<{
     const inputWithBadge = (child: React.ReactNode, configField: string) => {
         // Get values for the field from user, theme, and default
         const userValue = (styleConfig as any)?.[configField]
-        const themeValue = (themeConfig as any)?.[configField] // TODO: handle theme config
         const filterValue = (input.default as any)?.[configField]
         // Determine which value is active
         let isChanged = false

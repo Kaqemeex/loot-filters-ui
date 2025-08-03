@@ -34,7 +34,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
     onClose,
 }) => {
     const [filterUrl, setFilterUrl] = useState('')
-    const [filterNameOverride, setFilterNameOverride] = useState('')
+    const [_, setFilterNameOverride] = useState('')
     const [importError, setImportError] = useState('')
     const { updateFilter, setActiveFilter } = useFilterStore()
     const navigate = useNavigate()
@@ -208,7 +208,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                                 </Button>
                                 <Button
                                     disabled={loading}
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         setLoading(true)
                                         loadFilterFromUrl(FILTERSCAPE_FILTER)
                                             .then((filter) => {
@@ -281,7 +281,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                                     GitHub
                                 </Button>
                                 <Button
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         setLoading(true)
                                         loadFilterFromUrl(JOES_FILTER)
                                             .then((filter) => {
@@ -348,7 +348,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                             <CardActions>
                                 <Button
                                     size="small"
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         setShowURLImportOptions(true)
                                     }}
                                 >
@@ -381,7 +381,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                             <CardActions>
                                 <Button
                                     size="small"
-                                    onClick={(e) => {
+                                    onClick={() => {
                                         const id = generateId()
                                         updateFilter(
                                             FilterSpec.parse({
@@ -432,7 +432,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                             disabled={filterUrl.length === 0}
                             variant="outlined"
                             color="primary"
-                            onClick={(e) => {
+                            onClick={() => {
                                 setLoading(true)
                                 if (!filterUrl) {
                                     setLoading(false)

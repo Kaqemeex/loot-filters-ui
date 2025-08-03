@@ -1,9 +1,14 @@
+import {
+    DEFAULT_FILTER_CONFIGURATION,
+    FilterConfiguration,
+    parse,
+    ParseResult,
+} from '@loot-filters/core'
 import { Editor } from '@monaco-editor/react'
 import { ArrowBack } from '@mui/icons-material'
 import { Button, Tab, Tabs, Typography } from '@mui/material'
 import { ReactNode, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { parse, ParseResult, DEFAULT_FILTER_CONFIGURATION, FilterConfiguration, FilterId } from '@loot-filters/core'
 import { colors } from '../styles/MuiTheme'
 import { ErrorBoundary } from './ErrorBoundary'
 import { Option, UISelect } from './inputs/UISelect'

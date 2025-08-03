@@ -15,7 +15,7 @@ export const useAlertStore = create<AlertStoreState>()(
             set((state) => ({ alerts: [...state.alerts, alert] })),
         removeAlert: (alert_index) =>
             set((state) => ({
-                alerts: state.alerts.filter((n, i) => i !== alert_index),
+                alerts: state.alerts.filter((_, i) => i !== alert_index),
             })),
     }))
 )

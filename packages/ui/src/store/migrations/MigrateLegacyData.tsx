@@ -51,7 +51,7 @@ export const MigrateLegacyData: React.FC = () => {
     const [migrationsStarted, setMigrationsStarted] = useState<string[]>([])
 
     Object.values(legacyData.importedModularFilters).forEach(
-        ({ id, name, active, source }: any, index: number) => {
+        ({ id, name, active, source }: any)  => {
             let url = null
             if (typeof source === 'string') {
                 url = source

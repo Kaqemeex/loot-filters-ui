@@ -1,3 +1,9 @@
+import {
+    parse,
+    render,
+    renderFilter,
+    RenderOptimizedRs2f,
+} from '@loot-filters/core'
 import { Env } from './env'
 import { load } from './load'
 import { save } from './save'
@@ -38,7 +44,7 @@ export default {
                 return new Response(
                     JSON.stringify({
                         filterVariants: filtersCount,
-                        configVariants: configsCount
+                        configVariants: configsCount,
                     }),
                     {
                         status: 200,
@@ -50,6 +56,79 @@ export default {
                 )
             } catch (error) {
                 console.error('Error fetching stats:', error)
+                return new Response(
+                    JSON.stringify({ error: 'Internal server error' }),
+                    {
+                        status: 500,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*',
+                        },
+                    }
+                )
+            }
+        }
+
+        // Handle /render/{id} endpoint
+        const renderMatch = path.match(/^\/render\/([^\/]+)$/)
+        if (renderMatch && request.method === 'GET') {
+            const filterId = renderMatch[1]
+
+            try {
+                // Get the filter from R2
+                const filterData = await load(filterId, env)
+
+                // Parse the RS2F content to create a proper Filter object
+                const parseResult = parse(filterData.filter.rs2f, false, {
+                    name: filterData.filter.sourceUrl || 'Unknown Filter',
+                })
+
+                if (parseResult.errors) {
+                    return new Response(
+                        JSON.stringify({
+                            error: 'Failed to parse filter',
+                            details: parseResult.errors
+                                .map((e) => e.error.message)
+                                .join(', '),
+                        }),
+                        {
+                            status: 400,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                        }
+                    )
+                }
+
+                if (!parseResult.filter) {
+                    return new Response(
+                        JSON.stringify({ error: 'Failed to parse filter' }),
+                        {
+                            status: 400,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                        }
+                    )
+                }
+
+                // Render the filter using the core package
+                const renderedFilter = renderFilter(
+                    parseResult.filter,
+                    filterData.config as any
+                )
+
+                return new Response(renderedFilter, {
+                    status: 200,
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                })
+            } catch (error) {
+                console.error('Error rendering filter:', error)
                 return new Response(
                     JSON.stringify({ error: 'Internal server error' }),
                     {
@@ -90,6 +169,34 @@ export default {
                         },
                     }
                 )
+            }
+        }
+
+        if (path === '/render/compiled' && request.method === 'POST') {
+            try {
+                const filter = (await request.json()) as RenderOptimizedRs2f & {
+                    prefix?: RenderOptimizedRs2f
+                    prefixMacroOverrides: Record<string, string>
+                    suffix?: RenderOptimizedRs2f
+                    suffixMacroOverrides: Record<string, string>
+                }
+                const compiled = render(
+                    filter,
+                    {},
+                    filter.prefix,
+                    filter.prefixMacroOverrides,
+                    filter.suffix,
+                    filter.suffixMacroOverrides
+                )
+                return new Response(compiled, {
+                    status: 200,
+                    headers: {
+                        'Content-Type': 'text/plain',
+                        'Access-Control-Allow-Origin': '*',
+                    },
+                })
+            } catch (error) {
+                console.error('Error in save endpoint:', error)
             }
         }
 

@@ -1,13 +1,9 @@
 import { Box, Typography } from '@mui/material'
-import { useState } from 'react'
-import { FilterSelector } from '../components/FilterSelector'
 import { CustomizeTab } from '../components/tabs/CustomizeTab'
 import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useFilterStore } from '../store/filterStore'
 
 export const CustomizeFilterPageBody: React.FC = () => {
-    const [activeTab, setActiveTab] = useState(0)
-
     const activeFilter = useFilterStore((state) =>
         Object.values(state.filters).find((filter) => filter.active)
     )

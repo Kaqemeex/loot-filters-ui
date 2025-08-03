@@ -1,8 +1,10 @@
 import {
+    compile,
     DEFAULT_FILTER_CONFIGURATION,
     Filter,
     FilterConfigurationSpec,
     FilterId,
+    render,
     renderFilter,
 } from '@loot-filters/core'
 import {
@@ -314,6 +316,18 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
                     sx={{ fontSize: '20px', paddingRight: '5px' }}
                 />
                 Export to RuneLite
+            </Button>
+            <Button
+                variant="outlined"
+                onClick={() => {
+                    if (!activeFilter) {
+                        return
+                    }
+                    const compiled = compile(activeFilter.modules)
+                    const rendered = render(compiled, {})
+                }}
+            >
+                Compile & Render
             </Button>
         </SmartTooltip>
     )

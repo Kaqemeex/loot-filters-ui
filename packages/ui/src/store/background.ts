@@ -13,7 +13,7 @@ export const useBackgroundStore = create<BackgroundStoreState>()(
             (set) => ({
                 background: BackgroundImage.Default,
                 updateBackground: (background) =>
-                    set((state) => ({ background })),
+                    set(() => ({ background })),
             }),
             {
                 name: 'background-image-selected',

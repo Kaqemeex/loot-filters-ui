@@ -13,15 +13,9 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAlertStore } from '../store/alerts'
 import { useFilterStore } from '../store/filterStore'
-import { useOboardingStore } from '../store/onboarding'
 import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
-
-interface ImportFilterDialogProps {
-    open: boolean
-    onClose: () => void
-}
 
 const FILTERSCAPE_FILTER =
     'https://raw.githubusercontent.com/riktenx/filterscape/refs/heads/main/filter.rs2f'
@@ -45,7 +39,6 @@ export const NewFilterPage: React.FC = () => {
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showURLImportOptions, setShowURLImportOptions] = useState(false)
-    const { onboardingComplete, setOnboardingComplete } = useOboardingStore()
 
     const loadFilter = (url: string) => {
         setLoading(true)
@@ -234,7 +227,7 @@ export const NewFilterPage: React.FC = () => {
                                 <CardActions>
                                     <Button
                                         variant="main-action"
-                                        onClick={(e) => {
+                                        onClick={() => {
                                             setShowURLImportOptions(true)
                                         }}
                                     >
@@ -268,7 +261,7 @@ export const NewFilterPage: React.FC = () => {
                                 <CardActions>
                                     <Button
                                         variant="main-action"
-                                        onClick={(e) => {
+                                        onClick={() => {
                                             const id = generateId()
                                             updateFilter(
                                                 FilterSpec.parse({
@@ -319,7 +312,7 @@ export const NewFilterPage: React.FC = () => {
                                 disabled={filterUrl.length === 0}
                                 variant="outlined"
                                 color="primary"
-                                onClick={(e) => {
+                                onClick={() => {
                                     setLoading(true)
                                     if (!filterUrl) {
                                         setLoading(false)

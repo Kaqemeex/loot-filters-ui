@@ -2,6 +2,10 @@ name = "loot-filters-api"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
+# Set CPU limit to 5 seconds
+[limits]
+cpu_ms = 5000
+
 [[r2_buckets]]
 binding = "FILTERS_BUCKET"
 bucket_name = "loot-filters" 
