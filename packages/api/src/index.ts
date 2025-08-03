@@ -30,7 +30,7 @@ export default {
         router.registerRoute(statsRoute)
         router.registerRoute(getShortLinkRoute)
         router.registerRoute(saveShortLinkRoute)
-        // Legacy route for UI
+        // TODO: Legacy route for UI - can be removed once UI changes in this branch are deployed
         router.registerRoute({
             ...saveShortLinkRoute,
             path: /^\/save$/,
