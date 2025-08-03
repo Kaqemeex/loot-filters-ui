@@ -30,6 +30,11 @@ export default {
         router.registerRoute(statsRoute)
         router.registerRoute(getShortLinkRoute)
         router.registerRoute(saveShortLinkRoute)
+        // Legacy route for UI
+        router.registerRoute({
+            ...saveShortLinkRoute,
+            path: /^\/save$/,
+        })
 
         return router.handle(request)
     },
