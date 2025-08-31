@@ -1,0 +1,33 @@
+name = "loot-filters-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[env.production]
+name = "loot-filters-api-prod"
+
+[env.staging]
+name = "loot-filters-api-staging"
+
+# D2 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "loot-filters"
+database_id = "23e9d8d1-5f16-42a8-8d7b-2345c75cc04d"
+migrations_dir = "migrations"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "development"
+DISCORD_CLIENT_ID = "1411366696979009567"
+DISCORD_CLIENT_SECRET = "YdmELTTGY4Ga9ab7C5X3PYBUVu14J70e"
+# If you're changing one; you need to change the other
+DISCORD_REDIRECT_URI = "http://localhost:3000/login/redirect"
+DISCORD_LOGIN_URI = "https://discord.com/oauth2/authorize?client_id=1411366696979009567&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin%2Fredirect&scope=identify"
+
+# Cron triggers (optional)
+[triggers]
+crons = []
