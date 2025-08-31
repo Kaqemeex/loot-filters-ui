@@ -8,20 +8,20 @@ import {
 } from '@mui/material'
 import { Route, Routes } from 'react-router-dom'
 import { OAuthRedirectLandingPage, useAuthActions, useAuthState } from './auth'
+import { FilterViewer } from './components/FilterViewer'
+import { MyFilters } from './components/MyFilters'
 import { Navbar } from './components/Navbar'
+import { PublicFilters } from './components/PublicFilters'
 import { Sidebar } from './components/Sidebar'
-import { osrsColors } from './theme/osrsTheme'
 
 function App() {
-    const { sessionId, sessionExpiresAt } = useAuthState()
-    const isAuthenticated =
-        sessionId && sessionExpiresAt && Date.now() < sessionExpiresAt
+    const { isAuthenticated } = useAuthState()
 
     return (
         <Box
             sx={{
                 display: 'flex',
-                backgroundColor: osrsColors.bodyBackground,
+                backgroundColor: 'background.default',
                 minHeight: '100vh',
             }}
         >
@@ -33,6 +33,16 @@ function App() {
                 <Box sx={{ flexGrow: 1, p: 3 }}>
                     <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/my-filters" element={<MyFilters />} />
+                        <Route
+                            path="/filters/:filterId"
+                            element={<FilterViewer />}
+                        />
+
+                        <Route
+                            path="/public-filters"
+                            element={<PublicFilters />}
+                        />
                         <Route
                             path="/login/redirect"
                             element={<OAuthRedirectLandingPage />}
@@ -45,22 +55,11 @@ function App() {
 }
 
 function Home() {
-    const { username, sessionId, sessionExpiresAt } = useAuthState()
+    const { username, isAuthenticated } = useAuthState()
     const { logout } = useAuthActions()
-    const isAuthenticated =
-        sessionId && sessionExpiresAt && Date.now() < sessionExpiresAt
 
     return (
         <Box>
-            <Typography
-                variant="h6"
-                color="text.secondary"
-                paragraph
-                sx={{ mb: 4 }}
-            >
-                Manage your Path of Exile loot filters with ease.
-            </Typography>
-
             {isAuthenticated ? (
                 <Card sx={{ maxWidth: 400 }}>
                     <CardContent sx={{ p: 3 }}>

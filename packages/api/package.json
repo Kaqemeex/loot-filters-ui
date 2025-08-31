@@ -18,17 +18,20 @@
         "clean": "rm -rf dist",
         "type-check": "tsc --noEmit",
         "lint": "eslint src --ext .ts",
-        "test": "wrangler dev --test-scheduled"
+        "test": "wrangler dev --test-scheduled",
+        "db:generate": "drizzle-kit generate",
+        "db:migrate": "wrangler d1 migrations apply loot-filters"
     },
     "dependencies": {
         "@loot-filters/core": "file:../core",
         "drizzle-orm": "^0.44.5",
-        "itty-router": "^5.0.22"
+        "itty-router": "^5.0.22",
+        "zod": "^3.22.3"
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20241218.0",
         "drizzle-kit": "^0.31.4",
         "typescript": "5.3.3",
-        "wrangler": "^3.0.0"
+        "wrangler": "^4.33.1"
     }
 }

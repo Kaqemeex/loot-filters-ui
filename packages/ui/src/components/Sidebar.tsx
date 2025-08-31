@@ -3,8 +3,6 @@ import {
     ChevronRight as ChevronRightIcon,
     FilterList as FilterIcon,
     Home as HomeIcon,
-    Person as PersonIcon,
-    Settings as SettingsIcon,
 } from '@mui/icons-material'
 import {
     Box,
@@ -19,7 +17,7 @@ import {
     Tooltip,
 } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { osrsColors } from '../theme/osrsTheme'
+import { useAuthState } from '../auth/useAuth'
 import { useSidebarStore } from './sidebarStore'
 
 const DRAWER_WIDTH = 240
@@ -27,17 +25,21 @@ const COLLAPSED_DRAWER_WIDTH = 64
 
 const navigationItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
-    { text: 'Loot Filters', icon: <FilterIcon />, path: '/filters' },
-    { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
-    { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
+    { text: 'My Filters', icon: <FilterIcon />, path: '/my-filters' },
+    { text: 'Public Filters', icon: <FilterIcon />, path: '/public-filters' },
 ]
 
 export const Sidebar: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const { isCollapsed, toggleCollapse } = useSidebarStore()
+    const { isAuthenticated } = useAuthState()
 
     const handleNavigation = (path: string) => {
+        // Don't allow navigation to authenticated-only pages if not authenticated
+        if (path === '/my-filters' && !isAuthenticated) {
+            return
+        }
         navigate(path)
     }
 
@@ -51,9 +53,6 @@ export const Sidebar: React.FC = () => {
                 '& .MuiDrawer-paper': {
                     width: isCollapsed ? COLLAPSED_DRAWER_WIDTH : DRAWER_WIDTH,
                     boxSizing: 'border-box',
-                    backgroundColor: osrsColors.bodyDark,
-                    color: osrsColors.buttonDark,
-                    borderRight: `1px solid ${osrsColors.bodyBorder}`,
                     transition: 'width 0.2s ease-in-out',
                     overflowX: 'hidden',
                 },
@@ -63,16 +62,7 @@ export const Sidebar: React.FC = () => {
                 <Tooltip
                     title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 >
-                    <IconButton
-                        onClick={toggleCollapse}
-                        size="small"
-                        sx={{
-                            color: osrsColors.buttonDark,
-                            '&:hover': {
-                                backgroundColor: osrsColors.bodyMid,
-                            },
-                        }}
-                    >
+                    <IconButton onClick={toggleCollapse} size="small">
                         {isCollapsed ? (
                             <ChevronRightIcon />
                         ) : (
@@ -82,48 +72,42 @@ export const Sidebar: React.FC = () => {
                 </Tooltip>
             </Box>
 
-            <Divider sx={{ borderColor: osrsColors.bodyBorder }} />
+            <Divider />
 
             <List sx={{ pt: 1 }}>
-                {navigationItems.map((item) => (
-                    <ListItem key={item.text} disablePadding>
-                        <ListItemButton
-                            onClick={() => handleNavigation(item.path)}
-                            selected={location.pathname === item.path}
-                            sx={{
-                                mx: 1,
-                                borderRadius: 1,
-                                '&.Mui-selected': {
-                                    backgroundColor: osrsColors.ecstasy,
-                                    color: osrsColors.buttonDark,
-                                    '&:hover': {
-                                        backgroundColor: osrsColors.korma,
-                                    },
-                                },
-                                '&:hover': {
-                                    backgroundColor: osrsColors.bodyMid,
-                                },
-                            }}
-                        >
-                            <ListItemIcon
+                {navigationItems.map((item) => {
+                    const isAuthenticatedOnly = item.path === '/my-filters'
+                    const isDisabled = isAuthenticatedOnly && !isAuthenticated
+
+                    return (
+                        <ListItem key={item.text} disablePadding>
+                            <ListItemButton
+                                onClick={() => handleNavigation(item.path)}
+                                selected={location.pathname === item.path}
+                                disabled={isDisabled}
                                 sx={{
-                                    color: 'inherit',
-                                    minWidth: 40,
+                                    mx: 1,
+                                    borderRadius: 1,
+                                    opacity: isDisabled ? 0.5 : 1,
                                 }}
                             >
-                                {item.icon}
-                            </ListItemIcon>
-                            {!isCollapsed && (
-                                <ListItemText
-                                    primary={item.text}
-                                    primaryTypographyProps={{
-                                        fontWeight: 500,
+                                <ListItemIcon
+                                    sx={{
+                                        color: 'inherit',
+                                        minWidth: 40,
                                     }}
-                                />
-                            )}
-                        </ListItemButton>
-                    </ListItem>
-                ))}
+                                >
+                                    {item.icon}
+                                </ListItemIcon>
+                                {!isCollapsed && (
+                                    <ListItemText
+                                        primary={item.text}
+                                    />
+                                )}
+                            </ListItemButton>
+                        </ListItem>
+                    )
+                })}
             </List>
         </Drawer>
     )

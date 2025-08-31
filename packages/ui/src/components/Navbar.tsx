@@ -10,13 +10,10 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { DiscordLoginButton, useAuthActions, useAuthState } from '../auth'
-import { osrsColors } from '../theme/osrsTheme'
 
 export const Navbar: React.FC = () => {
-    const { username, sessionId, sessionExpiresAt } = useAuthState()
+    const { username, isAuthenticated } = useAuthState()
     const { logout } = useAuthActions()
-    const isAuthenticated =
-        sessionId && sessionExpiresAt && Date.now() < sessionExpiresAt
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
@@ -36,11 +33,6 @@ export const Navbar: React.FC = () => {
     return (
         <AppBar
             position="static"
-            sx={{
-                backgroundColor: osrsColors.buttonDark,
-                color: osrsColors.bodyMain,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-            }}
         >
             <Toolbar>
                 <Typography
@@ -49,8 +41,6 @@ export const Navbar: React.FC = () => {
                     sx={{
                         flexGrow: 1,
                         fontWeight: 700,
-                        color: osrsColors.ecstasy,
-                        textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
                     }}
                 >
                     Loot Filters
@@ -62,7 +52,6 @@ export const Navbar: React.FC = () => {
                             variant="h6"
                             sx={{
                                 mr: 2,
-                                color: osrsColors.bodyLight,
                                 fontWeight: 500,
                             }}
                         >
@@ -74,12 +63,6 @@ export const Navbar: React.FC = () => {
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
                             onClick={handleMenu}
-                            sx={{
-                                color: osrsColors.bodyMain,
-                                '&:hover': {
-                                    backgroundColor: osrsColors.buttonLight,
-                                },
-                            }}
                         >
                             <AccountCircle />
                         </IconButton>
@@ -97,25 +80,26 @@ export const Navbar: React.FC = () => {
                             }}
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
-                            sx={{
-                                '& .MuiPaper-root': {
-                                    backgroundColor: osrsColors.bodyMain,
-                                    border: `1px solid ${osrsColors.bodyBorder}`,
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                },
-                            }}
                         >
                             <MenuItem
-                                onClick={handleLogout}
-                                sx={{
-                                    color: osrsColors.buttonDark,
-                                    '&:hover': {
-                                        backgroundColor: osrsColors.bodyLight,
-                                    },
+                                onClick={() => {
+                                    // TODO: Navigate to profile page
+                                    console.log('Profile clicked')
+                                    handleClose()
                                 }}
                             >
-                                Logout
+                                Profile
                             </MenuItem>
+                            <MenuItem
+                                onClick={() => {
+                                    // TODO: Navigate to settings page
+                                    console.log('Settings clicked')
+                                    handleClose()
+                                }}
+                            >
+                                Settings
+                            </MenuItem>
+                            <MenuItem onClick={handleLogout}>Logout</MenuItem>
                         </Menu>
                     </Box>
                 ) : (

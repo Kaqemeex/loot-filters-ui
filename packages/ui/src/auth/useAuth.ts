@@ -15,7 +15,12 @@ export const useAuth = () => {
 // Hook for components that only need to read auth state
 export const useAuthState = () => {
     const { username, sessionId, sessionExpiresAt } = useAuthStore()
-    return { username, sessionId, sessionExpiresAt }
+
+    // Compute authentication status
+    const isAuthenticated =
+        sessionId && sessionExpiresAt && Date.now() < sessionExpiresAt
+
+    return { username, sessionId, sessionExpiresAt, isAuthenticated }
 }
 
 // Hook for components that need to perform auth actions

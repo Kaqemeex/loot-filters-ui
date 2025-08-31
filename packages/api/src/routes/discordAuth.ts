@@ -1,6 +1,6 @@
 import { and, eq, lt } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
-import { IRequest } from 'itty-router'
+import { AutoRouterType, IRequest } from 'itty-router'
 import { users, userSessions } from '../db/users'
 import { Env } from '../env'
 
@@ -18,7 +18,7 @@ export type DiscordOAuthData = {
     refresh_token: string
     scope: 'identify'
 }
-    
+
 export const doDiscordLogin = async (req: IRequest, env: Env) => {
     const code = req.query.code as string
 
@@ -39,8 +39,6 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
     })
 
     const oauthData = (await result.json()) as DiscordOAuthData
-    console.log('oauthData', oauthData)
-
     const userReq = await fetch('https://discord.com/api/users/@me', {
         headers: {
             authorization: `${oauthData.token_type} ${oauthData.access_token}`,
@@ -48,10 +46,7 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
     })
 
     const user = (await userReq.json()) as { id: string; username: string }
-    console.log('user', user)
-
-    await drizzle(env.DB)
-        .insert(users)
+    await env.DB.insert(users)
         .values({
             discordId: user.id,
             discordUsername: user.username,
@@ -69,19 +64,17 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
             },
         })
 
-    await drizzle(env.DB)
-        .delete(userSessions)
-        .where(
-            and(
-                eq(userSessions.discordId, user.id),
-                lt(userSessions.expiresAt, new Date())
-            )
+    await env.DB.delete(userSessions).where(
+        and(
+            eq(userSessions.discordId, user.id),
+            lt(userSessions.expiresAt, new Date())
         )
+    )
 
     const sessionId = crypto.randomUUID()
     const createdAt = new Date()
     const expiresAt = new Date(createdAt.getTime() + sessionDuration)
-    await drizzle(env.DB).insert(userSessions).values({
+    await env.DB.insert(userSessions).values({
         sessionId,
         discordId: user.id,
         expiresAt,
@@ -105,26 +98,23 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
     )
 }
 
-export const withAuthenticatedUser = async (req: IRequest, env: Env) => {
-    console.log('middleware')
-    const sessionId = req.headers.get('Cookie')?.split('=')[1]
-    if (!sessionId) {
-        return new Response('Unauthorized', { status: 401 })
-    }
-
-    console.log('sessionId', sessionId)
-
-    const result = await drizzle(env.DB)
-        .select()
-        .from(userSessions)
-        .where(eq(userSessions.sessionId, sessionId))
-        .limit(1)
-        .get()
-
-    console.log('result', result)
-    if (result && result.expiresAt > new Date()) {
-        return
-    }
-
-    return new Response('Unauthorized', { status: 401 })
+export const configureAuthRoutes = (router: AutoRouterType) => {
+    router
+        .get('/login', async (req: IRequest, env: Env) => {
+            const state = req.query.state
+            return new Response(null, {
+                status: 302,
+                headers: {
+                    Location: env.DISCORD_LOGIN_URI + `&state=${state}`,
+                },
+            })
+        })
+        .get('/login/oauth/discord', async (req: IRequest, env: Env) => {
+            try {
+                return await doDiscordLogin(req, env)
+            } catch (err) {
+                console.error('Error logging in with Discord', err)
+                return new Response('Internal Server Error', { status: 500 })
+            }
+        })
 }
