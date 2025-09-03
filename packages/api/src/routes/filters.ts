@@ -1,10 +1,19 @@
-import { filterEggSchema, filterVersionEggSchema } from '@loot-filters/core'
+import {
+    filterEggSchema,
+    filterSettingsSchema,
+    filterVersionEggSchema,
+} from '@loot-filters/core'
 import { eq } from 'drizzle-orm'
 import { AutoRouterType, IRequest } from 'itty-router'
-import { FILTERS_TABLE, filterVersions } from '../db/filters'
+import {
+    FILTER_SETTINGS_TABLE,
+    FILTERS_TABLE,
+    filterVersions,
+} from '../db/filters'
 import {
     withAuthenticatedUser,
-    withFilterOwner,
+    withOwnedFilter,
+    withOwnedFilterOrPublic,
 } from '../utils/withAuthenticatedUser'
 
 type FilterInsert = typeof FILTERS_TABLE.$inferInsert
@@ -45,7 +54,7 @@ const createFilter = (router: AutoRouterType) => {
 const updateFilter = (router: AutoRouterType) => {
     router.patch(
         '/filters/:filterId/update',
-        withFilterOwner,
+        withOwnedFilter,
         async (
             req: IRequest & { filter: typeof FILTERS_TABLE.$inferSelect },
             env
@@ -94,7 +103,7 @@ const updateFilter = (router: AutoRouterType) => {
 const deleteFilter = (router: AutoRouterType) => {
     router.delete(
         '/filters/:filterId/delete',
-        withFilterOwner,
+        withOwnedFilter,
         async (
             req: IRequest & { filter: typeof FILTERS_TABLE.$inferSelect },
             env
@@ -135,7 +144,7 @@ const listPublicFilters = (router: AutoRouterType) => {
 const createFilterVersion = (router: AutoRouterType) => {
     router.post(
         '/filters/:filterId/create-version',
-        withFilterOwner,
+        withOwnedFilter,
         async (
             req: IRequest & { filter: typeof FILTERS_TABLE.$inferSelect },
             env
@@ -161,11 +170,83 @@ const createFilterVersion = (router: AutoRouterType) => {
     )
 }
 
+const getFilter = (router: AutoRouterType) => {
+    router.get('/filters/:filterId', async (req, env) => {
+        const { filterId } = req.params
+        const filter = await env.DB.select()
+            .from(FILTERS_TABLE)
+            .where(eq(FILTERS_TABLE.filterId, filterId))
+            .get()
+
+        return new Response(JSON.stringify(filter), { status: 200 })
+    })
+}
+
+const getFilterVersions = (router: AutoRouterType) => {
+    router.get(
+        '/filters/:filterId/versions',
+        withOwnedFilterOrPublic,
+        async (req, env) => {
+            const { filterId } = req.params
+            const versions = await env.DB.select()
+                .from(filterVersions)
+                .where(eq(filterVersions.filterId, filterId))
+                .orderBy(filterVersions.createdAt)
+
+            return new Response(JSON.stringify(versions), { status: 200 })
+        }
+    )
+}
+
+const getFilterSettings = (router: AutoRouterType) => {
+    router.get(
+        '/filters/:filterId/settings',
+        withOwnedFilterOrPublic,
+        async (req, env) => {
+            const { filterId } = req.params
+            const settings = await env.DB.select()
+                .from(FILTER_SETTINGS_TABLE)
+                .where(eq(FILTER_SETTINGS_TABLE.filterId, filterId))
+                .get()
+
+            return new Response(settings?.settings || '{"modules": []}', {
+                status: 200,
+            })
+        }
+    )
+}
+
+const updateFilterSettings = (router: AutoRouterType) => {
+    router.patch(
+        '/filters/:filterId/settings',
+        withOwnedFilter,
+        async (req, env) => {
+            const { filterId } = req.params
+            const json = await req.json()
+            const parsedSettings = filterSettingsSchema.parse(json)
+            console.log('parsedSettings', parsedSettings)
+            await env.DB.insert(FILTER_SETTINGS_TABLE)
+                .values({ filterId, settings: JSON.stringify(parsedSettings) })
+                .onConflictDoUpdate({
+                    target: [FILTER_SETTINGS_TABLE.filterId],
+                    set: { settings: JSON.stringify(parsedSettings) },
+                })
+                .execute()
+
+            return new Response('{"updated": true}', { status: 200 })
+        }
+    )
+}
+
 export const configureFilterApis = (router: AutoRouterType) => {
     listPublicFilters(router)
     listMyFilters(router)
+    getFilter(router)
+    getFilterVersions(router)
     createFilter(router)
     createFilterVersion(router)
     updateFilter(router)
+    getFilterSettings(router)
+    updateFilterSettings(router)
     deleteFilter(router)
 }

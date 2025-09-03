@@ -34,3 +34,4 @@ export const filterVersionSchema = filterVersionEggSchema.extend({
     createdAt: timestampSchema,
 })
 export type FilterVersion = z.infer<typeof filterVersionSchema>
+

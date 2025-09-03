@@ -18,9 +18,9 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPublicFilters } from '../utils/api'
+import { getPublicFilters } from '../../utils/api'
 
-export const PublicFilters: React.FC = () => {
+export const PublicFiltersPage: React.FC = () => {
     const navigate = useNavigate()
     const [filters, setFilters] = useState<Filter[]>([])
     const [loading, setLoading] = useState(true)
@@ -107,11 +107,7 @@ export const PublicFilters: React.FC = () => {
     return (
         <Box>
             <Box sx={{ mb: 4 }}>
-                <Typography
-                    variant="h4"
-                    component="h1"
-                    sx={{ mb: 2 }}
-                >
+                <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
                     Public Filters
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
@@ -129,10 +125,7 @@ export const PublicFilters: React.FC = () => {
                         >
                             No public filters available
                         </Typography>
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                        >
+                        <Typography variant="body2" color="text.secondary">
                             Check back later for community-created filters
                         </Typography>
                     </CardContent>
@@ -151,9 +144,7 @@ export const PublicFilters: React.FC = () => {
                 >
                     {Array.isArray(filters) &&
                         filters.map((filter) => (
-                            <Card
-                                key={filter.filterId}
-                            >
+                            <Card key={filter.filterId}>
                                 <CardContent sx={{ p: 3 }}>
                                     <Box
                                         sx={{
@@ -163,10 +154,7 @@ export const PublicFilters: React.FC = () => {
                                             mb: 2,
                                         }}
                                     >
-                                        <Typography
-                                            variant="h6"
-                                            component="h3"
-                                        >
+                                        <Typography variant="h6" component="h3">
                                             {filter.name}
                                         </Typography>
                                         <Chip

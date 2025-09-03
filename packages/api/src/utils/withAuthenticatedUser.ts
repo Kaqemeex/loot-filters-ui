@@ -5,12 +5,7 @@ import { userSessions } from '../db/users'
 import { Env } from '../env'
 
 export const withAuthenticatedUser = async (req: IRequest, env: Env) => {
-    let sessionId = req.headers.get('Cookie')?.split('=')[1]
-
-    if (!sessionId) {
-        sessionId = req.headers.get('Authorization')?.split(' ')[1]
-    }
-
+    const sessionId = req.headers.get('Authorization')?.split(' ')[1]
     if (!sessionId) {
         return new Response('Unauthorized', { status: 401 })
     }
@@ -32,10 +27,12 @@ export const withAuthenticatedUser = async (req: IRequest, env: Env) => {
     return new Response('Unauthorized', { status: 401 })
 }
 
-export const withFilterOwner = async (req: IRequest, env: Env) => {
-    await withAuthenticatedUser(req, env)
-
+export const withFilter = async (req: IRequest, env: Env) => {
     const filterId = req.params.filterId
+    if (!filterId) {
+        return new Response('Filter ID required', { status: 400 })
+    }
+
     const filter = await env.DB.select()
         .from(FILTERS_TABLE)
         .where(eq(FILTERS_TABLE.filterId, filterId))
@@ -45,10 +42,30 @@ export const withFilterOwner = async (req: IRequest, env: Env) => {
     if (!filter) {
         return new Response('Filter not found', { status: 404 })
     }
-    if (filter.ownerDiscordId !== req.auth.discordId) {
-        return new Response('Unauthorized', { status: 401 })
+    req.filter = filter
+    return
+}
+
+export const withOwnedFilterOrPublic = async (req: IRequest, env: Env) => {
+    await withFilter(req, env)
+
+    if (req.filter?.public) {
+        return
     }
 
-    req.filter = filter
+    await withAuthenticatedUser(req, env)
+    if (req.filter?.ownerDiscordId !== req.auth.discordId) {
+        return new Response('Unauthorized', { status: 401 })
+    }
+    return
+}
+
+export const withOwnedFilter = async (req: IRequest, env: Env) => {
+    await withAuthenticatedUser(req, env)
+    await withFilter(req, env)
+
+    if (req.filter.ownerDiscordId !== req.auth.discordId) {
+        return new Response('Unauthorized', { status: 401 })
+    }
     return
 }

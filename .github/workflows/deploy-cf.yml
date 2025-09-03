@@ -4,10 +4,7 @@ on:
     push:
         branches: [main, '*']
         # Only run for specific users
-        if: |
-            github.actor == 'kaqemeex' ||
-            github.actor == 'typical-whack' ||
-            github.actor == 'omniforce'
+        if: github.actor == 'kaqemeex'
 jobs:
     buildAndDeployUI:
         runs-on: ubuntu-latest
@@ -24,10 +21,8 @@ jobs:
             - name: Save Git SHA
               run: |
                   echo '{"gitSha": "${{ github.sha }}"}' > packages/ui/src/build-info.json
-            - name: Prettier Check
-              run: npm run prettier:check
             - name: Build UI
-              run: npm run build-ui
+              run: npm run build
               env:
                   NODE_ENV: production
             - name: Deploy UI
@@ -35,5 +30,5 @@ jobs:
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  command: pages deploy packages/ui/dist --project-name=loot-filters-ui --branch="${{ github.ref == 'refs/heads/main' && 'main' ||github.actor }}"
+                  command: pages deploy packages/ui/dist --project-name=loot-filters-ui-v2 --branch="${{ github.ref == 'refs/heads/v2' && 'v2' || github.actor }}"
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}

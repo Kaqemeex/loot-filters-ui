@@ -8,11 +8,13 @@ import {
 } from '@mui/material'
 import { Route, Routes } from 'react-router-dom'
 import { OAuthRedirectLandingPage, useAuthActions, useAuthState } from './auth'
-import { FilterViewer } from './components/FilterViewer'
-import { MyFilters } from './components/MyFilters'
 import { Navbar } from './components/Navbar'
-import { PublicFilters } from './components/PublicFilters'
 import { Sidebar } from './components/Sidebar'
+import { CreateFilterPage } from './pages/CreateFilterPage/CreateFilterPage'
+import { FilterSettingsPage } from './pages/FilterSettingsPage/FilterSettingsPage'
+import { FilterViewerPage } from './pages/FilterViewerPage/FilterViewerPage'
+import { MyFiltersPage } from './pages/MyFiltersPage/MyFiltersPage'
+import { PublicFiltersPage } from './pages/PublicFiltersPage/PublicFiltersPage'
 
 function App() {
     const { isAuthenticated } = useAuthState()
@@ -33,15 +35,22 @@ function App() {
                 <Box sx={{ flexGrow: 1, p: 3 }}>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/my-filters" element={<MyFilters />} />
+                        <Route path="/my-filters" element={<MyFiltersPage />} />
+                        <Route
+                            path="/create-filter"
+                            element={<CreateFilterPage />}
+                        />
                         <Route
                             path="/filters/:filterId"
-                            element={<FilterViewer />}
+                            element={<FilterViewerPage />}
                         />
-
+                        <Route
+                            path="/filters/:filterId/settings"
+                            element={<FilterSettingsPage />}
+                        />
                         <Route
                             path="/public-filters"
-                            element={<PublicFilters />}
+                            element={<PublicFiltersPage />}
                         />
                         <Route
                             path="/login/redirect"

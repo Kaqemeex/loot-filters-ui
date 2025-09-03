@@ -17,5 +17,10 @@ export const filterVersions = sqliteTable('filter_versions', {
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
     rawRs2f: text('raw_rs2f').notNull(),
     precompiledRs2f: text('precompiled_rs2f').notNull(),
-    parsedMacros: text('parsed_macros').notNull(), // JSON
+    parsedMacros: text('parsed_macros').notNull(), // JSON stored as text
+})
+
+export const FILTER_SETTINGS_TABLE = sqliteTable('filter_settings', {
+    filterId: text('filter_id').primaryKey().notNull(),
+    settings: text('settings').notNull(), // JSON stored as text
 })

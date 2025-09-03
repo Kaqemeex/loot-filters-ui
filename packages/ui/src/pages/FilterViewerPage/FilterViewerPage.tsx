@@ -2,6 +2,7 @@ import { Filter } from '@loot-filters/core'
 import {
     ArrowBack as ArrowBackIcon,
     Download as DownloadIcon,
+    Settings as SettingsIcon,
     Share as ShareIcon,
 } from '@mui/icons-material'
 import {
@@ -20,7 +21,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getMyFilters } from '../utils/api'
+import { getMyFilters } from '../../utils/api'
 
 interface TabPanelProps {
     children?: React.ReactNode
@@ -44,7 +45,7 @@ function TabPanel(props: TabPanelProps) {
     )
 }
 
-export const FilterViewer: React.FC = () => {
+export const FilterViewerPage: React.FC = () => {
     const { filterId } = useParams<{ filterId: string }>()
     const navigate = useNavigate()
     const [filter, setFilter] = useState<Filter | null>(null)
@@ -168,6 +169,15 @@ export const FilterViewer: React.FC = () => {
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Settings">
+                        <IconButton
+                            onClick={() =>
+                                navigate(`/filters/${filter.filterId}/settings`)
+                            }
+                        >
+                            <SettingsIcon />
+                        </IconButton>
+                    </Tooltip>
                     <Tooltip title="Download Filter">
                         <IconButton onClick={handleDownload}>
                             <DownloadIcon />
@@ -260,10 +270,7 @@ export const FilterViewer: React.FC = () => {
 
             {/* Tabs for different views */}
             <Paper>
-                <Tabs
-                    value={activeTab}
-                    onChange={handleTabChange}
-                >
+                <Tabs value={activeTab} onChange={handleTabChange}>
                     <Tab label="Filter Rules" />
                     <Tab label="Macros" />
                     <Tab label="Compiled" />

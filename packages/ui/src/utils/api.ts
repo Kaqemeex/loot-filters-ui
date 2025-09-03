@@ -96,6 +96,14 @@ export const getPublicFilters = () => {
     return publicApiRequest('/filters/public')
 }
 
+export const getFilter = (filterId: string) => {
+    return apiRequest(`/filters/${filterId}`)
+}
+
+export const getFilterVersions = (filterId: string) => {
+    return apiRequest(`/filters/${filterId}/versions`)
+}
+
 export const createFilter = (filter: FilterEgg) => {
     return apiRequest('/filters/create', {
         method: 'POST',
@@ -126,5 +134,16 @@ export const updateFilter = (
     return apiRequest(`/filters/${filterId}/update`, {
         method: 'PATCH',
         body: JSON.stringify(updates),
+    })
+}
+
+export const getFilterSettings = (filterId: string) => {
+    return apiRequest(`/filters/${filterId}/settings`)
+}
+
+export const updateFilterSettings = (filterId: string, settings: any) => {
+    return apiRequest(`/filters/${filterId}/settings`, {
+        method: 'PATCH',
+        body: JSON.stringify(settings),
     })
 }

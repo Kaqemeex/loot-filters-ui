@@ -29,7 +29,6 @@
         "@types/react-dom": "^18.0.0",
         "@types/react-router-dom": "^5.3.3",
         "css-loader": "^6.0.0",
-        "dotenv-webpack": "^8.1.1",
         "html-webpack-plugin": "^5.0.0",
         "sass": "^1.91.0",
         "sass-loader": "^16.0.5",

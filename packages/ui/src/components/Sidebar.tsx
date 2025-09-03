@@ -18,7 +18,7 @@ import {
 } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuthState } from '../auth/useAuth'
-import { useSidebarStore } from './sidebarStore'
+import { useSidebarStore } from '../stores/sidebarStore'
 
 const DRAWER_WIDTH = 240
 const COLLAPSED_DRAWER_WIDTH = 64

@@ -6,24 +6,24 @@ apply (VAR_ALCHS_FORCE_SHOWN && name:VAR_ALCHS_ITEM_LIST) {
     hidden = false;
 }
 
-#define VAR_ALCHS_CUSTOMSTYLE \
+#define VAR_ALCHS_CUSTOMSTYLE \\
     icon = Sprite(41, 0);
 
 apply (name:VAR_ALCHS_ITEM_LIST) {
     VAR_ALCHS_CUSTOMSTYLE
 }
 
-#define VAR_ALCHS_ITEM_LIST [ \
-  "Adamant platebody", \
-  "Air battlestaff", \
-  "Dragon battleaxe", \
-  "Dragon dagger", \
-  "Rune sq shield", \
-  "Rune sword", \
-  "Rune warhammer", \
-  "Runite crossbow (u)", \
-  "Runite limbs", \
-  "Water battlestaff", \
+#define VAR_ALCHS_ITEM_LIST [ \\
+  "Adamant platebody", \\
+  "Air battlestaff", \\
+  "Dragon battleaxe", \\
+  "Dragon dagger", \\
+  "Rune sq shield", \\
+  "Rune sword", \\
+  "Rune warhammer", \\
+  "Runite crossbow (u)", \\
+  "Runite limbs", \\
+  "Water battlestaff", \\
 ]
 
 #define VAR_ALCHS_TERMINATE false
@@ -43,22 +43,23 @@ export const precompileFilter = (
     let escapedLine = ''
     const precompiledRs2f = []
 
-    for (const line in filterStr.split('\n')) {
-        if (line.endsWith('\\\n')) {
-            // Strip off the escaped newline at the end
-            escapedLine += line.slice(0, -2)
+    for (const line of filterStr.split('\n')) {
+        if (line[line.length - 2] !== '\\' && line[line.length - 1] === '\\') {
+            // ditch the backslash, the split ate the newline
+            escapedLine += line.slice(0, -1)
             continue
         } else {
             escapedLine += line
         }
 
-        if (line.startsWith('#define')) {
-            const defineLineParts = line.split(' ')
-            // const defineExpr = defineLineParts[0]
+        if (escapedLine.startsWith('#define')) {
+            const defineLineParts = escapedLine.split(' ')
+            const defineExpr = defineLineParts[0]
             const macroName = defineLineParts[1]
             const macroValue = defineLineParts.slice(2).join(' ')
-            macros[macroName] = macroValue
+            macros[macroName] = macroValue.trim()
             precompiledRs2f.push(`//@define ${macroName}`)
+            escapedLine = ''
         } else {
             precompiledRs2f.push(escapedLine)
             escapedLine = ''

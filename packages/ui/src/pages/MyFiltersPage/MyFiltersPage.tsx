@@ -1,10 +1,5 @@
 import { Filter } from '@loot-filters/core'
-import {
-    Add as AddIcon,
-    Delete as DeleteIcon,
-    Edit as EditIcon,
-    Visibility as ViewIcon,
-} from '@mui/icons-material'
+import { Add as AddIcon } from '@mui/icons-material'
 import {
     Alert,
     Box,
@@ -13,65 +8,22 @@ import {
     CardContent,
     Chip,
     CircularProgress,
-    IconButton,
-    Tooltip,
     Typography,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthState } from '../auth/useAuth'
-import { deleteFilter, getMyFilters } from '../utils/api'
-import { CreateFilter } from './CreateFilter'
+import { useAuthState } from '../../auth/useAuth'
+import { getMyFilters } from '../../utils/api'
 
-export const MyFilters: React.FC = () => {
+export const MyFiltersPage: React.FC = () => {
     const navigate = useNavigate()
     const { isAuthenticated } = useAuthState()
     const [filters, setFilters] = useState<Filter[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
     const handleCreateFilter = () => {
-        setCreateDialogOpen(true)
-    }
-
-    const handleCreateDialogClose = () => {
-        setCreateDialogOpen(false)
-    }
-
-    const handleCreateSuccess = () => {
-        // Refresh the filters list
-        if (isAuthenticated) {
-            const fetchFilters = async () => {
-                try {
-                    setLoading(true)
-                    setError(null)
-                    const data = (await getMyFilters()) as Filter[]
-                    setFilters(data)
-                } catch (err) {
-                    console.error('Failed to fetch filters:', err)
-                    setError(
-                        err instanceof Error
-                            ? err.message
-                            : 'Failed to fetch filters'
-                    )
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchFilters()
-        }
-    }
-
-    const handleEditFilter = (filterId: string) => {
-        // TODO: Implement edit filter functionality
-        console.log('Edit filter clicked:', filterId)
-    }
-
-    const handleDeleteFilter = (filterId: string) => {
-        deleteFilter(filterId).then(() => {
-            setFilters((prev) => prev.filter((f) => f.filterId !== filterId))
-        })
+        navigate('/create-filter')
     }
 
     const handleViewFilter = (filterId: string) => {
@@ -130,10 +82,7 @@ export const MyFilters: React.FC = () => {
                     mb: 4,
                 }}
             >
-                <Typography
-                    variant="h4"
-                    component="h1"
-                >
+                <Typography variant="h4" component="h1">
                     My Filters
                 </Typography>
                 <Button
@@ -163,10 +112,7 @@ export const MyFilters: React.FC = () => {
                         >
                             No filters yet
                         </Typography>
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                        >
+                        <Typography variant="body2" color="text.secondary">
                             Create your first loot filter to get started
                         </Typography>
                         <Button
@@ -194,7 +140,16 @@ export const MyFilters: React.FC = () => {
                             <Card
                                 sx={{
                                     height: '100%',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease-in-out',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: 3,
+                                    },
                                 }}
+                                onClick={() =>
+                                    handleViewFilter(filter.filterId)
+                                }
                             >
                                 <CardContent sx={{ p: 3 }}>
                                     <Box
@@ -205,11 +160,7 @@ export const MyFilters: React.FC = () => {
                                             mb: 2,
                                         }}
                                     >
-                                        <Typography
-                                            variant="h6"
-                                            component="h3"
-                                       
-                                        >
+                                        <Typography variant="h6" component="h3">
                                             {filter.name}
                                         </Typography>
                                         <Chip
@@ -240,7 +191,6 @@ export const MyFilters: React.FC = () => {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            mb: 3,
                                         }}
                                     >
                                         <Typography
@@ -263,60 +213,12 @@ export const MyFilters: React.FC = () => {
                                             ).toLocaleDateString()}
                                         </Typography>
                                     </Box>
-
-                                    <Box sx={{ display: 'flex', gap: 1 }}>
-                                        <Tooltip title="View Filter">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    handleViewFilter(
-                                                        filter.filterId
-                                                    )
-                                                }
-                                                
-                                            >
-                                                <ViewIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Edit Filter">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    handleEditFilter(
-                                                        filter.filterId
-                                                    )
-                                                }
-                                                
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <Tooltip title="Delete Filter">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() =>
-                                                    handleDeleteFilter(
-                                                        filter.filterId
-                                                    )
-                                                }
-                                                
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Box>
                                 </CardContent>
                             </Card>
                         </Box>
                     ))}
                 </Box>
             )}
-
-            <CreateFilter
-                open={createDialogOpen}
-                onClose={handleCreateDialogClose}
-                onSuccess={handleCreateSuccess}
-            />
         </Box>
     )
 }
