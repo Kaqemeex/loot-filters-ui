@@ -1,4 +1,4 @@
-import { EXAMPLE_FILTER, FilterEgg } from '@loot-filters/core'
+import { FilterEgg } from '@loot-filters/core'
 import { Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import {
     Alert,
@@ -15,16 +15,15 @@ import {
 } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuthState } from '../../auth/useAuth'
-import { createFilter } from '../../utils/api'
-import { createFilterVersionWithPrecompiling } from '../../utils/filterVersionUtils'
+import { EXAMPLE_FILTER, precompileFilter } from '../../../core/src/parser'
+import { useAuthState } from '../auth/useAuth'
+import { createFilter, createFilterVersion } from '../utils/api'
 
 interface CreateFilterForm {
     name: string
     description: string
     public: boolean
     rawRs2f: string
-    versionName: string
 }
 
 const initialFormState: CreateFilterForm = {
@@ -32,7 +31,6 @@ const initialFormState: CreateFilterForm = {
     description: '',
     public: false,
     rawRs2f: EXAMPLE_FILTER,
-    versionName: 'Initial Version',
 }
 
 export const CreateFilterPage: React.FC = () => {
@@ -57,10 +55,6 @@ export const CreateFilterPage: React.FC = () => {
             newErrors.rawRs2f = 'Filter content is required'
         }
 
-        if (!form.versionName.trim()) {
-            newErrors.versionName = 'Version name is required'
-        }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -83,6 +77,9 @@ export const CreateFilterPage: React.FC = () => {
 
         setSaving(true)
         try {
+            // Use the parser helper to precompile the filter
+            const precompiledData = precompileFilter(form.rawRs2f)
+
             // Create the filter metadata
             const filterData: FilterEgg = {
                 name: form.name,
@@ -96,18 +93,11 @@ export const CreateFilterPage: React.FC = () => {
             }
             console.log('newFilter', newFilter)
 
-            // Create the filter version using the shared utility
-            const versionResult = await createFilterVersionWithPrecompiling({
+            // Then create the filter version with the precompiled data
+            await createFilterVersion(newFilter.filterId, {
                 filterId: newFilter.filterId,
-                versionName: form.versionName,
-                rawRs2f: form.rawRs2f,
+                ...precompiledData,
             })
-
-            if (!versionResult.success) {
-                throw new Error(
-                    versionResult.error || 'Failed to create filter version'
-                )
-            }
 
             // Navigate to the new filter
             navigate(`/filters/${newFilter.filterId}`)
@@ -257,24 +247,6 @@ export const CreateFilterPage: React.FC = () => {
                                 helperText={
                                     errors.description ||
                                     'Describe what this filter does'
-                                }
-                                sx={{ mb: 3 }}
-                            />
-
-                            <TextField
-                                fullWidth
-                                label="Version Name"
-                                value={form.versionName}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        'versionName',
-                                        e.target.value
-                                    )
-                                }
-                                error={!!errors.versionName}
-                                helperText={
-                                    errors.versionName ||
-                                    'Name for this version of the filter'
                                 }
                                 sx={{ mb: 3 }}
                             />

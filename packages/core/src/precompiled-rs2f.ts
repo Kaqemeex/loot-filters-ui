@@ -1,5 +1,20 @@
-import { FilterVersionEgg } from '@loot-filters/core'
+import { z } from 'zod'
+import { FilterVersionEgg } from './filter-version'
 
+export const MacroBindingSchema = z.object({
+    macroName: z.string(),
+    value: z.string().optional(),
+})
+export type MacroBinding = z.infer<typeof MacroBindingSchema>
+
+export const PrecompiledRs2fSchema = z.object({
+    rawRs2f: z.string(),
+    precompiledRs2f: z.string(),
+    parsedMacros: z.array(MacroBindingSchema),
+})
+export type PrecompiledRs2f = z.infer<typeof PrecompiledRs2fSchema>
+
+// Example filter for testing the ui
 export const EXAMPLE_FILTER = `#define VAR_ALCHS_FORCE_SHOWN true
 
 apply (VAR_ALCHS_FORCE_SHOWN && name:VAR_ALCHS_ITEM_LIST) {
@@ -32,14 +47,14 @@ rule (VAR_ALCHS_TERMINATE && name:VAR_ALCHS_ITEM_LIST) {}
 `
 
 /**
- *
  * Precompiles a filter by extracting macros and inserting placeholders for future rendering.
- * This allows us to improve the performance of rendering by making it a simple find and replace; no tokenization needed.
+ * This allows us to improve the performance of rendering
+ * by making it a simple find and replace; no tokenization needed.
  */
 export const precompileFilter = (
     filterStr: string
 ): Omit<FilterVersionEgg, 'filterId'> => {
-    const macros: Record<string, string> = {}
+    const macros: MacroBinding[] = []
     let escapedLine = ''
     const precompiledRs2f = []
 
@@ -54,10 +69,9 @@ export const precompileFilter = (
 
         if (escapedLine.startsWith('#define')) {
             const defineLineParts = escapedLine.split(' ')
-            const defineExpr = defineLineParts[0]
             const macroName = defineLineParts[1]
             const macroValue = defineLineParts.slice(2).join(' ')
-            macros[macroName] = macroValue.trim()
+            macros.push({ macroName, value: macroValue.trim() })
             precompiledRs2f.push(`//@define ${macroName}`)
             escapedLine = ''
         } else {
@@ -69,6 +83,6 @@ export const precompileFilter = (
     return {
         rawRs2f: filterStr,
         precompiledRs2f: precompiledRs2f.join('\n'),
-        parsedMacros: JSON.stringify(macros),
+        parsedMacros: macros,
     }
 }

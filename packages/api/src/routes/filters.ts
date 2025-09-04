@@ -1,15 +1,7 @@
-import {
-    filterEggSchema,
-    filterSettingsSchema,
-    filterVersionEggSchema,
-} from '@loot-filters/core'
+import { FilterEggSchema } from '@loot-filters/core'
 import { eq } from 'drizzle-orm'
 import { AutoRouterType, IRequest } from 'itty-router'
-import {
-    FILTER_SETTINGS_TABLE,
-    FILTERS_TABLE,
-    filterVersions,
-} from '../db/filters'
+import { FILTERS_TABLE, FILTER_VERSIONS_TABLE } from '../db/filters'
 import {
     withAuthenticatedUser,
     withOwnedFilter,
@@ -20,7 +12,7 @@ type FilterInsert = typeof FILTERS_TABLE.$inferInsert
 
 const createFilter = (router: AutoRouterType) => {
     router.post('/filters/create', withAuthenticatedUser, async (req, env) => {
-        const parsedFilter = filterEggSchema.safeParse(
+        const parsedFilter = FilterEggSchema.safeParse(
             JSON.parse(await req.text())
         )
         if (!parsedFilter.success) {
@@ -141,35 +133,6 @@ const listPublicFilters = (router: AutoRouterType) => {
     })
 }
 
-const createFilterVersion = (router: AutoRouterType) => {
-    router.post(
-        '/filters/:filterId/create-version',
-        withOwnedFilter,
-        async (
-            req: IRequest & { filter: typeof FILTERS_TABLE.$inferSelect },
-            env
-        ) => {
-            const versionId = crypto.randomUUID()
-            const egg = filterVersionEggSchema.parse(await req.json())
-            const filterVersionObj: typeof filterVersions.$inferInsert = {
-                ...egg,
-                versionId,
-                filterId: req.filter.filterId,
-                createdAt: new Date(),
-            }
-
-            const createdFilterVersion = await env.DB.insert(filterVersions)
-                .values(filterVersionObj)
-                .returning()
-                .get()
-
-            return new Response(JSON.stringify(createdFilterVersion), {
-                status: 200,
-            })
-        }
-    )
-}
-
 const getFilter = (router: AutoRouterType) => {
     router.get('/filters/:filterId', async (req, env) => {
         const { filterId } = req.params
@@ -182,36 +145,70 @@ const getFilter = (router: AutoRouterType) => {
     })
 }
 
-const getFilterVersions = (router: AutoRouterType) => {
-    router.get(
-        '/filters/:filterId/versions',
-        withOwnedFilterOrPublic,
-        async (req, env) => {
-            const { filterId } = req.params
-            const versions = await env.DB.select()
-                .from(filterVersions)
-                .where(eq(filterVersions.filterId, filterId))
-                .orderBy(filterVersions.createdAt)
-
-            return new Response(JSON.stringify(versions), { status: 200 })
-        }
-    )
-}
-
 const getFilterSettings = (router: AutoRouterType) => {
     router.get(
         '/filters/:filterId/settings',
         withOwnedFilterOrPublic,
         async (req, env) => {
             const { filterId } = req.params
-            const settings = await env.DB.select()
-                .from(FILTER_SETTINGS_TABLE)
-                .where(eq(FILTER_SETTINGS_TABLE.filterId, filterId))
+
+            // Get the current version of the filter
+            const currentVersion = await env.DB.select()
+                .from(FILTER_VERSIONS_TABLE)
+                .where(eq(FILTER_VERSIONS_TABLE.filterId, filterId))
+                .orderBy(FILTER_VERSIONS_TABLE.createdAt)
                 .get()
 
-            return new Response(settings?.settings || '{"modules": []}', {
-                status: 200,
-            })
+            if (!currentVersion) {
+                return new Response(
+                    JSON.stringify({ sections: [], macroInputMappings: {} }),
+                    { status: 200 }
+                )
+            }
+
+            try {
+                const settings = JSON.parse(currentVersion.settings)
+                return new Response(JSON.stringify(settings), { status: 200 })
+            } catch (error) {
+                console.error('Error parsing filter settings:', error)
+                return new Response(
+                    JSON.stringify({ sections: [], macroInputMappings: {} }),
+                    { status: 200 }
+                )
+            }
+        }
+    )
+}
+
+const getFilterVersionSettings = (router: AutoRouterType) => {
+    router.get(
+        '/filters/:filterId/versions/:versionId/settings',
+        withOwnedFilterOrPublic,
+        async (req, env) => {
+            const { versionId } = req.params
+
+            const version = await env.DB.select()
+                .from(FILTER_VERSIONS_TABLE)
+                .where(eq(FILTER_VERSIONS_TABLE.versionId, versionId))
+                .get()
+
+            if (!version) {
+                return new Response(
+                    JSON.stringify({ error: 'Version not found' }),
+                    { status: 404 }
+                )
+            }
+
+            try {
+                const settings = JSON.parse(version.settings)
+                return new Response(JSON.stringify(settings), { status: 200 })
+            } catch (error) {
+                console.error('Error parsing filter version settings:', error)
+                return new Response(
+                    JSON.stringify({ sections: [], macroInputMappings: {} }),
+                    { status: 200 }
+                )
+            }
         }
     )
 }
@@ -222,18 +219,46 @@ const updateFilterSettings = (router: AutoRouterType) => {
         withOwnedFilter,
         async (req, env) => {
             const { filterId } = req.params
-            const json = await req.json()
-            const parsedSettings = filterSettingsSchema.parse(json)
-            console.log('parsedSettings', parsedSettings)
-            await env.DB.insert(FILTER_SETTINGS_TABLE)
-                .values({ filterId, settings: JSON.stringify(parsedSettings) })
-                .onConflictDoUpdate({
-                    target: [FILTER_SETTINGS_TABLE.filterId],
-                    set: { settings: JSON.stringify(parsedSettings) },
-                })
-                .execute()
+            const settings = await req.json()
 
-            return new Response('{"updated": true}', { status: 200 })
+            // Get the current version of the filter
+            const currentVersion = await env.DB.select()
+                .from(FILTER_VERSIONS_TABLE)
+                .where(eq(FILTER_VERSIONS_TABLE.filterId, filterId))
+                .orderBy(FILTER_VERSIONS_TABLE.createdAt)
+                .get()
+
+            if (!currentVersion) {
+                return new Response(
+                    JSON.stringify({ error: 'No filter version found' }),
+                    { status: 404 }
+                )
+            }
+
+            try {
+                const updatedVersion = await env.DB.update(
+                    FILTER_VERSIONS_TABLE
+                )
+                    .set({ settings: JSON.stringify(settings) })
+                    .where(
+                        eq(
+                            FILTER_VERSIONS_TABLE.versionId,
+                            currentVersion.versionId
+                        )
+                    )
+                    .returning()
+                    .get()
+
+                return new Response(JSON.stringify(updatedVersion), {
+                    status: 200,
+                })
+            } catch (error) {
+                console.error('Error updating filter settings:', error)
+                return new Response(
+                    JSON.stringify({ error: 'Failed to update settings' }),
+                    { status: 500 }
+                )
+            }
         }
     )
 }
@@ -242,11 +267,10 @@ export const configureFilterApis = (router: AutoRouterType) => {
     listPublicFilters(router)
     listMyFilters(router)
     getFilter(router)
-    getFilterVersions(router)
-    createFilter(router)
-    createFilterVersion(router)
-    updateFilter(router)
     getFilterSettings(router)
+    getFilterVersionSettings(router)
     updateFilterSettings(router)
+    createFilter(router)
+    updateFilter(router)
     deleteFilter(router)
 }

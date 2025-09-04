@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS filter_versions (
     created_at DATETIME NOT NULL,
     raw_rs2f TEXT NOT NULL,
     precompiled_rs2f TEXT NOT NULL,
-    parsed_macros TEXT NOT NULL
+    parsed_macros TEXT NOT NULL,
+    settings TEXT NOT NULL
+    name TEXT NOT NULL,
 );
 

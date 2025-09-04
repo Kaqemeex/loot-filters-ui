@@ -129,7 +129,12 @@ export const createFilterVersion = (
 
 export const updateFilter = (
     filterId: string,
-    updates: { name?: string; description?: string; public?: boolean }
+    updates: {
+        name?: string
+        description?: string
+        public?: boolean
+        currentVersionId?: string
+    }
 ) => {
     return apiRequest(`/filters/${filterId}/update`, {
         method: 'PATCH',
@@ -141,9 +146,27 @@ export const getFilterSettings = (filterId: string) => {
     return apiRequest(`/filters/${filterId}/settings`)
 }
 
+export const getFilterVersionSettings = (
+    filterId: string,
+    versionId: string
+) => {
+    return apiRequest(`/filters/${filterId}/versions/${versionId}/settings`)
+}
+
 export const updateFilterSettings = (filterId: string, settings: any) => {
     return apiRequest(`/filters/${filterId}/settings`, {
         method: 'PATCH',
+        body: JSON.stringify(settings),
+    })
+}
+
+export const updateFilterVersionSettings = (
+    filterId: string,
+    versionId: string,
+    settings: any
+) => {
+    return apiRequest(`/filters/${filterId}/versions/${versionId}/settings`, {
+        method: 'PUT',
         body: JSON.stringify(settings),
     })
 }

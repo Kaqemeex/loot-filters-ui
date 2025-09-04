@@ -1,6 +1,7 @@
 import { AutoRouter } from 'itty-router'
 import { configureAuthRoutes } from './routes/discordAuth'
 import { configureFilterApis } from './routes/filters'
+import { configureFilterVersionApis } from './routes/filterVersions'
 
 const router = AutoRouter({
     catch: (err: Error) => {
@@ -23,5 +24,6 @@ router.options('*', () => {
 
 configureAuthRoutes(router)
 configureFilterApis(router)
+configureFilterVersionApis(router)
 
 export default { ...router }

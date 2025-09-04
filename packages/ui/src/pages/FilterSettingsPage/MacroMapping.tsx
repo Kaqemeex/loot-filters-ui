@@ -1,22 +1,21 @@
-import { Group } from '@loot-filters/core'
-import {
-    Add as AddIcon,
-    Delete as DeleteIcon,
-    DragIndicator as DragIndicatorIcon,
-} from '@mui/icons-material'
+import { Group, MacroInputMapping, Section } from '@loot-filters/core'
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
 import {
     Box,
     Button,
     Card,
     CardContent,
     Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     FormControl,
     IconButton,
     InputLabel,
     List,
     ListItem,
     ListItemButton,
-    ListItemIcon,
     ListItemText,
     MenuItem,
     Select,
@@ -28,40 +27,56 @@ import { useState } from 'react'
 
 interface MacroMappingProps {
     availableMacros: Record<string, string>
-    groups: Group[]
+    sections: Section[]
+    macroInputMappings: Record<string, MacroInputMapping>
     onAddMacroToGroup: (macroName: string, groupId: string) => void
     onRemoveMacroFromGroup: (macroName: string, groupId: string) => void
-    onAddGroup: () => void
+    onUpdateMacroInputMapping: (
+        macroName: string,
+        mapping: MacroInputMapping
+    ) => void
 }
 
 export const MacroMapping: React.FC<MacroMappingProps> = ({
     availableMacros,
-    groups,
+    sections,
+    macroInputMappings,
     onAddMacroToGroup,
     onRemoveMacroFromGroup,
-    onAddGroup,
+    onUpdateMacroInputMapping,
 }) => {
     const [selectedGroup, setSelectedGroup] = useState<string>('')
     const [searchTerm, setSearchTerm] = useState('')
+    const [editDialogOpen, setEditDialogOpen] = useState(false)
+    const [editingMacro, setEditingMacro] = useState<string>('')
+    const [editingInputType, setEditingInputType] =
+        useState<'raw_rs2f'>('raw_rs2f')
 
     const macroNames = Object.keys(availableMacros)
-    const filteredMacros = macroNames.filter((name) =>
-        name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
 
-    const getMacrosInGroup = (groupId: string): string[] => {
-        const group = groups.find((g) => g.id === groupId)
-        return group?.macros || []
+    // Get all groups from all sections
+    const getAllGroups = (): Group[] => {
+        return sections.flatMap((section) => section.groups)
     }
 
-    const getUnmappedMacros = (): string[] => {
-        const allMappedMacros = groups.flatMap((group) => group.macros)
-        return macroNames.filter((macro) => !allMappedMacros.includes(macro))
+    const isMacroInGroup = (macroName: string, groupId: string): boolean => {
+        const group = getAllGroups().find((g) => g.id === groupId)
+        return group?.macros.includes(macroName) || false
     }
 
-    const handleAddMacroToGroup = (macroName: string) => {
+    const getGroupsForMacro = (macroName: string): string[] => {
+        return getAllGroups()
+            .filter((group) => group.macros.includes(macroName))
+            .map((group) => group.id)
+    }
+
+    const handleToggleMacroInGroup = (macroName: string) => {
         if (selectedGroup) {
-            onAddMacroToGroup(macroName, selectedGroup)
+            if (isMacroInGroup(macroName, selectedGroup)) {
+                onRemoveMacroFromGroup(macroName, selectedGroup)
+            } else {
+                onAddMacroToGroup(macroName, selectedGroup)
+            }
         }
     }
 
@@ -69,8 +84,30 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
         onRemoveMacroFromGroup(macroName, groupId)
     }
 
-    const unmappedMacros = getUnmappedMacros()
-    const filteredUnmappedMacros = unmappedMacros.filter((name) =>
+    const handleEditMacroInputMapping = (macroName: string) => {
+        const currentMapping = macroInputMappings[macroName]
+        setEditingMacro(macroName)
+        setEditingInputType(currentMapping?.inputType || 'raw_rs2f')
+        setEditDialogOpen(true)
+    }
+
+    const handleSaveMacroInputMapping = () => {
+        if (editingMacro) {
+            onUpdateMacroInputMapping(editingMacro, {
+                macroName: editingMacro,
+                inputType: editingInputType,
+            })
+        }
+        setEditDialogOpen(false)
+        setEditingMacro('')
+    }
+
+    const handleCancelEdit = () => {
+        setEditDialogOpen(false)
+        setEditingMacro('')
+    }
+
+    const filteredMacros = macroNames.filter((name) =>
         name.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
@@ -87,20 +124,12 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                 <Typography variant="h6" component="h3">
                     Macro Mapping
                 </Typography>
-                <Button
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={onAddGroup}
-                    variant="outlined"
-                >
-                    Add Group
-                </Button>
             </Box>
 
             <Box
                 sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' },
+                    display: 'flex',
+                    flexDirection: 'column',
                     gap: 3,
                 }}
             >
@@ -108,7 +137,7 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                 <Card>
                     <CardContent sx={{ p: 3 }}>
                         <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                            Available Macros ({filteredUnmappedMacros.length})
+                            All Macros ({filteredMacros.length})
                         </Typography>
 
                         <TextField
@@ -129,53 +158,125 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                                 }
                                 label="Select Group"
                             >
-                                {groups.map((group) => (
-                                    <MenuItem key={group.id} value={group.id}>
-                                        {group.name}
-                                    </MenuItem>
-                                ))}
+                                {sections.map((section) =>
+                                    section.groups.map((group) => (
+                                        <MenuItem
+                                            key={group.id}
+                                            value={group.id}
+                                        >
+                                            {section.name} - {group.name}
+                                        </MenuItem>
+                                    ))
+                                )}
                             </Select>
                         </FormControl>
 
+                        {!selectedGroup && (
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    display: 'block',
+                                    mb: 2,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                Select a group above to add/remove macros
+                            </Typography>
+                        )}
+
                         <List sx={{ maxHeight: 300, overflow: 'auto' }}>
-                            {filteredUnmappedMacros.map((macroName) => (
-                                <ListItem
-                                    key={macroName}
-                                    disablePadding
-                                    secondaryAction={
-                                        <Tooltip title="Add to Group">
-                                            <IconButton
-                                                edge="end"
-                                                size="small"
-                                                onClick={() =>
-                                                    handleAddMacroToGroup(
-                                                        macroName
-                                                    )
+                            {filteredMacros.map((macroName) => {
+                                const isInSelectedGroup = selectedGroup
+                                    ? isMacroInGroup(macroName, selectedGroup)
+                                    : false
+                                const mappedGroups =
+                                    getGroupsForMacro(macroName)
+                                const isUnmapped = mappedGroups.length === 0
+
+                                return (
+                                    <ListItem
+                                        key={macroName}
+                                        disablePadding
+                                        secondaryAction={
+                                            selectedGroup ? (
+                                                <Tooltip
+                                                    title={
+                                                        isInSelectedGroup
+                                                            ? 'Remove from Group'
+                                                            : 'Add to Group'
+                                                    }
+                                                >
+                                                    <IconButton
+                                                        edge="end"
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleToggleMacroInGroup(
+                                                                macroName
+                                                            )
+                                                        }
+                                                        color={
+                                                            isInSelectedGroup
+                                                                ? 'error'
+                                                                : 'primary'
+                                                        }
+                                                    >
+                                                        {isInSelectedGroup ? (
+                                                            <DeleteIcon />
+                                                        ) : (
+                                                            <AddIcon />
+                                                        )}
+                                                    </IconButton>
+                                                </Tooltip>
+                                            ) : null
+                                        }
+                                    >
+                                        <ListItemButton>
+                                            <ListItemText
+                                                primary={
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems:
+                                                                'center',
+                                                            gap: 1,
+                                                        }}
+                                                    >
+                                                        <Typography variant="body2">
+                                                            {macroName}
+                                                        </Typography>
+                                                        {isInSelectedGroup && (
+                                                            <Chip
+                                                                label="In Selected Group"
+                                                                size="small"
+                                                                color="success"
+                                                                variant="outlined"
+                                                            />
+                                                        )}
+                                                        {!isUnmapped &&
+                                                            !isInSelectedGroup && (
+                                                                <Chip
+                                                                    label={`Mapped to ${mappedGroups.length} group${mappedGroups.length > 1 ? 's' : ''}`}
+                                                                    size="small"
+                                                                    color="info"
+                                                                    variant="outlined"
+                                                                />
+                                                            )}
+                                                    </Box>
                                                 }
-                                                disabled={!selectedGroup}
-                                            >
-                                                <AddIcon />
-                                            </IconButton>
-                                        </Tooltip>
-                                    }
-                                >
-                                    <ListItemButton>
-                                        <ListItemIcon>
-                                            <DragIndicatorIcon />
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary={macroName}
-                                            secondary={
-                                                availableMacros[macroName] ||
-                                                'No value'
-                                            }
-                                        />
-                                    </ListItemButton>
-                                </ListItem>
-                            ))}
+                                                secondary={
+                                                    availableMacros[
+                                                        macroName
+                                                    ] || 'No value'
+                                                }
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                )
+                            })}
                         </List>
 
-                        {filteredUnmappedMacros.length === 0 && (
+                        {filteredMacros.length === 0 && (
                             <Typography
                                 variant="body2"
                                 color="text.secondary"
@@ -183,125 +284,49 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                             >
                                 {searchTerm
                                     ? 'No macros match your search'
-                                    : 'All macros have been mapped to groups'}
+                                    : 'No macros available'}
                             </Typography>
-                        )}
-                    </CardContent>
-                </Card>
-
-                {/* Group Mappings */}
-                <Card>
-                    <CardContent sx={{ p: 3 }}>
-                        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                            Group Mappings
-                        </Typography>
-
-                        {groups.length === 0 ? (
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ textAlign: 'center', py: 2 }}
-                            >
-                                No groups created yet. Create a group to start
-                                mapping macros.
-                            </Typography>
-                        ) : (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: 2,
-                                }}
-                            >
-                                {groups.map((group) => {
-                                    const groupMacros = getMacrosInGroup(
-                                        group.id
-                                    )
-                                    return (
-                                        <Card
-                                            key={group.id}
-                                            variant="outlined"
-                                            sx={{
-                                                backgroundColor: 'action.hover',
-                                            }}
-                                        >
-                                            <CardContent sx={{ p: 2 }}>
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        justifyContent:
-                                                            'space-between',
-                                                        alignItems: 'center',
-                                                        mb: 1,
-                                                    }}
-                                                >
-                                                    <Typography variant="subtitle2">
-                                                        {group.name}
-                                                    </Typography>
-                                                    <Chip
-                                                        label={`${groupMacros.length} macros`}
-                                                        size="small"
-                                                        color="primary"
-                                                    />
-                                                </Box>
-                                                {group.description && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                        sx={{
-                                                            display: 'block',
-                                                            mb: 1,
-                                                        }}
-                                                    >
-                                                        {group.description}
-                                                    </Typography>
-                                                )}
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        flexWrap: 'wrap',
-                                                        gap: 0.5,
-                                                    }}
-                                                >
-                                                    {groupMacros.map(
-                                                        (macroName) => (
-                                                            <Chip
-                                                                key={macroName}
-                                                                label={
-                                                                    macroName
-                                                                }
-                                                                size="small"
-                                                                onDelete={() =>
-                                                                    handleRemoveMacroFromGroup(
-                                                                        macroName,
-                                                                        group.id
-                                                                    )
-                                                                }
-                                                                deleteIcon={
-                                                                    <DeleteIcon />
-                                                                }
-                                                            />
-                                                        )
-                                                    )}
-                                                </Box>
-                                                {groupMacros.length === 0 && (
-                                                    <Typography
-                                                        variant="caption"
-                                                        color="text.secondary"
-                                                    >
-                                                        No macros assigned to
-                                                        this group
-                                                    </Typography>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-                                    )
-                                })}
-                            </Box>
                         )}
                     </CardContent>
                 </Card>
             </Box>
+
+            {/* Edit Macro Input Mapping Dialog */}
+            <Dialog
+                open={editDialogOpen}
+                onClose={handleCancelEdit}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle>Edit Macro Input Type: {editingMacro}</DialogTitle>
+                <DialogContent>
+                    <Box sx={{ mt: 2 }}>
+                        <FormControl fullWidth>
+                            <InputLabel>Input Type</InputLabel>
+                            <Select
+                                value={editingInputType}
+                                onChange={(e) =>
+                                    setEditingInputType(
+                                        e.target.value as 'raw_rs2f'
+                                    )
+                                }
+                                label="Input Type"
+                            >
+                                <MenuItem value="raw_rs2f">Raw RS2F</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelEdit}>Cancel</Button>
+                    <Button
+                        onClick={handleSaveMacroInputMapping}
+                        variant="contained"
+                    >
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     )
 }
