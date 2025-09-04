@@ -84,5 +84,9 @@ export const precompileFilter = (
         rawRs2f: filterStr,
         precompiledRs2f: precompiledRs2f.join('\n'),
         parsedMacros: macros,
+        settings: {
+            sections: [],
+            macroInputMappings: {},
+        },
     }
 }
