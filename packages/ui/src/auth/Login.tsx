@@ -5,7 +5,7 @@ import { useAuthActions } from './useAuth'
 
 const API_BASE_URLS: Record<string, string> = {
     LOCAL_UI: 'http://localhost:8787',
-    PROD: 'null',
+    PROD: 'https://v2-api.kaqemeex.net/',
 }
 
 const buildApiBaseUrl = (): string => {

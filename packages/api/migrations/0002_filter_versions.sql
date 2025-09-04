@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS filter_versions (
     raw_rs2f TEXT NOT NULL,
     precompiled_rs2f TEXT NOT NULL,
     parsed_macros TEXT NOT NULL,
-    settings TEXT NOT NULL
-    name TEXT NOT NULL,
+    settings TEXT NOT NULL,
+    name TEXT NOT NULL
 );
 
