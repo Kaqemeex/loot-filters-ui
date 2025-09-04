@@ -2,11 +2,9 @@ import { Button } from '@mui/material'
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuthActions } from './useAuth'
+import { API_BASE_URLS } from '../utils/api'
 
-const API_BASE_URLS: Record<string, string> = {
-    LOCAL_UI: 'http://localhost:8787',
-    PROD: 'https://v2-api.kaqemeex.net',
-}
+
 
 const buildApiBaseUrl = (): string => {
     const env = window.location.hostname === 'localhost' ? 'LOCAL_UI' : 'PROD'
