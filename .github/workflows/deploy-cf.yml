@@ -21,8 +21,11 @@ jobs:
             - name: Save Git SHA
               run: |
                   echo '{"gitSha": "${{ github.sha }}"}' > packages/ui/src/build-info.json
-            - name: Build UI
-              run: npm run build
+            - name: Build packages in order
+              run: |
+                  npm run build --workspace=@loot-filters/core
+                  npm run build --workspace=@loot-filters/api
+                  npm run build --workspace=@loot-filters/ui
               env:
                   NODE_ENV: production
             - name: Deploy UI
