@@ -1,5 +1,4 @@
 import { and, eq, lt } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/d1'
 import { AutoRouterType, IRequest } from 'itty-router'
 import { users, userSessions } from '../db/users'
 import { Env } from '../env'
@@ -21,15 +20,13 @@ export type DiscordOAuthData = {
 
 export const doDiscordLogin = async (req: IRequest, env: Env) => {
     const code = req.query.code as string
-
-    console.log('code', code)
     const result = await fetch('https://discord.com/api/oauth2/token', {
         method: 'POST',
         body: new URLSearchParams({
             code,
             client_id: env.DISCORD_CLIENT_ID,
             client_secret: env.DISCORD_CLIENT_SECRET,
-            redirect_uri: env.DISCORD_REDIRECT_URI,
+            redirect_uri: `${req.headers.get('origin')}/login/redirect`,
             grant_type: 'authorization_code',
             scope: 'identify',
         }).toString(),
@@ -98,14 +95,27 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
     )
 }
 
+const discordLoginLinks: Record<string, string> = {
+    'https://v2.kaqemeex.net/':
+        'https://discord.com/oauth2/authorize?client_id=1411366696979009567&response_type=code&redirect_uri=https%3A%2F%2Fv2.kaqemeex.net%2Flogin%2Fredirect&scope=identify',
+    'http://localhost:3000/':
+        'https://discord.com/oauth2/authorize?client_id=1411366696979009567&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Flogin%2Fredirect&scope=identify',
+}
+
 export const configureAuthRoutes = (router: AutoRouterType) => {
     router
         .get('/login', async (req: IRequest, env: Env) => {
             const state = req.query.state
+            const referer = req.headers.get('Referer') || '_missing_referer_'
+            const discordLoginLink = discordLoginLinks[referer]
+            if (!discordLoginLink) {
+                return new Response('Invalid referer', { status: 400 })
+            }
+
             return new Response(null, {
                 status: 302,
                 headers: {
-                    Location: env.DISCORD_LOGIN_URI + `&state=${state}`,
+                    Location: discordLoginLink + `&state=${state}`,
                 },
             })
         })

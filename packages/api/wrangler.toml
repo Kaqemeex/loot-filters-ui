@@ -18,9 +18,6 @@ migrations_dir = "migrations"
 DISCORD_CLIENT_ID = "1411366696979009567"
 DISCORD_CLIENT_SECRET = "YdmELTTGY4Ga9ab7C5X3PYBUVu14J70e"
 # If you're changing one; you need to change the other
-DISCORD_REDIRECT_URI = "https://v2.kaqemeex.net/login/redirect"
-DISCORD_LOGIN_URI = "https://discord.com/oauth2/authorize?client_id=1411366696979009567&response_type=code&redirect_uri=https%3A%2F%2Fv2.kaqemeex.net%2Flogin%2Fredirect&scope=identify"
-
 # Cron triggers (optional)
 [triggers]
 crons = []

@@ -600,14 +600,6 @@ export const FilterSettingsPage: React.FC = () => {
                     Configure sections, groups, and macro bindings for your
                     filter
                 </Typography>
-                {selectedVersionId && (
-                    <Typography variant="h6" color="primary">
-                        Editing:{' '}
-                        {filterVersions.find(
-                            (v) => v.versionId === selectedVersionId
-                        )?.name || 'Unnamed Version'}
-                    </Typography>
-                )}
 
                 {/* Filter Properties Section */}
                 <Box sx={{ mt: 4, mb: 4 }}>

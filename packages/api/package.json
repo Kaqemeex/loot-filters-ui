@@ -19,8 +19,7 @@
         "type-check": "tsc --noEmit",
         "lint": "eslint src --ext .ts",
         "test": "wrangler dev --test-scheduled",
-        "db:generate": "drizzle-kit generate",
-        "db:migrate": "wrangler d1 migrations apply loot-filters"
+        "db:migrate": "wrangler d1 migrations apply loot-filters-v2"
     },
     "dependencies": {
         "@loot-filters/core": "file:../core",
