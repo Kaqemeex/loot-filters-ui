@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS filter_versions (
     parsed_macros TEXT NOT NULL,
     settings TEXT NOT NULL,
     name TEXT NOT NULL,
-    url TEXT,
+    url TEXT
 );
 
