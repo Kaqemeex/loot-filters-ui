@@ -15,7 +15,14 @@ export const apiRequest = async <T>(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<T> => {
-    const { sessionId } = useAuthStore.getState()
+    const { sessionId, checkAuth } = useAuthStore.getState()
+
+    // Check if session is still valid before making the request
+    if (sessionId && !checkAuth()) {
+        // Session expired, clear auth state
+        useAuthStore.getState().logout()
+        throw new Error('Session expired')
+    }
 
     const url = `${buildApiBaseUrl()}${endpoint}`
     const headers: Record<string, string> = {

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MacroInputMappingSchema } from './inputs'
+import { InputTypeSchema } from './inputs'
 
 /**
  * FilterSettings => how the filter is rendered to the user
@@ -27,8 +27,11 @@ export const SectionSchema = z.object({
 })
 export type Section = z.infer<typeof SectionSchema>
 
+export const MacroInputMappingSchema = z.record(z.string(), InputTypeSchema)
+export type MacroInputMapping = z.infer<typeof MacroInputMappingSchema>
+
 export const FilterVersionSettingsSchema = z.object({
     sections: z.array(SectionSchema),
-    macroInputMappings: z.record(z.string(), MacroInputMappingSchema),
+    macroInputMappings: MacroInputMappingSchema,
 })
 export type FilterVersionSettings = z.infer<typeof FilterVersionSettingsSchema>

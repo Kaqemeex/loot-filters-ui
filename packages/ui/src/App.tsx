@@ -6,6 +6,7 @@ import {
     CardContent,
     Typography,
 } from '@mui/material'
+import { useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { OAuthRedirectLandingPage, useAuthActions, useAuthState } from './auth'
 import { Navbar } from './components/Navbar'
@@ -18,6 +19,22 @@ import { PublicFiltersPage } from './pages/PublicFiltersPage/PublicFiltersPage'
 
 function App() {
     const { isAuthenticated } = useAuthState()
+    const { checkAuth } = useAuthActions()
+
+    // Check authentication status on app load and periodically
+    useEffect(() => {
+        checkAuth()
+
+        // Check auth every 5 minutes to catch expired sessions
+        const interval = setInterval(
+            () => {
+                checkAuth()
+            },
+            5 * 60 * 1000
+        ) // 5 minutes
+
+        return () => clearInterval(interval)
+    }, [checkAuth])
 
     return (
         <Box

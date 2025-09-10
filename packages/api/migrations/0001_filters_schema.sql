@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS filters (
     owner_discord_id TEXT NOT NULL,
     name TEXT NOT NULL,
     description TEXT NOT NULL,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
     public BOOLEAN NOT NULL,
     current_version_id TEXT NOT NULL
 );

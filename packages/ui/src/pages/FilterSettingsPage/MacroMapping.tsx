@@ -1,5 +1,19 @@
-import { Group, MacroInputMapping, Section } from '@loot-filters/core'
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material'
+import {
+    BooleanInput,
+    Group,
+    InputType,
+    ListInput,
+    MacroInputMapping,
+    NumberInput,
+    RawRs2fInput,
+    Section,
+    getInputTypeNames,
+} from '@loot-filters/core'
+import {
+    Add as AddIcon,
+    Delete as DeleteIcon,
+    Edit as EditIcon,
+} from '@mui/icons-material'
 import {
     Box,
     Button,
@@ -10,7 +24,9 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    Divider,
     FormControl,
+    FormControlLabel,
     IconButton,
     InputLabel,
     List,
@@ -19,6 +35,7 @@ import {
     ListItemText,
     MenuItem,
     Select,
+    Switch,
     TextField,
     Tooltip,
     Typography,
@@ -28,13 +45,10 @@ import { useState } from 'react'
 interface MacroMappingProps {
     availableMacros: Record<string, string>
     sections: Section[]
-    macroInputMappings: Record<string, MacroInputMapping>
+    macroInputMappings: MacroInputMapping
     onAddMacroToGroup: (macroName: string, groupId: string) => void
     onRemoveMacroFromGroup: (macroName: string, groupId: string) => void
-    onUpdateMacroInputMapping: (
-        macroName: string,
-        mapping: MacroInputMapping
-    ) => void
+    onUpdateMacroInputMapping: (macroName: string, mapping: InputType) => void
 }
 
 export const MacroMapping: React.FC<MacroMappingProps> = ({
@@ -49,8 +63,9 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
     const [searchTerm, setSearchTerm] = useState('')
     const [editDialogOpen, setEditDialogOpen] = useState(false)
     const [editingMacro, setEditingMacro] = useState<string>('')
-    const [editingInputType, setEditingInputType] =
-        useState<'raw_rs2f'>('raw_rs2f')
+    const [editingInputType, setEditingInputType] = useState<InputType>({
+        type: 'raw_rs2f',
+    } as RawRs2fInput)
 
     const macroNames = Object.keys(availableMacros)
 
@@ -70,6 +85,13 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
             .map((group) => group.id)
     }
 
+    const getInputTypeDisplayName = (inputType: InputType): string => {
+        if (inputType.type === 'list') {
+            return `list (${inputType.itemTypes})`
+        }
+        return inputType.type
+    }
+
     const handleToggleMacroInGroup = (macroName: string) => {
         if (selectedGroup) {
             if (isMacroInGroup(macroName, selectedGroup)) {
@@ -87,19 +109,46 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
     const handleEditMacroInputMapping = (macroName: string) => {
         const currentMapping = macroInputMappings[macroName]
         setEditingMacro(macroName)
-        setEditingInputType(currentMapping?.inputType || 'raw_rs2f')
+        setEditingInputType(currentMapping || { type: 'raw_rs2f' })
         setEditDialogOpen(true)
     }
 
     const handleSaveMacroInputMapping = () => {
         if (editingMacro) {
-            onUpdateMacroInputMapping(editingMacro, {
-                macroName: editingMacro,
-                inputType: editingInputType,
-            })
+            onUpdateMacroInputMapping(editingMacro, editingInputType)
         }
         setEditDialogOpen(false)
         setEditingMacro('')
+    }
+
+    const handleInputTypeChange = (newType: string) => {
+        // Create a new input type object based on the selected type
+        const createInputType = (type: string): InputType => {
+            switch (type) {
+                case 'raw_rs2f':
+                    return { type: 'raw_rs2f' } as RawRs2fInput
+                case 'number':
+                    return { type: 'number' } as NumberInput
+                case 'boolean':
+                    return { type: 'boolean' } as BooleanInput
+                case 'list':
+                    return {
+                        type: 'list',
+                        itemTypes: 'string',
+                        allowCustomItems: true,
+                    } as ListInput
+                default:
+                    return { type: 'raw_rs2f' } as RawRs2fInput
+            }
+        }
+        setEditingInputType(createInputType(newType))
+    }
+
+    const updateInputTypeProperty = (property: string, value: any) => {
+        setEditingInputType((prev) => ({
+            ...prev,
+            [property]: value,
+        }))
     }
 
     const handleCancelEdit = () => {
@@ -199,39 +248,78 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                                         key={macroName}
                                         disablePadding
                                         secondaryAction={
-                                            selectedGroup ? (
-                                                <Tooltip
-                                                    title={
-                                                        isInSelectedGroup
-                                                            ? 'Remove from Group'
-                                                            : 'Add to Group'
-                                                    }
-                                                >
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1,
+                                                }}
+                                            >
+                                                <Tooltip title="Edit Macro Configuration">
                                                     <IconButton
-                                                        edge="end"
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleToggleMacroInGroup(
+                                                        className="edit-icon"
+                                                        size="medium"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            handleEditMacroInputMapping(
                                                                 macroName
                                                             )
-                                                        }
-                                                        color={
-                                                            isInSelectedGroup
-                                                                ? 'error'
-                                                                : 'primary'
-                                                        }
+                                                        }}
+                                                        sx={{
+                                                            opacity: 0,
+                                                            transition:
+                                                                'opacity 0.2s ease-in-out',
+                                                        }}
                                                     >
-                                                        {isInSelectedGroup ? (
-                                                            <DeleteIcon />
-                                                        ) : (
-                                                            <AddIcon />
-                                                        )}
+                                                        <EditIcon />
                                                     </IconButton>
                                                 </Tooltip>
-                                            ) : null
+                                                {selectedGroup && (
+                                                    <Tooltip
+                                                        title={
+                                                            isInSelectedGroup
+                                                                ? 'Remove from Group'
+                                                                : 'Add to Group'
+                                                        }
+                                                    >
+                                                        <IconButton
+                                                            edge="end"
+                                                            size="small"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation()
+                                                                handleToggleMacroInGroup(
+                                                                    macroName
+                                                                )
+                                                            }}
+                                                            color={
+                                                                isInSelectedGroup
+                                                                    ? 'error'
+                                                                    : 'primary'
+                                                            }
+                                                        >
+                                                            {isInSelectedGroup ? (
+                                                                <DeleteIcon />
+                                                            ) : (
+                                                                <AddIcon />
+                                                            )}
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
                                         }
+                                        sx={{
+                                            '&:hover .edit-icon': {
+                                                opacity: 1,
+                                            },
+                                        }}
                                     >
-                                        <ListItemButton>
+                                        <ListItemButton
+                                            onClick={() =>
+                                                handleEditMacroInputMapping(
+                                                    macroName
+                                                )
+                                            }
+                                        >
                                             <ListItemText
                                                 primary={
                                                     <Box
@@ -262,12 +350,28 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                                                                     variant="outlined"
                                                                 />
                                                             )}
+                                                        {macroInputMappings[
+                                                            macroName
+                                                        ] && (
+                                                            <Chip
+                                                                label={getInputTypeDisplayName(
+                                                                    macroInputMappings[
+                                                                        macroName
+                                                                    ]
+                                                                )}
+                                                                size="small"
+                                                                color="primary"
+                                                                variant="outlined"
+                                                            />
+                                                        )}
                                                     </Box>
                                                 }
                                                 secondary={
-                                                    availableMacros[
-                                                        macroName
-                                                    ] || 'No value'
+                                                    <Typography variant="caption">
+                                                        {availableMacros[
+                                                            macroName
+                                                        ] || 'No value'}
+                                                    </Typography>
                                                 }
                                             />
                                         </ListItemButton>
@@ -295,26 +399,193 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
             <Dialog
                 open={editDialogOpen}
                 onClose={handleCancelEdit}
-                maxWidth="sm"
+                maxWidth="md"
                 fullWidth
             >
-                <DialogTitle>Edit Macro Input Type: {editingMacro}</DialogTitle>
+                <DialogTitle>Configure Input Type: {editingMacro}</DialogTitle>
                 <DialogContent>
                     <Box sx={{ mt: 2 }}>
-                        <FormControl fullWidth>
+                        {/* Current Macro Value Display */}
+                        <Box sx={{ mb: 3 }}>
+                            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                                Current Value:
+                            </Typography>
+                            <Box
+                                sx={{
+                                    p: 2,
+                                    backgroundColor: 'grey.100',
+                                    borderRadius: 1,
+                                    border: '1px solid',
+                                    borderColor: 'grey.300',
+                                }}
+                            >
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontFamily: 'monospace',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                    }}
+                                >
+                                    {availableMacros[editingMacro] ||
+                                        'No value'}
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        <FormControl fullWidth sx={{ mb: 3 }}>
                             <InputLabel>Input Type</InputLabel>
                             <Select
-                                value={editingInputType}
+                                value={editingInputType.type}
                                 onChange={(e) =>
-                                    setEditingInputType(
-                                        e.target.value as 'raw_rs2f'
-                                    )
+                                    handleInputTypeChange(e.target.value)
                                 }
                                 label="Input Type"
                             >
-                                <MenuItem value="raw_rs2f">Raw RS2F</MenuItem>
+                                {getInputTypeNames().map((inputType) => (
+                                    <MenuItem
+                                        key={inputType.value}
+                                        value={inputType.value}
+                                    >
+                                        {inputType.label}
+                                    </MenuItem>
+                                ))}
                             </Select>
                         </FormControl>
+
+                        <Divider sx={{ mb: 3 }} />
+
+                        {/* Input Type Specific Configuration */}
+                        {editingInputType.type === 'raw_rs2f' && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography variant="subtitle2">
+                                    Raw RS2F Configuration
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    Raw RS2F inputs accept a string value only.
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {editingInputType.type === 'number' && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography variant="subtitle2">
+                                    Number Input Configuration
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    Number inputs accept numeric values only.
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {editingInputType.type === 'boolean' && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography variant="subtitle2">
+                                    Boolean Input Configuration
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    Boolean inputs accept true/false values
+                                    only.
+                                </Typography>
+                            </Box>
+                        )}
+
+                        {editingInputType.type === 'list' && (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 2,
+                                }}
+                            >
+                                <Typography variant="subtitle2">
+                                    List Input Configuration
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                >
+                                    List inputs allow users to select from
+                                    predefined options or enter custom values.
+                                </Typography>
+
+                                {/* Item Type Selection */}
+                                <Box sx={{ mt: 2 }}>
+                                    <FormControl fullWidth sx={{ mb: 2 }}>
+                                        <InputLabel>Item Type</InputLabel>
+                                        <Select
+                                            value={
+                                                (editingInputType as ListInput)
+                                                    .itemTypes
+                                            }
+                                            onChange={(e) =>
+                                                updateInputTypeProperty(
+                                                    'itemTypes',
+                                                    e.target.value
+                                                )
+                                            }
+                                            label="Item Type"
+                                        >
+                                            <MenuItem value="string">
+                                                String
+                                            </MenuItem>
+                                            <MenuItem value="number">
+                                                Number
+                                            </MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+
+                                {/* Allow Custom Items Toggle */}
+                                <Box sx={{ mt: 2 }}>
+                                    <FormControlLabel
+                                        control={
+                                            <Switch
+                                                checked={
+                                                    (
+                                                        editingInputType as ListInput
+                                                    ).allowCustomItems
+                                                }
+                                                onChange={(e) =>
+                                                    updateInputTypeProperty(
+                                                        'allowCustomItems',
+                                                        e.target.checked
+                                                    )
+                                                }
+                                            />
+                                        }
+                                        label="Allow custom values (users can enter values not in the list)"
+                                    />
+                                </Box>
+                            </Box>
+                        )}
                     </Box>
                 </DialogContent>
                 <DialogActions>
@@ -323,7 +594,7 @@ export const MacroMapping: React.FC<MacroMappingProps> = ({
                         onClick={handleSaveMacroInputMapping}
                         variant="contained"
                     >
-                        Save
+                        Save Configuration
                     </Button>
                 </DialogActions>
             </Dialog>

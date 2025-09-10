@@ -5,13 +5,13 @@ export const users = sqliteTable('users', {
     discordUsername: text('discord_username').notNull(),
     refreshToken: text('refresh_token'),
     authToken: text('auth_token'),
-    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
 })
 
 export const userSessions = sqliteTable('user_sessions', {
     sessionId: text('session_id').primaryKey(),
     discordId: text('discord_id').notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-    expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull(),
+    createdAt: integer('created_at').notNull(),
+    expiresAt: integer('expires_at').notNull(),
 })

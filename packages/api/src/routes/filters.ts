@@ -21,13 +21,19 @@ const createFilter = (router: AutoRouterType) => {
             })
         }
 
+        const filterData = parsedFilter.data
+        const filterId = crypto.randomUUID()
+        const versionId = crypto.randomUUID()
+
         const newFilter: FilterInsert = {
-            ...parsedFilter.data,
-            filterId: crypto.randomUUID(),
+            name: filterData.name,
+            description: filterData.description,
+            public: filterData.public,
+            filterId,
             ownerDiscordId: req.auth.discordId,
-            currentVersionId: crypto.randomUUID(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            currentVersionId: versionId,
+            createdAt: new Date().getTime(),
+            updatedAt: new Date().getTime(),
         }
 
         try {
@@ -72,7 +78,7 @@ const updateFilter = (router: AutoRouterType) => {
             if (name !== undefined) updateData.name = name
             if (description !== undefined) updateData.description = description
             if (isPublic !== undefined) updateData.public = isPublic
-            updateData.updatedAt = new Date()
+            updateData.updatedAt = new Date().getTime()
 
             try {
                 const updatedFilter = await env.DB.update(FILTERS_TABLE)

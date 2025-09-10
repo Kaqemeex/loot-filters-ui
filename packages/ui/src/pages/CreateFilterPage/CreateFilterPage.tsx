@@ -1,5 +1,5 @@
-import { EXAMPLE_FILTER, FilterEgg } from '@loot-filters/core'
-import { Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material'
+import { FilterEgg, TYPICAL_WHACK_GITHUB_URL } from '@loot-filters/core'
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import {
     Alert,
     Box,
@@ -16,23 +16,19 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthState } from '../../auth/useAuth'
+import { FilterVersionCreator } from '../../components/FilterVersionCreator'
 import { createFilter } from '../../utils/api'
-import { createFilterVersionWithPrecompiling } from '../../utils/filterVersionUtils'
 
 interface CreateFilterForm {
     name: string
     description: string
     public: boolean
-    rawRs2f: string
-    versionName: string
 }
 
 const initialFormState: CreateFilterForm = {
     name: '',
     description: '',
     public: false,
-    rawRs2f: EXAMPLE_FILTER,
-    versionName: 'Initial Version',
 }
 
 export const CreateFilterPage: React.FC = () => {
@@ -41,6 +37,8 @@ export const CreateFilterPage: React.FC = () => {
     const [form, setForm] = useState<CreateFilterForm>(initialFormState)
     const [saving, setSaving] = useState(false)
     const [errors, setErrors] = useState<Partial<CreateFilterForm>>({})
+    const [showVersionCreator, setShowVersionCreator] = useState(false)
+    const [createdFilterId, setCreatedFilterId] = useState<string | null>(null)
 
     const validateForm = (): boolean => {
         const newErrors: Partial<CreateFilterForm> = {}
@@ -53,14 +51,6 @@ export const CreateFilterPage: React.FC = () => {
             newErrors.description = 'Description is required'
         }
 
-        if (!form.rawRs2f.trim()) {
-            newErrors.rawRs2f = 'Filter content is required'
-        }
-
-        if (!form.versionName.trim()) {
-            newErrors.versionName = 'Version name is required'
-        }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -70,7 +60,6 @@ export const CreateFilterPage: React.FC = () => {
         value: string | boolean
     ) => {
         setForm((prev) => ({ ...prev, [field]: value }))
-        // Clear error when user starts typing
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: undefined }))
         }
@@ -90,27 +79,12 @@ export const CreateFilterPage: React.FC = () => {
                 public: form.public,
             }
 
-            // Create the filter first
             const newFilter = (await createFilter(filterData)) as {
                 filterId: string
             }
-            console.log('newFilter', newFilter)
 
-            // Create the filter version using the shared utility
-            const versionResult = await createFilterVersionWithPrecompiling({
-                filterId: newFilter.filterId,
-                versionName: form.versionName,
-                rawRs2f: form.rawRs2f,
-            })
-
-            if (!versionResult.success) {
-                throw new Error(
-                    versionResult.error || 'Failed to create filter version'
-                )
-            }
-
-            // Navigate to the new filter
-            navigate(`/filters/${newFilter.filterId}`)
+            setCreatedFilterId(newFilter.filterId)
+            setShowVersionCreator(true)
         } catch (error) {
             console.error('Failed to create filter:', error)
         } finally {
@@ -118,15 +92,21 @@ export const CreateFilterPage: React.FC = () => {
         }
     }
 
-    const handleCancel = () => {
-        navigate('/my-filters')
+    const handleVersionCreated = (versionId: string) => {
+        if (createdFilterId) {
+            navigate(`/filters/${createdFilterId}`)
+        }
     }
 
-    const handleResetToExample = () => {
-        setForm((prev) => ({ ...prev, rawRs2f: EXAMPLE_FILTER }))
-        if (errors.rawRs2f) {
-            setErrors((prev) => ({ ...prev, rawRs2f: undefined }))
+    const handleVersionCreatorCancel = () => {
+        setShowVersionCreator(false)
+        if (createdFilterId) {
+            navigate(`/filters/${createdFilterId}`)
         }
+    }
+
+    const handleCancel = () => {
+        navigate('/my-filters')
     }
 
     // Show authentication error if not logged in
@@ -159,195 +139,107 @@ export const CreateFilterPage: React.FC = () => {
                 </Typography>
             </Box>
 
-            <Box
-                sx={{
-                    display: 'grid',
-                    gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' },
-                    gap: 4,
-                }}
-            >
-                {/* Filter Content Section */}
-                <Box>
-                    <Card>
-                        <CardContent sx={{ p: 3 }}>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    mb: 3,
-                                }}
-                            >
-                                <Typography variant="h6" component="h3">
-                                    Filter Content (RS2F)
-                                </Typography>
-                                <Button
-                                    size="small"
-                                    variant="contained"
-                                    onClick={handleResetToExample}
-                                >
-                                    Reset to Example
-                                </Button>
-                            </Box>
+            <Box sx={{ maxWidth: 600 }}>
+                <Card
+                    sx={{
+                        backgroundColor: 'action.hover',
+                        border: `1px solid ${'divider'}`,
+                        mb: 3,
+                    }}
+                >
+                    <CardContent sx={{ p: 3 }}>
+                        <Typography
+                            variant="h6"
+                            component="h3"
+                            sx={{ color: 'primary.dark', mb: 3 }}
+                        >
+                            Filter Details
+                        </Typography>
 
-                            <TextField
-                                fullWidth
-                                multiline
-                                rows={25}
-                                value={form.rawRs2f}
-                                onChange={(e) =>
-                                    handleInputChange('rawRs2f', e.target.value)
+                        <TextField
+                            fullWidth
+                            label="Filter Name"
+                            value={form.name}
+                            onChange={(e) =>
+                                handleInputChange('name', e.target.value)
+                            }
+                            error={!!errors.name}
+                            helperText={
+                                errors.name ||
+                                'Give your filter a descriptive name'
+                            }
+                            sx={{ mb: 3 }}
+                        />
+
+                        <TextField
+                            fullWidth
+                            label="Description"
+                            multiline
+                            rows={4}
+                            value={form.description}
+                            onChange={(e) =>
+                                handleInputChange('description', e.target.value)
+                            }
+                            error={!!errors.description}
+                            helperText={
+                                errors.description ||
+                                'Describe what this filter does'
+                            }
+                            sx={{ mb: 3 }}
+                        />
+
+                        <FormControl fullWidth>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={form.public}
+                                        onChange={(e) =>
+                                            handleInputChange(
+                                                'public',
+                                                e.target.checked
+                                            )
+                                        }
+                                    />
                                 }
-                                error={!!errors.rawRs2f}
-                                helperText={
-                                    errors.rawRs2f ||
-                                    'Enter your loot filter content in RS2F format'
-                                }
+                                label="Make this filter public"
                             />
-                        </CardContent>
-                    </Card>
-                </Box>
+                            <FormHelperText>
+                                Public filters can be viewed and used by other
+                                players
+                            </FormHelperText>
+                        </FormControl>
+                    </CardContent>
+                </Card>
 
-                {/* Filter Details Section */}
-                <Box>
-                    <Card
-                        sx={{
-                            backgroundColor: 'action.hover',
-                            border: `1px solid ${'divider'}`,
-                            mb: 3,
-                        }}
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button onClick={handleCancel} variant="outlined" fullWidth>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        onClick={handleSave}
+                        disabled={saving}
+                        fullWidth
                     >
-                        <CardContent sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h3"
-                                sx={{ color: 'primary.dark', mb: 3 }}
-                            >
-                                Filter Details
-                            </Typography>
-
-                            <TextField
-                                fullWidth
-                                label="Filter Name"
-                                value={form.name}
-                                onChange={(e) =>
-                                    handleInputChange('name', e.target.value)
-                                }
-                                error={!!errors.name}
-                                helperText={
-                                    errors.name ||
-                                    'Give your filter a descriptive name'
-                                }
-                                sx={{ mb: 3 }}
-                            />
-
-                            <TextField
-                                fullWidth
-                                label="Description"
-                                multiline
-                                rows={4}
-                                value={form.description}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        'description',
-                                        e.target.value
-                                    )
-                                }
-                                error={!!errors.description}
-                                helperText={
-                                    errors.description ||
-                                    'Describe what this filter does'
-                                }
-                                sx={{ mb: 3 }}
-                            />
-
-                            <TextField
-                                fullWidth
-                                label="Version Name"
-                                value={form.versionName}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        'versionName',
-                                        e.target.value
-                                    )
-                                }
-                                error={!!errors.versionName}
-                                helperText={
-                                    errors.versionName ||
-                                    'Name for this version of the filter'
-                                }
-                                sx={{ mb: 3 }}
-                            />
-
-                            <FormControl fullWidth>
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={form.public}
-                                            onChange={(e) =>
-                                                handleInputChange(
-                                                    'public',
-                                                    e.target.checked
-                                                )
-                                            }
-                                        />
-                                    }
-                                    label="Make this filter public"
-                                />
-                                <FormHelperText>
-                                    Public filters can be viewed and used by
-                                    other players
-                                </FormHelperText>
-                            </FormControl>
-                        </CardContent>
-                    </Card>
-
-                    {/* Parser Info Card */}
-                    <Card>
-                        <CardContent sx={{ p: 3 }}>
-                            <Typography
-                                variant="h6"
-                                component="h3"
-                                sx={{ mb: 2 }}
-                            >
-                                Parser Information
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Your filter will be automatically parsed and
-                                optimized using the RS2F parser.
-                            </Typography>
-                            <Typography
-                                variant="body2"
-                                color="text.secondary"
-                                sx={{ mt: 1 }}
-                            >
-                                Macros will be extracted and the filter will be
-                                precompiled for better performance.
-                            </Typography>
-                        </CardContent>
-                    </Card>
-
-                    {/* Action Buttons */}
-                    <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                        <Button
-                            onClick={handleCancel}
-                            variant="outlined"
-                            fullWidth
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={handleSave}
-                            disabled={saving}
-                            fullWidth
-                        >
-                            {saving ? 'Creating...' : 'Create Filter'}
-                        </Button>
-                    </Box>
+                        {saving ? 'Creating...' : 'Create Filter'}
+                    </Button>
                 </Box>
             </Box>
+
+            {/* Version Creator Dialog */}
+            {createdFilterId && (
+                <FilterVersionCreator
+                    filterId={createdFilterId}
+                    onVersionCreated={handleVersionCreated}
+                    onCancel={handleVersionCreatorCancel}
+                    open={showVersionCreator}
+                    initialVersionName="Initial Version"
+                    initialContentSource="url"
+                    initialUrl={TYPICAL_WHACK_GITHUB_URL}
+                    title="Create Initial Version"
+                />
+            )}
         </Box>
     )
 }

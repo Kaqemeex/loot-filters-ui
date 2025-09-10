@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { timestampSchema } from './types'
-import { MacroBindingSchema } from './precompiled-rs2f'
 import { FilterVersionSettingsSchema } from './filter-version-settings'
+import { MacroBindingSchema } from './precompiled-rs2f'
+import { timestampSchema } from './types'
 
 export const FilterVersionEggSchema = z.object({
     filterId: z.string().nonempty(),
@@ -10,6 +10,7 @@ export const FilterVersionEggSchema = z.object({
     precompiledRs2f: z.string(),
     parsedMacros: z.array(MacroBindingSchema),
     settings: FilterVersionSettingsSchema,
+    url: z.string().url().optional(),
 })
 export type FilterVersionEgg = z.infer<typeof FilterVersionEggSchema>
 

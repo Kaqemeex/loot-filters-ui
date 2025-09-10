@@ -49,33 +49,33 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
             discordUsername: user.username,
             refreshToken: oauthData.refresh_token,
             authToken: oauthData.access_token,
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            createdAt: new Date().getTime(),
+            updatedAt: new Date().getTime(),
         })
         .onConflictDoUpdate({
             target: [users.discordId],
             set: {
                 authToken: oauthData.access_token,
                 refreshToken: oauthData.refresh_token,
-                updatedAt: new Date(),
+                updatedAt: new Date().getTime(),
             },
         })
 
     await env.DB.delete(userSessions).where(
         and(
             eq(userSessions.discordId, user.id),
-            lt(userSessions.expiresAt, new Date())
+            lt(userSessions.expiresAt, new Date().getTime() - 600 * 1000)
         )
     )
 
     const sessionId = crypto.randomUUID()
-    const createdAt = new Date()
-    const expiresAt = new Date(createdAt.getTime() + sessionDuration)
+    const createdAt = new Date().getTime()
+    const expiresAt = new Date(createdAt + sessionDuration).getTime()
     await env.DB.insert(userSessions).values({
         sessionId,
         discordId: user.id,
-        expiresAt,
-        createdAt,
+        expiresAt: expiresAt,
+        createdAt: createdAt,
     })
 
     return Response.json(
@@ -89,7 +89,7 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
             headers: {
                 'Content-Type': 'application/json',
                 // TODO: add 'Secure' -- can't for localdev
-                'set-cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Expires=${expiresAt.toUTCString()}`,
+                'set-cookie': `session_id=${sessionId}; Path=/; HttpOnly; SameSite=Strict; Expires=${new Date(expiresAt).toUTCString()}`,
             },
         }
     )

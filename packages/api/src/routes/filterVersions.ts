@@ -24,29 +24,53 @@ const createFilterVersion = (router: AutoRouterType) => {
             const versionId = crypto.randomUUID()
             const body = (await req.json()) as any
             const egg = FilterVersionEggSchema.parse(body)
-            const filterVersionObj: typeof FILTER_VERSIONS_TABLE.$inferInsert =
-                {
-                    ...egg,
-                    versionId,
-                    name:
-                        egg.name ||
-                        `Version ${new Date().toLocaleDateString()}`,
-                    filterId: req.filter.filterId,
-                    createdAt: new Date(),
-                    settings: JSON.stringify(egg.settings),
-                    parsedMacros: JSON.stringify(egg.parsedMacros),
+
+            try {
+                // Use the data already provided in the egg
+                const rawRs2f = egg.rawRs2f || ''
+                const precompiledRs2f = egg.precompiledRs2f || ''
+                const parsedMacros = egg.parsedMacros || []
+                const settings = egg.settings || {
+                    sections: [],
+                    macroInputMappings: {},
                 }
 
-            const createdFilterVersion = await env.DB.insert(
-                FILTER_VERSIONS_TABLE
-            )
-                .values(filterVersionObj)
-                .returning()
-                .get()
+                const filterVersionObj: typeof FILTER_VERSIONS_TABLE.$inferInsert =
+                    {
+                        versionId,
+                        name:
+                            egg.name ||
+                            `Version ${new Date().toLocaleDateString()}`,
+                        filterId: req.filter.filterId,
+                        rawRs2f,
+                        precompiledRs2f,
+                        parsedMacros: JSON.stringify(parsedMacros),
+                        settings: JSON.stringify(settings),
+                        createdAt: new Date().getTime(),
+                    }
 
-            return new Response(JSON.stringify(createdFilterVersion), {
-                status: 200,
-            })
+                const createdFilterVersion = await env.DB.insert(
+                    FILTER_VERSIONS_TABLE
+                )
+                    .values(filterVersionObj)
+                    .returning()
+                    .get()
+
+                return new Response(JSON.stringify(createdFilterVersion), {
+                    status: 200,
+                })
+            } catch (error) {
+                console.error('Error creating filter version:', error)
+                return new Response(
+                    JSON.stringify({
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : 'Failed to create filter version',
+                    }),
+                    { status: 500 }
+                )
+            }
         }
     )
 }

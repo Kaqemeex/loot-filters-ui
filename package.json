@@ -17,11 +17,12 @@
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
-        "typescript": "5.3.3",
-        "prettier": "^3.0.0",
-        "eslint": "^8.0.0",
         "@typescript-eslint/eslint-plugin": "^6.0.0",
-        "@typescript-eslint/parser": "^6.0.0"
+        "@typescript-eslint/parser": "^6.0.0",
+        "eslint": "^8.0.0",
+        "prettier": "^3.0.0",
+        "ts-unused-exports": "^11.0.1",
+        "typescript": "5.3.3"
     },
     "engines": {
         "node": ">=18.0.0",

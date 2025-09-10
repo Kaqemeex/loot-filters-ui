@@ -16,7 +16,7 @@ export const withAuthenticatedUser = async (req: IRequest, env: Env) => {
         .limit(1)
         .get()
 
-    if (result && result.expiresAt > new Date()) {
+    if (result && result.expiresAt > Date.now()) {
         req.auth = {
             sessionId,
             discordId: result.discordId,

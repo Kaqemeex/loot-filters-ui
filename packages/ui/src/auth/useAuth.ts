@@ -1,24 +1,11 @@
-import { useEffect } from 'react'
 import { useAuthStore } from './authStore'
-
-export const useAuth = () => {
-    const { checkAuth, ...authState } = useAuthStore()
-
-    // Check authentication status on mount and when dependencies change
-    useEffect(() => {
-        checkAuth()
-    }, [checkAuth])
-
-    return authState
-}
 
 // Hook for components that only need to read auth state
 export const useAuthState = () => {
-    const { username, sessionId, sessionExpiresAt } = useAuthStore()
+    const { username, sessionId, sessionExpiresAt, checkAuth } = useAuthStore()
 
-    // Compute authentication status
-    const isAuthenticated =
-        sessionId && sessionExpiresAt && Date.now() < sessionExpiresAt
+    // Check if session is valid and auto-logout if expired
+    const isAuthenticated = checkAuth()
 
     return { username, sessionId, sessionExpiresAt, isAuthenticated }
 }

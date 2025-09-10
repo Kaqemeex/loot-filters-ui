@@ -1,8 +1,9 @@
 import {
     FilterVersionSettings,
     Group,
-    MacroInputMapping,
+    InputType,
     Section,
+    TYPICAL_WHACK_GITHUB_URL,
 } from '@loot-filters/core'
 import {
     Add as AddIcon,
@@ -40,6 +41,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuthState } from '../../auth/useAuth'
+import { FilterVersionCreator } from '../../components/FilterVersionCreator'
 import {
     getFilter,
     getFilterVersions,
@@ -47,7 +49,6 @@ import {
     updateFilter,
     updateFilterVersionSettings,
 } from '../../utils/api'
-import { createFilterVersionWithPrecompiling } from '../../utils/filterVersionUtils'
 import { MacroMapping } from './MacroMapping'
 
 export const FilterSettingsPage: React.FC = () => {
@@ -75,8 +76,6 @@ export const FilterSettingsPage: React.FC = () => {
     >({})
     const [createVersionDialogOpen, setCreateVersionDialogOpen] =
         useState(false)
-    const [newVersionName, setNewVersionName] = useState('')
-    const [newVersionRs2f, setNewVersionRs2f] = useState('')
     const [currentVersionData, setCurrentVersionData] = useState<any>(null)
     const [copySettingsFromVersion, setCopySettingsFromVersion] =
         useState<string>('')
@@ -353,71 +352,32 @@ export const FilterSettingsPage: React.FC = () => {
 
     const handleCreateVersion = () => {
         setCreateVersionDialogOpen(true)
-        setNewVersionName('')
-        setNewVersionRs2f(currentVersionData?.rawRs2f || '')
         setCopySettingsFromVersion(selectedVersionId)
         setCopySettingsEnabled(true)
     }
 
-    const handleSaveNewVersion = async () => {
-        if (!newVersionName.trim() || !newVersionRs2f.trim() || !filterId) {
-            return
-        }
-
-        setSaving(true)
+    const handleVersionCreated = async (versionId: string) => {
         try {
-            // Determine which settings to use
-            let settingsToUse = settings
-
-            if (copySettingsEnabled && copySettingsFromVersion) {
-                // Get settings from the selected version
-                const sourceSettings = await getFilterVersionSettings(
-                    filterId,
-                    copySettingsFromVersion
-                )
-                settingsToUse = sourceSettings as FilterVersionSettings
-            }
-
-            // Create new version using the shared utility
-            const versionResult = await createFilterVersionWithPrecompiling({
-                filterId,
-                versionName: newVersionName.trim(),
-                rawRs2f: newVersionRs2f.trim(),
-                settings: settingsToUse,
-            })
-
-            if (!versionResult.success) {
-                throw new Error(
-                    versionResult.error || 'Failed to create new version'
-                )
-            }
-
             // Refresh the versions list
-            const updatedVersions = await getFilterVersions(filterId)
+            const updatedVersions = await getFilterVersions(filterId!)
             setFilterVersions(updatedVersions as any[])
 
             // Select the new version
-            if (versionResult.versionId) {
-                setSelectedVersionId(versionResult.versionId)
-            }
+            setSelectedVersionId(versionId)
 
             setCreateVersionDialogOpen(false)
-            setNewVersionName('')
-            setNewVersionRs2f('')
             setCopySettingsFromVersion('')
             setCopySettingsEnabled(false)
         } catch (error) {
-            console.error('Failed to create new version:', error)
-            setError('Failed to create new version. Please try again.')
-        } finally {
-            setSaving(false)
+            console.error('Failed to refresh versions:', error)
+            setError('Failed to refresh versions. Please try again.')
         }
     }
 
     const handleCancelCreateVersion = () => {
         setCreateVersionDialogOpen(false)
-        setNewVersionName('')
-        setNewVersionRs2f('')
+        setCopySettingsFromVersion('')
+        setCopySettingsEnabled(false)
     }
 
     const handleStartEditFilter = () => {
@@ -476,14 +436,6 @@ export const FilterSettingsPage: React.FC = () => {
                         : group
                 ),
             })),
-            // Also add the macro to macroInputMappings if it doesn't exist
-            macroInputMappings: {
-                ...prev.macroInputMappings,
-                [macroName]: prev.macroInputMappings[macroName] || {
-                    macroName,
-                    inputType: 'raw_rs2f' as const,
-                },
-            },
         }))
     }
 
@@ -531,7 +483,7 @@ export const FilterSettingsPage: React.FC = () => {
 
     const handleUpdateMacroInputMapping = (
         macroName: string,
-        mapping: MacroInputMapping
+        mapping: InputType
     ) => {
         setSettings((prev) => ({
             ...prev,
@@ -1426,114 +1378,24 @@ export const FilterSettingsPage: React.FC = () => {
             </Dialog>
 
             {/* Create New Version Dialog */}
-            <Dialog
+            <FilterVersionCreator
+                filterId={filterId!}
+                onVersionCreated={handleVersionCreated}
+                onCancel={handleCancelCreateVersion}
                 open={createVersionDialogOpen}
-                onClose={handleCancelCreateVersion}
-                maxWidth="md"
-                fullWidth
-            >
-                <DialogTitle>Create New Version</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ mt: 2 }}>
-                        <TextField
-                            fullWidth
-                            label="Version Name"
-                            value={newVersionName}
-                            onChange={(e) => setNewVersionName(e.target.value)}
-                            placeholder="Enter a name for the new version"
-                            sx={{ mb: 2 }}
-                        />
-                        <TextField
-                            fullWidth
-                            label="RS2F Content"
-                            multiline
-                            rows={12}
-                            value={newVersionRs2f}
-                            onChange={(e) => setNewVersionRs2f(e.target.value)}
-                            placeholder="Enter the RS2F filter content"
-                            sx={{ mb: 2 }}
-                        />
-
-                        {/* Copy Settings Section */}
-                        <Box sx={{ mb: 2 }}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={copySettingsEnabled}
-                                        onChange={(e) =>
-                                            setCopySettingsEnabled(
-                                                e.target.checked
-                                            )
-                                        }
-                                    />
-                                }
-                                label="Copy settings from another version"
-                            />
-
-                            {copySettingsEnabled && (
-                                <FormControl fullWidth sx={{ mt: 1 }}>
-                                    <InputLabel>
-                                        Copy settings from version
-                                    </InputLabel>
-                                    <Select
-                                        value={copySettingsFromVersion}
-                                        onChange={(e) =>
-                                            setCopySettingsFromVersion(
-                                                e.target.value
-                                            )
-                                        }
-                                        label="Copy settings from version"
-                                    >
-                                        {filterVersions
-                                            .sort(
-                                                (a, b) =>
-                                                    new Date(
-                                                        b.createdAt
-                                                    ).getTime() -
-                                                    new Date(
-                                                        a.createdAt
-                                                    ).getTime()
-                                            )
-                                            .map((version) => (
-                                                <MenuItem
-                                                    key={version.versionId}
-                                                    value={version.versionId}
-                                                >
-                                                    {version.name ||
-                                                        `Version ${new Date(version.createdAt).toLocaleDateString()}`}
-                                                </MenuItem>
-                                            ))}
-                                    </Select>
-                                </FormControl>
-                            )}
-                        </Box>
-
-                        <Typography variant="body2" color="text.secondary">
-                            This will create a new version with the provided
-                            RS2F content{' '}
-                            {copySettingsEnabled
-                                ? 'and settings from the selected version'
-                                : 'and current settings'}
-                            . The RS2F content will be precompiled
-                            automatically.
-                        </Typography>
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCancelCreateVersion}>Cancel</Button>
-                    <Button
-                        onClick={handleSaveNewVersion}
-                        variant="contained"
-                        disabled={
-                            !newVersionName.trim() ||
-                            !newVersionRs2f.trim() ||
-                            saving
-                        }
-                    >
-                        {saving ? 'Creating...' : 'Create Version'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                initialVersionName=""
+                initialContentSource="url"
+                initialUrl={TYPICAL_WHACK_GITHUB_URL}
+                initialRawRs2f={currentVersionData?.rawRs2f || ''}
+                settings={
+                    copySettingsEnabled && copySettingsFromVersion
+                        ? filterVersions.find(
+                              (v) => v.versionId === copySettingsFromVersion
+                          )?.settings || settings
+                        : settings
+                }
+                title="Create New Version"
+            />
         </Box>
     )
 }

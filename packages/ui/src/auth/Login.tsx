@@ -1,10 +1,8 @@
 import { Button } from '@mui/material'
 import { useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useAuthActions } from './useAuth'
 import { API_BASE_URLS } from '../utils/api'
-
-
+import { useAuthActions } from './useAuth'
 
 const buildApiBaseUrl = (): string => {
     const env = window.location.hostname === 'localhost' ? 'LOCAL_UI' : 'PROD'

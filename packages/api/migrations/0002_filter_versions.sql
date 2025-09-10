@@ -6,11 +6,12 @@
 CREATE TABLE IF NOT EXISTS filter_versions (
     version_id TEXT PRIMARY KEY NOT NULL,
     filter_id TEXT NOT NULL,
-    created_at DATETIME NOT NULL,
+    created_at INTEGER NOT NULL,
     raw_rs2f TEXT NOT NULL,
     precompiled_rs2f TEXT NOT NULL,
     parsed_macros TEXT NOT NULL,
     settings TEXT NOT NULL,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    url TEXT,
 );
 

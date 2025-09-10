@@ -7,14 +7,14 @@ CREATE TABLE IF NOT EXISTS users (
     discord_username TEXT NOT NULL,
     refresh_token TEXT,
     auth_token TEXT,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
 );
 
 -- Create user_sessions table
 CREATE TABLE IF NOT EXISTS user_sessions (
     session_id TEXT PRIMARY KEY NOT NULL,
     discord_id TEXT NOT NULL,
-    expires_at DATETIME NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    expires_at INTEGER NOT NULL,
+    created_at INTEGER NOT NULL
 );
