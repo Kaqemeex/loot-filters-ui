@@ -1,4 +1,4 @@
-import { FilterEgg, TYPICAL_WHACK_GITHUB_URL } from '@loot-filters/core'
+import { TYPICAL_WHACK_GITHUB_URL } from '@loot-filters/core'
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material'
 import {
     Alert,
@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthState } from '../../auth/useAuth'
 import { FilterVersionCreator } from '../../components/FilterVersionCreator'
-import { createFilter } from '../../utils/api'
+import { useCreateFilter } from '../../utils/api'
 
 interface CreateFilterForm {
     name: string
@@ -35,10 +35,13 @@ export const CreateFilterPage: React.FC = () => {
     const navigate = useNavigate()
     const { isAuthenticated } = useAuthState()
     const [form, setForm] = useState<CreateFilterForm>(initialFormState)
-    const [saving, setSaving] = useState(false)
     const [errors, setErrors] = useState<Partial<CreateFilterForm>>({})
     const [showVersionCreator, setShowVersionCreator] = useState(false)
-    const [createdFilterId, setCreatedFilterId] = useState<string | null>(null)
+    const {
+        data: createdFilterId,
+        apiCall: createFilter,
+        isLoading: isCreatingFilter,
+    } = useCreateFilter()
 
     const validateForm = (): boolean => {
         const newErrors: Partial<CreateFilterForm> = {}
@@ -69,27 +72,13 @@ export const CreateFilterPage: React.FC = () => {
         if (!validateForm()) {
             return
         }
-
-        setSaving(true)
-        try {
-            // Create the filter metadata
-            const filterData: FilterEgg = {
-                name: form.name,
-                description: form.description,
-                public: form.public,
-            }
-
-            const newFilter = (await createFilter(filterData)) as {
-                filterId: string
-            }
-
-            setCreatedFilterId(newFilter.filterId)
+        createFilter({
+            name: form.name,
+            description: form.description,
+            public: form.public,
+        }).then(() => {
             setShowVersionCreator(true)
-        } catch (error) {
-            console.error('Failed to create filter:', error)
-        } finally {
-            setSaving(false)
-        }
+        })
     }
 
     const handleVersionCreated = (versionId: string) => {
@@ -219,10 +208,10 @@ export const CreateFilterPage: React.FC = () => {
                     <Button
                         variant="contained"
                         onClick={handleSave}
-                        disabled={saving}
+                        disabled={isCreatingFilter}
                         fullWidth
                     >
-                        {saving ? 'Creating...' : 'Create Filter'}
+                        {isCreatingFilter ? 'Creating...' : 'Create Filter'}
                     </Button>
                 </Box>
             </Box>
@@ -230,7 +219,7 @@ export const CreateFilterPage: React.FC = () => {
             {/* Version Creator Dialog */}
             {createdFilterId && (
                 <FilterVersionCreator
-                    filterId={createdFilterId}
+                    filterId={createdFilterId.filterId}
                     onVersionCreated={handleVersionCreated}
                     onCancel={handleVersionCreatorCancel}
                     open={showVersionCreator}

@@ -1,4 +1,19 @@
-import { FilterEgg, FilterVersionEgg } from '@loot-filters/core'
+import {
+    Api,
+    ApiCallName,
+    FilterEgg,
+    FilterId,
+    FilterIdSchema,
+    FilterSchema,
+    FilterVersionEgg,
+    FilterVersionId,
+    FilterVersionSchema,
+    Resolve,
+    UpdateFilter,
+    UpdateFilterVersionSettingsRequest,
+} from '@loot-filters/core'
+import { useState } from 'react'
+import { z } from 'zod'
 import { useAuthStore } from '../auth/authStore'
 
 export const API_BASE_URLS: Record<string, string> = {
@@ -8,172 +23,244 @@ export const API_BASE_URLS: Record<string, string> = {
 
 const buildApiBaseUrl = (): string => {
     const env = window.location.hostname === 'localhost' ? 'LOCAL_UI' : 'PROD'
-    return API_BASE_URLS[env]
+    const url = API_BASE_URLS[env]
+    console.log('buildApiBaseUrl:', {
+        hostname: window.location.hostname,
+        env,
+        url,
+    })
+    return url
 }
 
-export const apiRequest = async <T>(
+const doApiRequest = async <T>(
     endpoint: string,
-    options: RequestInit = {}
+    body: any,
+    publicRequest: boolean
 ): Promise<T> => {
     const { sessionId, checkAuth } = useAuthStore.getState()
 
     // Check if session is still valid before making the request
     if (sessionId && !checkAuth()) {
-        // Session expired, clear auth state
-        useAuthStore.getState().logout()
-        throw new Error('Session expired')
+        if (!publicRequest) {
+            // Session expired, clear auth state
+            useAuthStore.getState().logout()
+            throw new Error('Session expired')
+        }
     }
 
     const url = `${buildApiBaseUrl()}${endpoint}`
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',
-    }
-
-    // Add custom headers from options
-    if (options.headers) {
-        Object.entries(options.headers).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-                headers[key] = value
-            }
-        })
     }
 
     // Add Authorization header if we have a session ID
     if (sessionId) {
         headers.Authorization = `Bearer ${sessionId}`
+        console.log('Added Authorization header with sessionId:', sessionId)
+    } else {
+        console.log('No sessionId available, making unauthenticated request')
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    })
+    console.log('Making API request:', { url, headers, body, sessionId })
 
-    if (!response.ok) {
-        if (response.status === 401) {
-            // Unauthorized - clear auth state if we had a session
-            if (sessionId) {
-                useAuthStore.getState().logout()
-                throw new Error('Authentication failed')
-            }
-            throw new Error('Unauthorized')
-        }
-        throw new Error(`API request failed: ${response.statusText}`)
-    }
-
-    return response.json()
-}
-
-export const publicApiRequest = async <T>(
-    endpoint: string,
-    options: RequestInit = {}
-): Promise<T> => {
-    const url = `${buildApiBaseUrl()}${endpoint}`
-    const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-    }
-
-    // Add custom headers from options
-    if (options.headers) {
-        Object.entries(options.headers).forEach(([key, value]) => {
-            if (typeof value === 'string') {
-                headers[key] = value
-            }
+    try {
+        const requestBody = body !== undefined ? JSON.stringify(body) : '{}'
+        const response = await fetch(url, {
+            method: 'POST',
+            body: requestBody,
+            headers,
         })
+
+        console.log('API response:', {
+            status: response.status,
+            statusText: response.statusText,
+        })
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                // Unauthorized - clear auth state if we had a session
+                if (sessionId) {
+                    useAuthStore.getState().logout()
+                    throw new Error('Authentication failed')
+                }
+                throw new Error('Unauthorized')
+            }
+            throw new Error(`API request failed: ${response.statusText}`)
+        }
+
+        return response.json()
+    } catch (error) {
+        console.error('API request failed:', error)
+        throw error
     }
+}
 
-    // No authorization header for public requests
-
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    })
-
-    if (!response.ok) {
-        throw new Error(`API request failed: ${response.statusText}`)
+const apiRequest = async <K extends ApiCallName>(
+    endpoint: string,
+    body: any,
+    schema: Api[K]['outputSchema']
+): Promise<Resolve<Api[K]['outputSchema']>> => {
+    const result = await doApiRequest(endpoint, body, false)
+    if (schema) {
+        return schema.parse(result) as Resolve<Api[K]['outputSchema']>
+    } else {
+        return result as Resolve<Api[K]['outputSchema']>
     }
-
-    return response.json()
 }
 
-export const getMyFilters = () => {
-    return apiRequest('/filters/mine')
-}
-
-export const getPublicFilters = () => {
-    return publicApiRequest('/filters/public')
-}
-
-export const getFilter = (filterId: string) => {
-    return apiRequest(`/filters/${filterId}`)
-}
-
-export const getFilterVersions = (filterId: string) => {
-    return apiRequest(`/filters/${filterId}/versions`)
-}
-
-export const createFilter = (filter: FilterEgg) => {
-    return apiRequest('/filters/create', {
-        method: 'POST',
-        body: JSON.stringify(filter),
-    })
-}
-
-export const deleteFilter = (filterId: string) => {
-    return apiRequest(`/filters/${filterId}/delete`, {
-        method: 'DELETE',
-    })
-}
-
-export const createFilterVersion = (
-    filterId: string,
-    filterVersion: FilterVersionEgg
-) => {
-    return apiRequest(`/filters/${filterId}/create-version`, {
-        method: 'POST',
-        body: JSON.stringify(filterVersion),
-    })
-}
-
-export const updateFilter = (
-    filterId: string,
-    updates: {
-        name?: string
-        description?: string
-        public?: boolean
-        currentVersionId?: string
+const publicApiRequest = async <K extends ApiCallName>(
+    endpoint: string,
+    body: any,
+    schema: Api[K]['outputSchema']
+): Promise<Resolve<Api[K]['outputSchema']>> => {
+    const result = await doApiRequest(endpoint, body, true)
+    if (schema) {
+        return schema.parse(result) as Resolve<Api[K]['outputSchema']>
+    } else {
+        return result as Resolve<Api[K]['outputSchema']>
     }
+}
+
+type ApiCall<
+    I extends z.ZodType | undefined,
+    O extends z.ZodType | undefined,
+> = (data: Resolve<I>) => Promise<Resolve<O>>
+
+type ApiCalls = {
+    [K in ApiCallName]: ApiCall<Api[K]['inputSchema'], Api[K]['outputSchema']>
+}
+
+const API_ROOT = `/api/v1`
+
+const createApiHook = <L extends keyof ApiCalls>(
+    call: L extends ApiCallName
+        ? ApiCalls[L]
+        : ApiCall<Api[L]['inputSchema'], Api[L]['outputSchema']>
 ) => {
-    return apiRequest(`/filters/${filterId}/update`, {
-        method: 'PATCH',
-        body: JSON.stringify(updates),
-    })
+    return () => {
+        const [isLoading, setIsLoading] = useState(false)
+        const [data, setData] = useState<Resolve<
+            Api[L]['outputSchema']
+        > | null>(null)
+
+        const apiCall = async (data: Resolve<Api[L]['inputSchema']>) => {
+            setIsLoading(true)
+            const result = await (
+                call as ApiCall<Api[L]['inputSchema'], Api[L]['outputSchema']>
+            )(data)
+            setData(result)
+            setIsLoading(false)
+        }
+
+        return { isLoading, data, apiCall }
+    }
 }
 
-export const getFilterSettings = (filterId: string) => {
-    return apiRequest(`/filters/${filterId}/settings`)
-}
+export const useCreateFilter = createApiHook<'createFilter'>(
+    async (egg: FilterEgg) =>
+        apiRequest<'createFilter'>(
+            `${API_ROOT}/createFilter`,
+            egg,
+            FilterIdSchema
+        )
+)
 
-export const getFilterVersionSettings = (
-    filterId: string,
-    versionId: string
-) => {
-    return apiRequest(`/filters/${filterId}/versions/${versionId}/settings`)
-}
+export const useUpdateFilter = createApiHook<'updateFilter'>(
+    async (updates: UpdateFilter) =>
+        apiRequest<'updateFilter'>(
+            `${API_ROOT}/updateFilter`,
+            updates,
+            FilterSchema
+        )
+)
 
-export const updateFilterSettings = (filterId: string, settings: any) => {
-    return apiRequest(`/filters/${filterId}/settings`, {
-        method: 'PATCH',
-        body: JSON.stringify(settings),
-    })
-}
+export const useReadFilter = createApiHook<'readFilter'>(
+    async (filterId: FilterId) =>
+        apiRequest<'readFilter'>(
+            `${API_ROOT}/readFilter`,
+            filterId,
+            FilterSchema
+        )
+)
 
-export const updateFilterVersionSettings = (
-    filterId: string,
-    versionId: string,
-    settings: any
-) => {
-    return apiRequest(`/filters/${filterId}/versions/${versionId}/settings`, {
-        method: 'PUT',
-        body: JSON.stringify(settings),
-    })
-}
+export const useDeleteFilter = createApiHook<'deleteFilter'>(
+    async (filterId: FilterId) =>
+        apiRequest<'deleteFilter'>(
+            `${API_ROOT}/deleteFilter`,
+            filterId,
+            undefined
+        )
+)
+
+export const useListPublicFilters = createApiHook<'listPublicFilters'>(
+    async () =>
+        publicApiRequest<'listPublicFilters'>(
+            `${API_ROOT}/listPublicFilters`,
+            undefined,
+            z.array(FilterSchema)
+        )
+)
+
+export const useListMyFilters = createApiHook<'listMyFilters'>(async () => {
+    console.log('useListMyFilters called')
+    return apiRequest<'listMyFilters'>(
+        `${API_ROOT}/listMyFilters`,
+        undefined,
+        z.array(FilterSchema)
+    )
+})
+
+export const useCreateFilterVersion = createApiHook<'createFilterVersion'>(
+    async (filterVersion: FilterVersionEgg) =>
+        apiRequest<'createFilterVersion'>(
+            `${API_ROOT}/createFilterVersion`,
+            filterVersion,
+            FilterVersionSchema
+        )
+)
+
+export const useReadFilterVersion = createApiHook<'readFilterVersion'>(
+    async (filterVersionId: FilterVersionId) =>
+        publicApiRequest<'readFilterVersion'>(
+            `${API_ROOT}/readFilterVersion`,
+            filterVersionId,
+            FilterVersionSchema
+        )
+)
+
+export const useUpdateSettingsOnFilterVersion =
+    createApiHook<'updateSettingsOnFilterVersion'>(
+        async (settings: UpdateFilterVersionSettingsRequest) =>
+            apiRequest<'updateSettingsOnFilterVersion'>(
+                `${API_ROOT}/updateSettingsOnFilterVersion`,
+                settings,
+                FilterVersionSchema
+            )
+    )
+
+export const useDeleteFilterVersion = createApiHook<'deleteFilterVersion'>(
+    async (filterVersionId: FilterVersionId) =>
+        apiRequest<'deleteFilterVersion'>(
+            `${API_ROOT}/deleteFilterVersion`,
+            filterVersionId,
+            undefined
+        )
+)
+
+export const useListFilterVersions = createApiHook<'listFilterVersions'>(
+    async (filterId: FilterId) =>
+        publicApiRequest<'listFilterVersions'>(
+            `${API_ROOT}/listFilterVersions`,
+            filterId,
+            z.array(FilterVersionSchema)
+        )
+)
+export const useReadCurrentFilterVersionSettings =
+    createApiHook<'readCurrentFilterVersionSettings'>(
+        async (filterId: FilterId) =>
+            publicApiRequest<'readCurrentFilterVersionSettings'>(
+                `${API_ROOT}/readCurrentFilterVersionSettings`,
+                filterId,
+                FilterVersionSchema
+            )
+    )

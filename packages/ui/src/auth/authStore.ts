@@ -29,6 +29,11 @@ export const useAuthStore = create<AuthStore>()(
                 sessionId: string,
                 sessionExpiresAt: Date
             ) => {
+                console.log('AuthStore: login called', {
+                    username,
+                    sessionId,
+                    sessionExpiresAt,
+                })
                 set({
                     username,
                     sessionId,
@@ -37,6 +42,7 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             logout: () => {
+                console.log('AuthStore: logout called')
                 set({
                     username: null,
                     sessionId: null,
@@ -45,8 +51,14 @@ export const useAuthStore = create<AuthStore>()(
             },
 
             checkAuth: () => {
-                const { sessionExpiresAt } = get()
-                if (!sessionExpiresAt) {
+                const { sessionExpiresAt, sessionId } = get()
+                console.log('AuthStore: checkAuth called', {
+                    sessionExpiresAt,
+                    sessionId,
+                })
+
+                if (!sessionExpiresAt || !sessionId) {
+                    console.log('AuthStore: No session data available')
                     return false
                 }
 
@@ -54,16 +66,24 @@ export const useAuthStore = create<AuthStore>()(
                 const isExpired = now > sessionExpiresAt
 
                 if (isExpired) {
+                    console.log('AuthStore: Session expired, auto-logout')
                     // Auto-logout if session expired
                     get().logout()
                     return false
                 }
 
+                console.log('AuthStore: Session is valid')
                 return true
             },
         }),
         {
             name: 'auth-storage',
+            onRehydrateStorage: () => {
+                console.log('AuthStore: Starting rehydration')
+                return (state) => {
+                    console.log('AuthStore: Rehydration completed', state)
+                }
+            },
         }
     )
 )

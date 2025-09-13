@@ -1,4 +1,3 @@
-import { Filter } from '@loot-filters/core'
 import {
     Download as DownloadIcon,
     FavoriteBorder as FavoriteBorderIcon,
@@ -16,51 +15,47 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPublicFilters } from '../../utils/api'
+import { useListPublicFilters } from '../../utils/api'
+
+const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    })
+}
 
 export const PublicFiltersPage: React.FC = () => {
     const navigate = useNavigate()
-    const [filters, setFilters] = useState<Filter[]>([])
-    const [loading, setLoading] = useState(true)
+
+    const {
+        data: filters,
+        apiCall: fetchPublicFilters,
+        isLoading: loading,
+    } = useListPublicFilters()
+
     const [error, setError] = useState<string | null>(null)
     const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
-    useEffect(() => {
-        const fetchPublicFilters = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                const data = await getPublicFilters()
-
-                // Ensure data is an array
-                if (Array.isArray(data)) {
-                    setFilters(data as Filter[])
-                } else {
-                    console.error('Expected array but got:', typeof data, data)
-                    setError('Invalid data format received from server')
-                    setFilters([])
-                }
-            } catch (err) {
-                console.error('Failed to fetch public filters:', err)
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : 'Failed to fetch public filters'
-                )
-                setFilters([])
-            } finally {
-                setLoading(false)
-            }
+    const fetchData = useCallback(async () => {
+        try {
+            setError(null)
+            await fetchPublicFilters(undefined)
+        } catch (err) {
+            console.error('Failed to fetch public filters:', err)
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : 'Failed to fetch public filters'
+            )
         }
-
-        fetchPublicFilters()
     }, [])
 
-    const handleViewFilter = (filterId: string) => {
-        navigate(`/filters/${filterId}`)
-    }
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     const handleToggleFavorite = (filterId: string) => {
         setFavorites((prev) => {
@@ -73,19 +68,6 @@ export const PublicFiltersPage: React.FC = () => {
             return newFavorites
         })
         // TODO: Implement actual favorite functionality with API
-    }
-
-    const handleDownload = (filterId: string) => {
-        // TODO: Implement filter download functionality
-        console.log('Download filter:', filterId)
-    }
-
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        })
     }
 
     if (loading) {
@@ -115,7 +97,7 @@ export const PublicFiltersPage: React.FC = () => {
                 </Typography>
             </Box>
 
-            {filters.length === 0 ? (
+            {!filters || filters.length === 0 ? (
                 <Card sx={{ maxWidth: 600, mx: 'auto' }}>
                     <CardContent sx={{ textAlign: 'center', py: 6 }}>
                         <Typography
@@ -203,8 +185,8 @@ export const PublicFiltersPage: React.FC = () => {
                                             <IconButton
                                                 size="small"
                                                 onClick={() =>
-                                                    handleViewFilter(
-                                                        filter.filterId
+                                                    navigate(
+                                                        `/filters/${filter.filterId}`
                                                     )
                                                 }
                                             >
@@ -233,8 +215,8 @@ export const PublicFiltersPage: React.FC = () => {
                                             <IconButton
                                                 size="small"
                                                 onClick={() =>
-                                                    handleDownload(
-                                                        filter.filterId
+                                                    setError(
+                                                        'Download not implemented'
                                                     )
                                                 }
                                             >

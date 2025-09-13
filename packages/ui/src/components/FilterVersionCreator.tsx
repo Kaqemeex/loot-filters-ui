@@ -18,8 +18,8 @@ import {
     TextField,
     Typography,
 } from '@mui/material'
-import { useState } from 'react'
-import { createFilterVersion } from '../utils/api'
+import { useCallback, useMemo, useState } from 'react'
+import { useCreateFilterVersion } from '../utils/api'
 
 interface FilterVersionCreatorProps {
     filterId: string
@@ -48,31 +48,44 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
     title = 'Create New Version',
     showAsDialog = true,
 }) => {
-    const [versionName, setVersionName] = useState(initialVersionName)
-    const [contentSource, setContentSource] = useState<'url' | 'raw'>(
-        initialContentSource
-    )
-    const [rawRs2f, setRawRs2f] = useState(initialRawRs2f)
-    const [url, setUrl] = useState(initialUrl)
-    const [saving, setSaving] = useState(false)
-    const [errors, setErrors] = useState<{
-        versionName?: string
-        rawRs2f?: string
-        url?: string
-    }>({})
+    const { apiCall: createFilterVersion, isLoading: saving } =
+        useCreateFilterVersion()
+
+    const formInitialState = {
+        filterId,
+        contentSource: initialContentSource,
+        name: initialVersionName,
+        rawRs2f: initialRawRs2f,
+        precompiledRs2f: '',
+        parsedMacros: [],
+        settings: settings || { sections: [], macroInputMappings: {} },
+        url: initialUrl,
+    }
+
+    const [formState, setFormState] = useState<
+        Partial<FilterVersionEgg> & { contentSource: 'url' | 'raw' }
+    >(formInitialState)
+
+    const clearForm = useCallback(() => {
+        setFormState(formInitialState)
+        setErrors({})
+    }, [])
+
+    const [errors, setErrors] = useState<Partial<typeof formInitialState>>({})
+    const hasErrors = useMemo(() => Object.values(errors).map((error) => !!error).some((error) => error), [errors])
 
     const validateForm = (): boolean => {
         const newErrors: typeof errors = {}
 
-        if (!versionName.trim()) {
-            newErrors.versionName = 'Version name is required'
+        if (!formState.name!.trim()) {
+            newErrors.name = 'Version name is required'
         }
 
-        if (contentSource === 'raw' && !rawRs2f.trim()) {
+        if (formState.contentSource === 'raw' && !formState.rawRs2f!.trim()) {
             newErrors.rawRs2f = 'Filter content is required'
         }
 
-        if (contentSource === 'url' && !url.trim()) {
+        if (formState.contentSource === 'url' && !formState.url!.trim()) {
             newErrors.url = 'URL is required'
         }
 
@@ -85,24 +98,23 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
             return
         }
 
-        setSaving(true)
         try {
-            let finalRawRs2f = rawRs2f
+            let finalRawRs2f = formState.rawRs2f
 
             // If content source is URL, fetch the content
-            if (contentSource === 'url') {
-                const response = await fetch(url)
+            if (formState.contentSource === 'url') {
+                const response = await fetch(formState.url!)
                 finalRawRs2f = await response.text()
             }
 
             // Precompile the filter
-            const precompiledData = precompileFilter(finalRawRs2f)
+            const precompiledData = precompileFilter(finalRawRs2f!)
 
             // Create the version data
             const versionData: FilterVersionEgg = {
                 filterId,
-                name: versionName.trim(),
-                rawRs2f: finalRawRs2f,
+                name: formState.name!.trim(),
+                rawRs2f: finalRawRs2f!,
                 precompiledRs2f: precompiledData.precompiledRs2f,
                 parsedMacros: precompiledData.parsedMacros,
                 settings: {
@@ -114,39 +126,15 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
                 },
             }
 
-            const newVersion = await createFilterVersion(filterId, versionData)
-
-            if (
-                newVersion &&
-                typeof newVersion === 'object' &&
-                'versionId' in newVersion
-            ) {
-                onVersionCreated((newVersion as any).versionId)
-            }
-
-            // Reset form
-            setVersionName('')
-            setRawRs2f('')
-            setUrl('')
-            setContentSource('url')
-            setErrors({})
+            createFilterVersion(versionData).then(() => {
+                clearForm()
+            })
         } catch (error) {
             console.error('Failed to create version:', error)
             setErrors({
-                versionName: 'Failed to create version. Please try again.',
+                name: 'Failed to create version. Please try again.',
             })
-        } finally {
-            setSaving(false)
         }
-    }
-
-    const handleCancel = () => {
-        setVersionName('')
-        setRawRs2f('')
-        setUrl('')
-        setContentSource('url')
-        setErrors({})
-        onCancel()
     }
 
     const content = (
@@ -158,21 +146,25 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
             <TextField
                 fullWidth
                 label="Version Name"
-                value={versionName}
-                onChange={(e) => setVersionName(e.target.value)}
-                error={!!errors.versionName}
-                helperText={
-                    errors.versionName || 'Enter a name for the new version'
+                value={formState.name!}
+                onChange={(e) =>
+                    setFormState({ ...formState, name: e.target.value })
                 }
+                error={!!errors.name}
+                required
+                helperText={errors.name || 'Enter a name for the new version'}
                 sx={{ mb: 2 }}
             />
 
             {/* Content Source Selection */}
             <FormControl component="fieldset" sx={{ mb: 2 }}>
                 <RadioGroup
-                    value={contentSource}
+                    value={formState.contentSource}
                     onChange={(e) =>
-                        setContentSource(e.target.value as 'url' | 'raw')
+                        setFormState({
+                            ...formState,
+                            contentSource: e.target.value as 'url' | 'raw',
+                        })
                     }
                     row
                 >
@@ -190,13 +182,16 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
             </FormControl>
 
             {/* URL Input */}
-            {contentSource === 'url' && (
+            {formState.contentSource === 'url' && (
                 <TextField
                     fullWidth
                     label="Filter URL"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
+                    value={formState.url!}
+                    onChange={(e) =>
+                        setFormState({ ...formState, url: e.target.value })
+                    }
                     error={!!errors.url}
+                    required
                     helperText={
                         errors.url || 'Enter a URL to load filter content from'
                     }
@@ -205,15 +200,18 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
             )}
 
             {/* Raw Content Input */}
-            {contentSource === 'raw' && (
+            {formState.contentSource === 'raw' && (
                 <TextField
                     fullWidth
                     label="RS2F Content"
                     multiline
                     rows={12}
-                    value={rawRs2f}
-                    onChange={(e) => setRawRs2f(e.target.value)}
+                    value={formState.rawRs2f}
+                    onChange={(e) =>
+                        setFormState({ ...formState, rawRs2f: e.target.value })
+                    }
                     error={!!errors.rawRs2f}
+                    required
                     helperText={
                         errors.rawRs2f ||
                         'Enter your loot filter content in RS2F format'
@@ -223,7 +221,13 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
             )}
 
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                <Button onClick={handleCancel} variant="outlined">
+                <Button
+                    onClick={() => {
+                        clearForm()
+                        onCancel()
+                    }}
+                    variant="outlined"
+                >
                     Cancel
                 </Button>
                 <Button
@@ -231,10 +235,7 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
                     variant="contained"
                     startIcon={<AddIcon />}
                     disabled={
-                        !versionName.trim() ||
-                        (contentSource === 'raw' && !rawRs2f.trim()) ||
-                        (contentSource === 'url' && !url.trim()) ||
-                        saving
+                        hasErrors || saving
                     }
                 >
                     {saving ? 'Creating...' : 'Create Version'}
@@ -245,7 +246,7 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
 
     if (showAsDialog) {
         return (
-            <Dialog open={open} onClose={handleCancel} maxWidth="md" fullWidth>
+            <Dialog open={open} onClose={clearForm} maxWidth="md" fullWidth>
                 <DialogTitle>{title}</DialogTitle>
                 <DialogContent>{content}</DialogContent>
             </Dialog>

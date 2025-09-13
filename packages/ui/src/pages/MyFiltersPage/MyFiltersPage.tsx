@@ -1,4 +1,3 @@
-import { Filter } from '@loot-filters/core'
 import { Add as AddIcon } from '@mui/icons-material'
 import {
     Alert,
@@ -10,52 +9,22 @@ import {
     CircularProgress,
     Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthState } from '../../auth/useAuth'
-import { getMyFilters } from '../../utils/api'
+import { useListMyFilters } from '../../utils/api'
 
 export const MyFiltersPage: React.FC = () => {
     const navigate = useNavigate()
-    const { isAuthenticated } = useAuthState()
-    const [filters, setFilters] = useState<Filter[]>([])
-    const [loading, setLoading] = useState(true)
+    const { isAuthenticated, sessionId, username } = useAuthState()
+
+    const {
+        data: filters,
+        apiCall: fetchMyFilters,
+        isLoading: loading,
+    } = useListMyFilters()
+
     const [error, setError] = useState<string | null>(null)
-
-    const handleCreateFilter = () => {
-        navigate('/create-filter')
-    }
-
-    const handleViewFilter = (filterId: string) => {
-        navigate(`/filters/${filterId}`)
-    }
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            setLoading(false)
-            return
-        }
-
-        const fetchFilters = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                const data = (await getMyFilters()) as Filter[]
-                setFilters(data)
-            } catch (err) {
-                console.error('Failed to fetch filters:', err)
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : 'Failed to fetch filters'
-                )
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchFilters()
-    }, [isAuthenticated])
 
     // Show authentication error if not logged in
     if (!isAuthenticated) {
@@ -68,6 +37,17 @@ export const MyFiltersPage: React.FC = () => {
                     You must be logged in to view your filters. Please log in to
                     continue.
                 </Alert>
+            </Box>
+        )
+    }
+    if (!loading && !filters) {
+        fetchMyFilters(undefined)
+    }
+
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                <CircularProgress />
             </Box>
         )
     }
@@ -88,7 +68,7 @@ export const MyFiltersPage: React.FC = () => {
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={handleCreateFilter}
+                    onClick={() => navigate('/create-filter')}
                 >
                     Create Filter
                 </Button>
@@ -102,7 +82,7 @@ export const MyFiltersPage: React.FC = () => {
                 <Alert severity="error" sx={{ mb: 3 }}>
                     {error}
                 </Alert>
-            ) : filters.length === 0 ? (
+            ) : !filters || filters.length === 0 ? (
                 <Card sx={{ maxWidth: 600, mx: 'auto' }}>
                     <CardContent sx={{ textAlign: 'center', py: 6 }}>
                         <Typography
@@ -118,7 +98,7 @@ export const MyFiltersPage: React.FC = () => {
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
-                            onClick={handleCreateFilter}
+                            onClick={() => navigate('/create-filter')}
                         >
                             Create Your First Filter
                         </Button>
@@ -148,7 +128,7 @@ export const MyFiltersPage: React.FC = () => {
                                     },
                                 }}
                                 onClick={() =>
-                                    handleViewFilter(filter.filterId)
+                                    navigate(`/filters/${filter.filterId}`)
                                 }
                             >
                                 <CardContent sx={{ p: 3 }}>

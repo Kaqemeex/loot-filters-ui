@@ -2,6 +2,7 @@ import { and, eq, lt } from 'drizzle-orm'
 import { AutoRouterType, IRequest } from 'itty-router'
 import { users, userSessions } from '../db/users'
 import { Env } from '../env'
+import { generateId } from '../utils/id_generation'
 
 const second = 1000
 const minute = 60 * second
@@ -68,7 +69,7 @@ export const doDiscordLogin = async (req: IRequest, env: Env) => {
         )
     )
 
-    const sessionId = crypto.randomUUID()
+    const sessionId = generateId('session')
     const createdAt = new Date().getTime()
     const expiresAt = new Date(createdAt + sessionDuration).getTime()
     await env.DB.insert(userSessions).values({

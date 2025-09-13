@@ -10,12 +10,12 @@ export const FilterVersionEggSchema = z.object({
     precompiledRs2f: z.string(),
     parsedMacros: z.array(MacroBindingSchema),
     settings: FilterVersionSettingsSchema,
-    url: z.string().url().optional(),
+    url: z.string().optional(),
 })
 export type FilterVersionEgg = z.infer<typeof FilterVersionEggSchema>
 
-export const filterVersionSchema = FilterVersionEggSchema.extend({
+export const FilterVersionSchema = FilterVersionEggSchema.extend({
     versionId: z.string().nonempty(),
     createdAt: timestampSchema,
 })
-export type FilterVersion = z.infer<typeof filterVersionSchema>
+export type FilterVersion = z.infer<typeof FilterVersionSchema>

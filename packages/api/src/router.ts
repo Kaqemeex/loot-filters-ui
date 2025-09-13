@@ -1,10 +1,13 @@
 import { AutoRouter } from 'itty-router'
 import { configureAuthRoutes } from './routes/discordAuth'
-import { configureFilterApis } from './routes/filters'
-import { configureFilterVersionApis } from './routes/filterVersions'
+import { HttpError } from './utils/http-errors'
+import { bindApi } from './routes/router-binding'
 
 const router = AutoRouter({
     catch: (err: Error) => {
+        if (err instanceof HttpError) {
+            return new Response(JSON.stringify(err), { status: err.status })
+        }
         console.error('Error in router', err)
         return new Response(JSON.stringify(err), { status: 500 })
     },
@@ -23,7 +26,6 @@ router.options('*', () => {
 })
 
 configureAuthRoutes(router)
-configureFilterApis(router)
-configureFilterVersionApis(router)
+bindApi(router)
 
 export default { ...router }

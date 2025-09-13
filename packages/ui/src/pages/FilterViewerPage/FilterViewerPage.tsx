@@ -1,4 +1,3 @@
-import { Filter } from '@loot-filters/core'
 import {
     ArrowBack as ArrowBackIcon,
     Download as DownloadIcon,
@@ -19,9 +18,9 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getMyFilters } from '../../utils/api'
+import { useReadFilter } from '../../utils/api'
 
 interface TabPanelProps {
     children?: React.ReactNode
@@ -48,46 +47,36 @@ function TabPanel(props: TabPanelProps) {
 export const FilterViewerPage: React.FC = () => {
     const { filterId } = useParams<{ filterId: string }>()
     const navigate = useNavigate()
-    const [filter, setFilter] = useState<Filter | null>(null)
-    const [loading, setLoading] = useState(true)
+
+    const {
+        data: filter,
+        apiCall: fetchFilter,
+        isLoading: loading,
+    } = useReadFilter()
+
     const [error, setError] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState(0)
 
-    useEffect(() => {
-        const fetchFilter = async () => {
-            if (!filterId) {
-                setError('No filter ID provided')
-                setLoading(false)
-                return
-            }
-
-            try {
-                setLoading(true)
-                setError(null)
-
-                // Fetch all filters and find the one we want
-                const filters = (await getMyFilters()) as Filter[]
-                const foundFilter = filters.find((f) => f.filterId === filterId)
-
-                if (foundFilter) {
-                    setFilter(foundFilter)
-                } else {
-                    setError('Filter not found')
-                }
-            } catch (err) {
-                console.error('Failed to fetch filter:', err)
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : 'Failed to fetch filter'
-                )
-            } finally {
-                setLoading(false)
-            }
+    const fetchData = useCallback(async () => {
+        if (!filterId) {
+            setError('No filter ID provided')
+            return
         }
 
-        fetchFilter()
+        try {
+            setError(null)
+            await fetchFilter({ filterId })
+        } catch (err) {
+            console.error('Failed to fetch filter:', err)
+            setError(
+                err instanceof Error ? err.message : 'Failed to fetch filter'
+            )
+        }
     }, [filterId])
+
+    useEffect(() => {
+        fetchData()
+    }, [fetchData])
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue)
