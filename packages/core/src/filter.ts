@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { discordIdSchema, timestampSchema } from './types'
+import { OnwedUpdatableSchema } from './core'
 
 export const FilterEggSchema = z.object({
     name: z.string().default('A Filter'),
@@ -19,11 +19,13 @@ export const UpdateFilterSchema = z.object({
 
 export type UpdateFilter = z.infer<typeof UpdateFilterSchema>
 
-export const FilterSchema = FilterEggSchema.extend({
+export const FilterSchema = OnwedUpdatableSchema.merge(FilterEggSchema).extend({
     filterId: z.string().nonempty(),
-    ownerDiscordId: discordIdSchema,
     currentVersionId: z.string(),
-    createdAt: timestampSchema,
-    updatedAt: timestampSchema,
 })
 export type Filter = z.infer<typeof FilterSchema>
+
+export const FilterIdSchema = z.object({
+    filterId: z.string().nonempty(),
+})
+export type FilterId = z.infer<typeof FilterIdSchema>

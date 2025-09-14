@@ -1,3 +1,4 @@
+import { Owned } from '@loot-filters/core'
 import { eq } from 'drizzle-orm'
 import { IRequest } from 'itty-router'
 import { FILTERS_TABLE } from '../db/filters'
@@ -55,6 +56,25 @@ export const withAuthenticatedUserIfPresent = async (
     await doAuth(req, env, false)
 }
 
+export const enforceOwnership = async (
+    req: IRequest,
+    env: Env,
+    skipOwnershipCheckIfPublic: boolean = false,
+    ownedEntity: Owned & { public?: boolean } | undefined
+) => {
+    if (!ownedEntity) {
+        throw new NotFoundError()
+    }
+
+    if (skipOwnershipCheckIfPublic && ownedEntity.public) {
+        return ownedEntity
+    }
+
+    if (ownedEntity.ownerDiscordId !== req?.auth?.discordId) {
+        throw new AuthorizationError()
+    }
+}
+
 export const getFilterAndCheckOwnership = async (
     req: IRequest,
     env: Env,
@@ -66,17 +86,6 @@ export const getFilterAndCheckOwnership = async (
         .where(eq(FILTERS_TABLE.filterId, filterId))
         .get()
 
-    if (!filter) {
-        throw new NotFoundError()
-    }
-
-    if (skipOwnershipCheckIfPublic && filter.public) {
-        return filter
-    }
-
-    if (filter.ownerDiscordId !== req.auth.discordId) {
-        throw new AuthorizationError()
-    }
-
+    enforceOwnership(req, env, skipOwnershipCheckIfPublic, filter)
     return filter
 }

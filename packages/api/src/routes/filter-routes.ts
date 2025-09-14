@@ -76,7 +76,7 @@ export const updateFilter: ApiCall<'updateFilter'> = {
 
         return await env.DB.update(FILTERS_TABLE)
             .set(updateData)
-            .where(eq(FILTERS_TABLE.filterId, filter.filterId))
+            .where(eq(FILTERS_TABLE.filterId, filter!.filterId))
             .returning()
             .get()
     },
@@ -121,6 +121,6 @@ export const readFilter: ApiCall<'readFilter'> = {
     middleware: [withAuthenticatedUserIfPresent],
     call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
         const filter = await getFilterAndCheckOwnership(req, env, id, true)
-        return filter
+        return filter!
     },
 }

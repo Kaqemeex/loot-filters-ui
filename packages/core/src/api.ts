@@ -1,23 +1,22 @@
 import { z } from 'zod'
-import { FilterEggSchema, FilterSchema, UpdateFilterSchema } from './filter'
-import { FilterVersionEggSchema, FilterVersionSchema } from './filter-version'
+import {
+    FilterEggSchema,
+    FilterIdSchema,
+    FilterSchema,
+    UpdateFilterSchema,
+} from './filter'
+import {
+    FilterConfigurationEggSchema,
+    FilterConfigurationIdSchema,
+    FilterConfigurationSchema,
+    UpdateFilterConfigurationSchema,
+} from './filter-configuration'
+import {
+    FilterVersionEggSchema,
+    FilterVersionIdSchema,
+    FilterVersionSchema,
+} from './filter-version'
 import { FilterVersionSettingsSchema } from './filter-version-settings'
-
-export const FilterIdSchema = z.object({
-    filterId: z.string().nonempty(),
-})
-export type FilterId = z.infer<typeof FilterIdSchema>
-
-export const FilterVersionIdSchema = z.object({
-    filterId: z.string().nonempty(),
-    versionId: z.string().nonempty(),
-})
-export type FilterVersionId = z.infer<typeof FilterVersionIdSchema>
-
-type Schema = {
-    inputSchema: z.ZodType | undefined
-    outputSchema: z.ZodType | undefined
-}
 
 export const UpdateFilterVersionSettingsRequestSchema = z.object({
     filterId: z.string().nonempty(),
@@ -34,6 +33,7 @@ export type Resolve<T> = T extends z.ZodType
       ? void
       : never
 export const LootFiltersApi = {
+    // Filters
     createFilter: {
         inputSchema: FilterEggSchema,
         outputSchema: FilterIdSchema,
@@ -59,6 +59,7 @@ export const LootFiltersApi = {
         outputSchema: z.array(FilterSchema),
     },
 
+    // Filter Versions
     createFilterVersion: {
         inputSchema: FilterVersionEggSchema,
         outputSchema: FilterVersionSchema,
@@ -82,6 +83,32 @@ export const LootFiltersApi = {
     readCurrentFilterVersionSettings: {
         inputSchema: FilterIdSchema,
         outputSchema: FilterVersionSchema,
+    },
+
+    // Filter Configurations
+    createFilterConfiguration: {
+        inputSchema: FilterConfigurationEggSchema,
+        outputSchema: FilterConfigurationSchema,
+    },
+    readFilterConfiguration: {
+        inputSchema: FilterConfigurationIdSchema,
+        outputSchema: FilterConfigurationSchema,
+    },
+    updateFilterConfiguration: {
+        inputSchema: UpdateFilterConfigurationSchema,
+        outputSchema: FilterConfigurationSchema,
+    },
+    deleteFilterConfiguration: {
+        inputSchema: FilterConfigurationIdSchema,
+        outputSchema: undefined,
+    },
+    listPublicFilterConfigurations: {
+        inputSchema: undefined,
+        outputSchema: z.array(FilterConfigurationSchema),
+    },
+    listMyFilterConfigurations: {
+        inputSchema: undefined,
+        outputSchema: z.array(FilterConfigurationSchema),
     },
 } as const
 

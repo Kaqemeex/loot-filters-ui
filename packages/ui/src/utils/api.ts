@@ -1,6 +1,9 @@
 import {
     Api,
     ApiCallName,
+    FilterConfigurationEgg,
+    FilterConfigurationId,
+    FilterConfigurationSchema,
     FilterEgg,
     FilterId,
     FilterIdSchema,
@@ -10,6 +13,7 @@ import {
     FilterVersionSchema,
     Resolve,
     UpdateFilter,
+    UpdateFilterConfiguration,
     UpdateFilterVersionSettingsRequest,
 } from '@loot-filters/core'
 import { useState } from 'react'
@@ -273,6 +277,65 @@ export const useReadCurrentFilterVersionSettings =
             )
     )
 
+// Filter Configuration API calls
+export const useCreateFilterConfiguration =
+    createApiHook<'createFilterConfiguration'>(
+        async (egg: FilterConfigurationEgg) =>
+            apiRequest<'createFilterConfiguration'>(
+                `${API_ROOT}/createFilterConfiguration`,
+                egg,
+                FilterConfigurationSchema
+            )
+    )
+
+export const useReadFilterConfiguration =
+    createApiHook<'readFilterConfiguration'>(
+        async (filterConfigurationId: FilterConfigurationId) =>
+            publicApiRequest<'readFilterConfiguration'>(
+                `${API_ROOT}/readFilterConfiguration`,
+                filterConfigurationId,
+                FilterConfigurationSchema
+            )
+    )
+
+export const useUpdateFilterConfiguration =
+    createApiHook<'updateFilterConfiguration'>(
+        async (updates: UpdateFilterConfiguration) =>
+            apiRequest<'updateFilterConfiguration'>(
+                `${API_ROOT}/updateFilterConfiguration`,
+                updates,
+                FilterConfigurationSchema
+            )
+    )
+
+export const useDeleteFilterConfiguration =
+    createApiHook<'deleteFilterConfiguration'>(
+        async (filterConfigurationId: FilterConfigurationId) =>
+            apiRequest<'deleteFilterConfiguration'>(
+                `${API_ROOT}/deleteFilterConfiguration`,
+                filterConfigurationId,
+                undefined
+            )
+    )
+
+export const useListMyFilterConfigurations =
+    createApiHook<'listMyFilterConfigurations'>(async () =>
+        apiRequest<'listMyFilterConfigurations'>(
+            `${API_ROOT}/listMyFilterConfigurations`,
+            undefined,
+            z.array(FilterConfigurationSchema)
+        )
+    )
+
+export const useListPublicFilterConfigurations =
+    createApiHook<'listPublicFilterConfigurations'>(async () =>
+        publicApiRequest<'listPublicFilterConfigurations'>(
+            `${API_ROOT}/listPublicFilterConfigurations`,
+            undefined,
+            z.array(FilterConfigurationSchema)
+        )
+    )
+
 // just in case i forget to update the api calls
 const apiCalls: Required<{
     [K in ApiCallName]: () => HookResult<K>
@@ -289,4 +352,10 @@ const apiCalls: Required<{
     deleteFilterVersion: useDeleteFilterVersion,
     listFilterVersions: useListFilterVersions,
     readCurrentFilterVersionSettings: useReadCurrentFilterVersionSettings,
+    createFilterConfiguration: useCreateFilterConfiguration,
+    readFilterConfiguration: useReadFilterConfiguration,
+    updateFilterConfiguration: useUpdateFilterConfiguration,
+    deleteFilterConfiguration: useDeleteFilterConfiguration,
+    listMyFilterConfigurations: useListMyFilterConfigurations,
+    listPublicFilterConfigurations: useListPublicFilterConfigurations,
 }

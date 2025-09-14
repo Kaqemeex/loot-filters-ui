@@ -2,6 +2,14 @@ import { ApiCallName, LootFiltersApi, Resolve } from '@loot-filters/core'
 import { AutoRouterType, IRequest } from 'itty-router'
 import { Env } from '../env'
 import {
+    createFilterConfiguration,
+    deleteFilterConfiguration,
+    listMyFilterConfigurations,
+    listPublicFilterConfigurations,
+    readFilterConfiguration,
+    updateFilterConfiguration,
+} from './filter-configuration'
+import {
     createFilter,
     deleteFilter,
     listMyFilters,
@@ -16,7 +24,7 @@ import {
     readCurrentFilterVersionSettings,
     readFilterVersion,
     updateSettingsOnFilterVersion,
-} from './filter-version-service'
+} from './filter-version'
 
 export type ApiCall<K extends keyof typeof LootFiltersApi> = {
     call: (
@@ -34,7 +42,6 @@ const serverCalls: Required<{
     readFilter,
     updateFilter,
     deleteFilter,
-
     listMyFilters,
     listPublicFilters,
 
@@ -42,9 +49,15 @@ const serverCalls: Required<{
     readFilterVersion,
     updateSettingsOnFilterVersion,
     deleteFilterVersion,
-
     listFilterVersions,
     readCurrentFilterVersionSettings,
+
+    createFilterConfiguration,
+    readFilterConfiguration,
+    updateFilterConfiguration,
+    deleteFilterConfiguration,
+    listPublicFilterConfigurations,
+    listMyFilterConfigurations,
 } as const
 
 export const bindApi = (router: AutoRouterType) => {

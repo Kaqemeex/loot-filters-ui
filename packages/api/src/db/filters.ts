@@ -22,3 +22,20 @@ export const FILTER_VERSIONS_TABLE = sqliteTable('filter_versions', {
     settings: text('settings').notNull(), // JSON stored as text
     url: text('url'),
 })
+
+export const FILTER_CONFIGURATIONS_TABLE = sqliteTable(
+    'filter_configurations',
+    {
+        id: text('id').primaryKey().notNull(),
+        ownerDiscordId: text('owner_discord_id').notNull(),
+        name: text('name').notNull(),
+        description: text('description'),
+        filterId: text('filter_id').notNull(),
+        filterPrefixRs2f: text('filter_prefix_rs2f').notNull(),
+        filterSuffixRs2f: text('filter_suffix_rs2f').notNull(),
+        macroOverrides: text('macro_overrides').notNull(), // JSON stored as text
+        public: integer('public', { mode: 'boolean' }).notNull(),
+        createdAt: integer('created_at').notNull(),
+        updatedAt: integer('updated_at').notNull(),
+    }
+)
