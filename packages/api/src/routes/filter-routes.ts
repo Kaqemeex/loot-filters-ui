@@ -1,9 +1,4 @@
-import {
-    FilterEgg,
-    FilterId,
-    FilterSchema,
-    UpdateFilter,
-} from '@loot-filters/core'
+import { FilterEgg, FilterId, UpdateFilter } from '@loot-filters/core'
 import { and, eq } from 'drizzle-orm'
 import { IRequest } from 'itty-router'
 import { FILTERS_TABLE } from '../db/filters'
@@ -15,7 +10,6 @@ import {
     withAuthenticatedUserIfPresent,
 } from '../utils/route-auth-utils'
 import { ApiCall } from './router-binding'
-import { z } from 'zod'
 
 type FilterInsert = typeof FILTERS_TABLE.$inferInsert
 

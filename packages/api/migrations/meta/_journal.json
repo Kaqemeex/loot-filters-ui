@@ -1,13 +1,13 @@
 {
-    "version": "5",
-    "dialect": "sqlite",
-    "entries": [
-        {
-            "idx": 0,
-            "version": "5",
-            "when": 1735584561000,
-            "tag": "0000_initial_schema",
-            "breakpoints": true
-        }
-    ]
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1757852082494,
+      "tag": "0000_groovy_slapstick",
+      "breakpoints": true
+    }
+  ]
 }

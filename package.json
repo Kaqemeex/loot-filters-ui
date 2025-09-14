@@ -14,7 +14,11 @@
         "lint": "npm run lint --workspaces",
         "clean": "npm run clean --workspaces",
         "type-check": "npm run type-check --workspaces",
-        "format": "npm run format --workspaces"
+        "format": "npm run format --workspaces",
+        "db:migrate": "cd packages/api/ && wrangler d1 migrations apply loot-filters-v2",
+        "db:generate": "drizzle-kit generate",
+        "db:push": "drizzle-kit push",
+        "db:studio": "drizzle-kit studio"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
@@ -23,7 +27,8 @@
         "eslint": "^8.0.0",
         "prettier": "^3.0.0",
         "ts-unused-exports": "^11.0.1",
-        "typescript": "5.3.3"
+        "typescript": "5.3.3",
+        "drizzle-kit": "^0.31.4"
     },
     "engines": {
         "node": ">=18.0.0",
