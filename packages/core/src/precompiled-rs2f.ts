@@ -114,8 +114,6 @@ const guessInputType = (value: string | undefined): InputType => {
     } catch (e) {}
 
     if (value.startsWith('[') && value.endsWith(']')) {
-        console.log('checking list list', value)
-        // Find first non-whitespace character after opening bracket
         let firstCharOfFirstElement = ''
         for (let i = 1; i < value.length; i++) {
             if (!/[\s\[]/.test(value[i])) {

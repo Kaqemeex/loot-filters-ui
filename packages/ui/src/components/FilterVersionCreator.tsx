@@ -3,6 +3,7 @@ import {
     FilterVersionEgg,
     FilterVersionSettings,
     precompileFilter,
+    TYPICAL_WHACK_GITHUB_URL,
 } from '@loot-filters/core'
 import { Add as AddIcon } from '@mui/icons-material'
 import {
@@ -23,7 +24,7 @@ import { useCreateFilterVersion } from '../utils/api'
 
 interface FilterVersionCreatorProps {
     filterId: string
-    onVersionCreated: (versionId: string) => void
+    onVersionCreated: () => void
     onCancel: () => void
     open: boolean
     initialVersionName?: string
@@ -40,10 +41,10 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
     onVersionCreated,
     onCancel,
     open,
-    initialVersionName = '',
+    initialVersionName = 'Initial Version',
     initialContentSource = 'url',
     initialRawRs2f = '',
-    initialUrl = '',
+    initialUrl = TYPICAL_WHACK_GITHUB_URL,
     settings,
     title = 'Create New Version',
     showAsDialog = true,
@@ -132,8 +133,9 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
                 },
             }
 
-            createFilterVersion(versionData).then(() => {
+            createFilterVersion(versionData).then(({ versionId }) => {
                 clearForm()
+                onVersionCreated(versionId)
             })
         } catch (error) {
             console.error('Failed to create version:', error)

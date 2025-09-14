@@ -1,3 +1,4 @@
+import { FilterVersion } from '@loot-filters/core'
 import { Add as AddIcon } from '@mui/icons-material'
 import {
     Box,
@@ -14,7 +15,7 @@ import React from 'react'
 
 interface VersionSelectorProps {
     selectedVersionId: string
-    filterVersions: any[]
+    filterVersions: FilterVersion[]
     onVersionChange: (versionId: string) => void
     onCreateVersion: () => void
 }

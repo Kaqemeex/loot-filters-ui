@@ -4,3 +4,19 @@ alwaysApply: true
 
 - Never write tests
 - Do not write Readme files
+- Avoid comments that state the obvious
+
+## Only extract complex logic into helper functions
+
+Example of inlining a simple helper for `onVersionChange` :w
+
+
+```typescript
+    <VersionSelector
+        selectedVersionId={selectedVersionId}
+        filterVersions={sortedFilterVersions}
+        onVersionChange={(versionId) => setSelectedVersionId(versionId)}
+        onCreateVersion={handleCreateVersion}
+    />
+
+```

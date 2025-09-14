@@ -1,21 +1,16 @@
-import {
-    Alert,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    Typography,
-} from '@mui/material'
-import { useEffect } from 'react'
+import { Alert, Box } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { OAuthRedirectLandingPage, useAuthActions, useAuthState } from './auth'
+import { FilterList } from './components/FilterList'
 import { Navbar } from './components/Navbar'
 import { Sidebar } from './components/Sidebar'
 import { CreateFilterPage } from './pages/CreateFilterPage/CreateFilterPage'
+import { FilterEditPropertiesPage } from './pages/FilterEditPropertiesPage/FilterEditPropertiesPage'
 import { FilterSettingsPage } from './pages/FilterSettingsPage/FilterSettingsPage'
 import { FilterViewerPage } from './pages/FilterViewerPage/FilterViewerPage'
-import { MyFiltersPage } from './pages/MyFiltersPage/MyFiltersPage'
 import { PublicFiltersPage } from './pages/PublicFiltersPage/PublicFiltersPage'
+import { useListMyFilters } from './utils/api'
 
 function App() {
     const { isAuthenticated } = useAuthState()
@@ -52,7 +47,6 @@ function App() {
                 <Box sx={{ flexGrow: 1, p: 3 }}>
                     <Routes>
                         <Route path="/" element={<Home />} />
-                        <Route path="/my-filters" element={<MyFiltersPage />} />
                         <Route
                             path="/create-filter"
                             element={<CreateFilterPage />}
@@ -64,6 +58,10 @@ function App() {
                         <Route
                             path="/filters/:filterId/settings"
                             element={<FilterSettingsPage />}
+                        />
+                        <Route
+                            path="/filters/:filterId/settings/edit-properties"
+                            element={<FilterEditPropertiesPage />}
                         />
                         <Route
                             path="/public-filters"
@@ -84,32 +82,51 @@ function Home() {
     const { username, isAuthenticated } = useAuthState()
     const { logout } = useAuthActions()
 
-    return (
-        <Box>
-            {isAuthenticated ? (
-                <Card sx={{ maxWidth: 400 }}>
-                    <CardContent sx={{ p: 3 }}>
-                        <Typography variant="h5" component="h3" gutterBottom>
-                            Welcome back, {username}!
-                        </Typography>
-                        <Typography variant="body1" paragraph sx={{ mb: 3 }}>
-                            You are successfully logged in.
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            color="warning"
-                            onClick={logout}
-                        >
-                            Logout
-                        </Button>
-                    </CardContent>
-                </Card>
-            ) : (
+    const {
+        data: filters,
+        apiCall: fetchMyFilters,
+        isLoading: loading,
+    } = useListMyFilters()
+
+    const [error, setError] = useState<string | null>(null)
+
+    // Fetch filters if authenticated and not already loaded
+    useEffect(() => {
+        if (isAuthenticated && !loading && !filters) {
+            fetchMyFilters(undefined).catch((err) => {
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : 'Failed to fetch your filters'
+                )
+            })
+        }
+    }, [isAuthenticated, loading, filters, fetchMyFilters])
+
+    if (!isAuthenticated) {
+        return (
+            <Box>
                 <Alert severity="info" sx={{ maxWidth: 400 }}>
                     Please log in to continue.
                 </Alert>
-            )}
-        </Box>
+            </Box>
+        )
+    }
+
+    return (
+        <FilterList
+            filters={filters || undefined}
+            loading={loading}
+            error={error}
+            title={`Welcome back, ${username}!`}
+            subtitle="Your personal loot filters"
+            showCreateButton={true}
+            emptyStateTitle="No filters yet"
+            emptyStateDescription="Create your first loot filter to get started"
+            emptyStateActionText="Create Your First Filter"
+            onEmptyStateAction={() => (window.location.href = '/create-filter')}
+            gridColumns={{ xs: 1, md: 2 }}
+        />
     )
 }
 

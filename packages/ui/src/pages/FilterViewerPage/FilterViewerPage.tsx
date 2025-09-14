@@ -1,8 +1,6 @@
 import {
     ArrowBack as ArrowBackIcon,
-    Download as DownloadIcon,
     Settings as SettingsIcon,
-    Share as ShareIcon,
 } from '@mui/icons-material'
 import {
     Alert,
@@ -18,14 +16,24 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useReadFilter } from '../../utils/api'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useFilterFromRouteStore } from '../../stores/filter-store'
 
 interface TabPanelProps {
     children?: React.ReactNode
     index: number
     value: number
+}
+
+const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -45,64 +53,20 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export const FilterViewerPage: React.FC = () => {
-    const { filterId } = useParams<{ filterId: string }>()
     const navigate = useNavigate()
+    const { filter, isLoadingFilter } = useFilterFromRouteStore()
 
-    const {
-        data: filter,
-        apiCall: fetchFilter,
-        isLoading: loading,
-    } = useReadFilter()
-
-    const [error, setError] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState(0)
 
-    const fetchData = useCallback(async () => {
-        if (!filterId) {
-            setError('No filter ID provided')
-            return
-        }
-
-        try {
-            setError(null)
-            await fetchFilter({ filterId })
-        } catch (err) {
-            console.error('Failed to fetch filter:', err)
-            setError(
-                err instanceof Error ? err.message : 'Failed to fetch filter'
-            )
-        }
-    }, [filterId])
-
-    useEffect(() => {
-        fetchData()
-    }, [fetchData])
-
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        setActiveTab(newValue)
+    if (!filter) {
+        return (
+            <Alert severity="error" sx={{ mb: 3 }}>
+                Filter not found
+            </Alert>
+        )
     }
 
-    const handleDownload = () => {
-        // TODO: Implement filter download functionality
-        console.log('Download filter:', filter?.filterId)
-    }
-
-    const handleShare = () => {
-        // TODO: Implement filter sharing functionality
-        console.log('Share filter:', filter?.filterId)
-    }
-
-    const formatDate = (timestamp: number) => {
-        return new Date(timestamp).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        })
-    }
-
-    if (loading) {
+    if (isLoadingFilter) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                 <CircularProgress sx={{ color: 'primary.main' }} />
@@ -110,20 +74,11 @@ export const FilterViewerPage: React.FC = () => {
         )
     }
 
-    if (error || !filter) {
-        return (
-            <Alert severity="error" sx={{ mb: 3 }}>
-                {error || 'Filter not found'}
-            </Alert>
-        )
-    }
-
     return (
         <Box>
-            {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <IconButton
-                    onClick={() => navigate('/my-filters')}
+                    onClick={() => navigate('/')}
                     sx={{
                         color: 'primary.main',
                         mr: 2,
@@ -140,20 +95,20 @@ export const FilterViewerPage: React.FC = () => {
                         component="h1"
                         sx={{ color: 'primary.main', mb: 1 }}
                     >
-                        {filter.name}
+                        {filter?.name}
                     </Typography>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                         <Chip
-                            label={filter.public ? 'Public' : 'Private'}
+                            label={filter?.public ? 'Public' : 'Private'}
                             size="small"
-                            color={filter.public ? 'success' : 'default'}
+                            color={filter?.public ? 'success' : 'default'}
                         />
                         <Typography
                             variant="body2"
                             color="text.secondary"
                             sx={{ ml: 1 }}
                         >
-                            Version {filter.currentVersionId.slice(0, 8)}
+                            Version {filter?.currentVersionId.slice(0, 8)}
                         </Typography>
                     </Box>
                 </Box>
@@ -161,20 +116,12 @@ export const FilterViewerPage: React.FC = () => {
                     <Tooltip title="Settings">
                         <IconButton
                             onClick={() =>
-                                navigate(`/filters/${filter.filterId}/settings`)
+                                navigate(
+                                    `/filters/${filter?.filterId}/settings`
+                                )
                             }
                         >
                             <SettingsIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Download Filter">
-                        <IconButton onClick={handleDownload}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Share Filter">
-                        <IconButton onClick={handleShare}>
-                            <ShareIcon />
                         </IconButton>
                     </Tooltip>
                 </Box>
@@ -195,7 +142,7 @@ export const FilterViewerPage: React.FC = () => {
                         color="text.secondary"
                         sx={{ mb: 3 }}
                     >
-                        {filter.description}
+                        {filter?.description}
                     </Typography>
                     <Box
                         sx={{
@@ -214,7 +161,7 @@ export const FilterViewerPage: React.FC = () => {
                                 Created
                             </Typography>
                             <Typography variant="body2" color="text.primary">
-                                {formatDate(filter.createdAt)}
+                                {formatDate(filter?.createdAt || 0)}
                             </Typography>
                         </Box>
                         <Box>
@@ -226,7 +173,7 @@ export const FilterViewerPage: React.FC = () => {
                                 Last Modified
                             </Typography>
                             <Typography variant="body2" color="text.primary">
-                                {formatDate(filter.updatedAt)}
+                                {formatDate(filter?.updatedAt || 0)}
                             </Typography>
                         </Box>
                         <Box>
@@ -238,7 +185,7 @@ export const FilterViewerPage: React.FC = () => {
                                 Filter ID
                             </Typography>
                             <Typography variant="body2" color="text.primary">
-                                {filter.filterId.slice(0, 8)}...
+                                {filter?.filterId.slice(0, 8)}...
                             </Typography>
                         </Box>
                         <Box>
@@ -250,7 +197,7 @@ export const FilterViewerPage: React.FC = () => {
                                 Status
                             </Typography>
                             <Typography variant="body2" color="text.primary">
-                                {filter.public ? 'Public' : 'Private'}
+                                {filter?.public ? 'Public' : 'Private'}
                             </Typography>
                         </Box>
                     </Box>
@@ -259,7 +206,10 @@ export const FilterViewerPage: React.FC = () => {
 
             {/* Tabs for different views */}
             <Paper>
-                <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tabs
+                    value={activeTab}
+                    onChange={(event, newValue) => setActiveTab(newValue)}
+                >
                     <Tab label="Filter Rules" />
                     <Tab label="Macros" />
                     <Tab label="Compiled" />

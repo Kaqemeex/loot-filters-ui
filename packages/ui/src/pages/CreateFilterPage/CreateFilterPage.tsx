@@ -81,10 +81,8 @@ export const CreateFilterPage: React.FC = () => {
         })
     }
 
-    const handleVersionCreated = (versionId: string) => {
-        if (createdFilterId) {
-            navigate(`/filters/${createdFilterId}`)
-        }
+    const whenVersionCreated = () => {
+        navigate(`/filters/${createdFilterId?.filterId}/settings`)
     }
 
     const handleVersionCreatorCancel = () => {
@@ -95,7 +93,7 @@ export const CreateFilterPage: React.FC = () => {
     }
 
     const handleCancel = () => {
-        navigate('/my-filters')
+        navigate('/')
     }
 
     // Show authentication error if not logged in
@@ -220,7 +218,7 @@ export const CreateFilterPage: React.FC = () => {
             {createdFilterId && (
                 <FilterVersionCreator
                     filterId={createdFilterId.filterId}
-                    onVersionCreated={handleVersionCreated}
+                    onVersionCreated={whenVersionCreated}
                     onCancel={handleVersionCreatorCancel}
                     open={showVersionCreator}
                     initialVersionName="Initial Version"

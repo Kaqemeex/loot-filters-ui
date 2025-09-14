@@ -25,3 +25,13 @@ export const FilterVersionIdSchema = z.object({
     versionId: z.string().nonempty(),
 })
 export type FilterVersionId = z.infer<typeof FilterVersionIdSchema>
+
+export const sortedFilterVersions = (filterVersions: FilterVersion[]) => {
+    return (
+        filterVersions?.sort(
+            (a: any, b: any) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+        ) || []
+    )
+}

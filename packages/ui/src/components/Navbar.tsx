@@ -79,24 +79,6 @@ export const Navbar: React.FC = () => {
                             open={Boolean(anchorEl)}
                             onClose={handleClose}
                         >
-                            <MenuItem
-                                onClick={() => {
-                                    // TODO: Navigate to profile page
-                                    console.log('Profile clicked')
-                                    handleClose()
-                                }}
-                            >
-                                Profile
-                            </MenuItem>
-                            <MenuItem
-                                onClick={() => {
-                                    // TODO: Navigate to settings page
-                                    console.log('Settings clicked')
-                                    handleClose()
-                                }}
-                            >
-                                Settings
-                            </MenuItem>
                             <MenuItem onClick={handleLogout}>Logout</MenuItem>
                         </Menu>
                     </Box>

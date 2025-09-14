@@ -16,7 +16,7 @@ import {
     UpdateFilterConfiguration,
     UpdateFilterVersionSettingsRequest,
 } from '@loot-filters/core'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { z } from 'zod'
 import { useAuthStore } from '../auth/authStore'
 
@@ -28,11 +28,6 @@ export const API_BASE_URLS: Record<string, string> = {
 const buildApiBaseUrl = (): string => {
     const env = window.location.hostname === 'localhost' ? 'LOCAL_UI' : 'PROD'
     const url = API_BASE_URLS[env]
-    console.log('buildApiBaseUrl:', {
-        hostname: window.location.hostname,
-        env,
-        url,
-    })
     return url
 }
 
@@ -43,10 +38,8 @@ const doApiRequest = async <T>(
 ): Promise<T> => {
     const { sessionId, checkAuth } = useAuthStore.getState()
 
-    // Check if session is still valid before making the request
     if (sessionId && !checkAuth()) {
         if (!publicRequest) {
-            // Session expired, clear auth state
             useAuthStore.getState().logout()
             throw new Error('Session expired')
         }
@@ -57,12 +50,8 @@ const doApiRequest = async <T>(
         'Content-Type': 'application/json',
     }
 
-    // Add Authorization header if we have a session ID
     if (sessionId) {
         headers.Authorization = `Bearer ${sessionId}`
-        console.log('Added Authorization header with sessionId:', sessionId)
-    } else {
-        console.log('No sessionId available, making unauthenticated request')
     }
 
     console.log('Making API request:', { url, headers, body, sessionId })
@@ -73,11 +62,6 @@ const doApiRequest = async <T>(
             method: 'POST',
             body: requestBody,
             headers,
-        })
-
-        console.log('API response:', {
-            status: response.status,
-            statusText: response.statusText,
         })
 
         if (!response.ok) {
@@ -92,7 +76,15 @@ const doApiRequest = async <T>(
             throw new Error(`API request failed: ${response.statusText}`)
         }
 
-        return response.json()
+        const json = await response.json()
+
+        console.log('API response:', {
+            call: endpoint,
+            args: body,
+            json,
+            statusText: response.statusText,
+        })
+        return json
     } catch (error) {
         console.error('API request failed:', error)
         throw error
@@ -125,27 +117,23 @@ const publicApiRequest = async <K extends ApiCallName>(
     }
 }
 
-export type ApiCall<K extends ApiCallName> = {
-    call: (
-        data: Resolve<Api[K]['inputSchema']>
-    ) => Promise<Resolve<Api[K]['outputSchema']>>
-}
-
-// type ApiCall<
-//     I extends z.ZodType | undefined,
-//     O extends z.ZodType | undefined,
-// > = (data: Resolve<I>) => Promise<Resolve<O>>
-
-type ApiCalls = {
-    [K in ApiCallName]: ApiCall<K>
-}
+export type ApiCall<K extends ApiCallName> = (
+    data: Resolve<Api[K]['inputSchema']>
+) => Promise<Resolve<Api[K]['outputSchema']>>
 
 const API_ROOT = `/api/v1`
+
+type SuccessCallback<K extends ApiCallName> = (
+    data: Resolve<Api[K]['outputSchema']>
+) => void
+type ErrorCallback = (error: any) => void
 
 type HookResult<K extends ApiCallName> = {
     isLoading: boolean
     data: Resolve<Api[K]['outputSchema']> | null
-    apiCall: (data: Resolve<Api[K]['inputSchema']>) => Promise<void>
+    apiCall: (
+        data: Resolve<Api[K]['inputSchema']>
+    ) => Promise<Resolve<Api[K]['outputSchema']>>
 }
 
 const createApiHook = <K extends ApiCallName>(
@@ -157,12 +145,29 @@ const createApiHook = <K extends ApiCallName>(
             Api[K]['outputSchema']
         > | null>(null)
 
-        const apiCall = async (data: Resolve<Api[K]['inputSchema']>) => {
-            setIsLoading(true)
-            const result = await call.call(data)
-            setData(result)
-            setIsLoading(false)
-        }
+        const [mostRecentArg, setMostRecentArg] = useState<Resolve<
+            Api[K]['inputSchema']
+        > | null>(null)
+        const [mostRecentArgSet, setMostRecentArgSet] = useState(false)
+
+        const apiCall = useCallback(
+            async (data: Resolve<Api[K]['inputSchema']>) => {
+                setIsLoading(true)
+                setMostRecentArg(data)
+                setMostRecentArgSet(true)
+                const result = await call(data)
+                setData(result)
+                setIsLoading(false)
+                return result
+            },
+            [
+                call,
+                setIsLoading,
+                setMostRecentArg,
+                setMostRecentArgSet,
+                setData,
+            ]
+        )
 
         return { isLoading, data, apiCall }
     }

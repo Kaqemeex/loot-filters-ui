@@ -25,7 +25,6 @@ const COLLAPSED_DRAWER_WIDTH = 64
 
 const navigationItems = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
-    { text: 'My Filters', icon: <FilterIcon />, path: '/my-filters' },
     { text: 'Public Filters', icon: <FilterIcon />, path: '/public-filters' },
 ]
 
@@ -36,10 +35,6 @@ export const Sidebar: React.FC = () => {
     const { isAuthenticated } = useAuthState()
 
     const handleNavigation = (path: string) => {
-        // Don't allow navigation to authenticated-only pages if not authenticated
-        if (path === '/my-filters' && !isAuthenticated) {
-            return
-        }
         navigate(path)
     }
 
@@ -75,37 +70,30 @@ export const Sidebar: React.FC = () => {
             <Divider />
 
             <List sx={{ pt: 1 }}>
-                {navigationItems.map((item) => {
-                    const isAuthenticatedOnly = item.path === '/my-filters'
-                    const isDisabled = isAuthenticatedOnly && !isAuthenticated
-
-                    return (
-                        <ListItem key={item.text} disablePadding>
-                            <ListItemButton
-                                onClick={() => handleNavigation(item.path)}
-                                selected={location.pathname === item.path}
-                                disabled={isDisabled}
+                {navigationItems.map((item) => (
+                    <ListItem key={item.text} disablePadding>
+                        <ListItemButton
+                            onClick={() => handleNavigation(item.path)}
+                            selected={location.pathname === item.path}
+                            sx={{
+                                mx: 1,
+                                borderRadius: 1,
+                            }}
+                        >
+                            <ListItemIcon
                                 sx={{
-                                    mx: 1,
-                                    borderRadius: 1,
-                                    opacity: isDisabled ? 0.5 : 1,
+                                    color: 'inherit',
+                                    minWidth: 40,
                                 }}
                             >
-                                <ListItemIcon
-                                    sx={{
-                                        color: 'inherit',
-                                        minWidth: 40,
-                                    }}
-                                >
-                                    {item.icon}
-                                </ListItemIcon>
-                                {!isCollapsed && (
-                                    <ListItemText primary={item.text} />
-                                )}
-                            </ListItemButton>
-                        </ListItem>
-                    )
-                })}
+                                {item.icon}
+                            </ListItemIcon>
+                            {!isCollapsed && (
+                                <ListItemText primary={item.text} />
+                            )}
+                        </ListItemButton>
+                    </ListItem>
+                ))}
             </List>
         </Drawer>
     )
