@@ -23,6 +23,16 @@ export const FilterPropertiesCard: React.FC = () => {
         )
     }
 
+    if (!filter) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                <Typography variant="body1" color="text.secondary">
+                    Filter not found
+                </Typography>
+            </Box>
+        )
+    }
+
     return (
         <Box sx={{ mt: 4, mb: 4 }}>
             <Box

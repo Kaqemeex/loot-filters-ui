@@ -160,13 +160,7 @@ const createApiHook = <K extends ApiCallName>(
                 setIsLoading(false)
                 return result
             },
-            [
-                call,
-                setIsLoading,
-                setMostRecentArg,
-                setMostRecentArgSet,
-                setData,
-            ]
+            [call, setIsLoading, setMostRecentArg, setMostRecentArgSet, setData]
         )
 
         return { isLoading, data, apiCall }

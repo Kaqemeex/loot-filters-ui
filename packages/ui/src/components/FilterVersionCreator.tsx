@@ -135,7 +135,7 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
 
             createFilterVersion(versionData).then(({ versionId }) => {
                 clearForm()
-                onVersionCreated(versionId)
+                onVersionCreated()
             })
         } catch (error) {
             console.error('Failed to create version:', error)

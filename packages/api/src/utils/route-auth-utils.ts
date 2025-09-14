@@ -60,7 +60,7 @@ export const enforceOwnership = async (
     req: IRequest,
     env: Env,
     skipOwnershipCheckIfPublic: boolean = false,
-    ownedEntity: Owned & { public?: boolean } | undefined
+    ownedEntity: (Owned & { public?: boolean }) | undefined
 ) => {
     if (!ownedEntity) {
         throw new NotFoundError()
