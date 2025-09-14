@@ -72,7 +72,13 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
     }, [])
 
     const [errors, setErrors] = useState<Partial<typeof formInitialState>>({})
-    const hasErrors = useMemo(() => Object.values(errors).map((error) => !!error).some((error) => error), [errors])
+    const hasErrors = useMemo(
+        () =>
+            Object.values(errors)
+                .map((error) => !!error)
+                .some((error) => error),
+        [errors]
+    )
 
     const validateForm = (): boolean => {
         const newErrors: typeof errors = {}
@@ -234,9 +240,7 @@ export const FilterVersionCreator: React.FC<FilterVersionCreatorProps> = ({
                     onClick={handleSave}
                     variant="contained"
                     startIcon={<AddIcon />}
-                    disabled={
-                        hasErrors || saving
-                    }
+                    disabled={hasErrors || saving}
                 >
                     {saving ? 'Creating...' : 'Create Version'}
                 </Button>

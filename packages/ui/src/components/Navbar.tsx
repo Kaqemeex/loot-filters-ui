@@ -31,9 +31,7 @@ export const Navbar: React.FC = () => {
     }
 
     return (
-        <AppBar
-            position="static"
-        >
+        <AppBar position="static">
             <Toolbar>
                 <Typography
                     variant="h6"

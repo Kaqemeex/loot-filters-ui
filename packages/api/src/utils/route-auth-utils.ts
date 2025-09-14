@@ -3,8 +3,11 @@ import { IRequest } from 'itty-router'
 import { FILTERS_TABLE } from '../db/filters'
 import { userSessions } from '../db/users'
 import { Env } from '../env'
-import { AuthenticationError, AuthorizationError, NotFoundError } from './http-errors'
-
+import {
+    AuthenticationError,
+    AuthorizationError,
+    NotFoundError,
+} from './http-errors'
 
 const doAuth = async (
     req: IRequest,

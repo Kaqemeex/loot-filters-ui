@@ -100,9 +100,7 @@ export const Sidebar: React.FC = () => {
                                     {item.icon}
                                 </ListItemIcon>
                                 {!isCollapsed && (
-                                    <ListItemText
-                                        primary={item.text}
-                                    />
+                                    <ListItemText primary={item.text} />
                                 )}
                             </ListItemButton>
                         </ListItem>
