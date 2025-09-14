@@ -1,4 +1,9 @@
-import { FilterEgg, FilterId, UpdateFilter } from '@loot-filters/core'
+import {
+    FilterEgg,
+    FilterId,
+    FilterSchema,
+    UpdateFilter,
+} from '@loot-filters/core'
 import { and, eq } from 'drizzle-orm'
 import { IRequest } from 'itty-router'
 import { FILTERS_TABLE } from '../db/filters'
@@ -9,10 +14,12 @@ import {
     withAuthenticatedUser,
     withAuthenticatedUserIfPresent,
 } from '../utils/route-auth-utils'
+import { ApiCall } from './router-binding'
+import { z } from 'zod'
 
 type FilterInsert = typeof FILTERS_TABLE.$inferInsert
 
-export const createFilter = {
+export const createFilter: ApiCall<'createFilter'> = {
     middleware: [withAuthenticatedUser],
     call: async (req: IRequest, env: Env, egg: FilterEgg) => {
         const filterId = generateId('filter')
@@ -35,7 +42,7 @@ export const createFilter = {
     },
 }
 
-export const updateFilter = {
+export const updateFilter: ApiCall<'updateFilter'> = {
     middleware: [withAuthenticatedUser],
     call: async (
         req: IRequest,
@@ -75,7 +82,7 @@ export const updateFilter = {
     },
 }
 
-export const deleteFilter = {
+export const deleteFilter: ApiCall<'deleteFilter'> = {
     middleware: [withAuthenticatedUser],
     call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
         await getFilterAndCheckOwnership(req, env, id)
@@ -88,9 +95,9 @@ export const deleteFilter = {
     },
 }
 
-export const listMyFilters = {
+export const listMyFilters: ApiCall<'listMyFilters'> = {
     middleware: [withAuthenticatedUser],
-    call: async (req: IRequest, env: Env, _: undefined) => {
+    call: async (req: IRequest, env: Env) => {
         const filters = await env.DB.select()
             .from(FILTERS_TABLE)
             .where(eq(FILTERS_TABLE.ownerDiscordId, req.auth.discordId))
@@ -99,9 +106,9 @@ export const listMyFilters = {
     },
 }
 
-export const listPublicFilters = {
+export const listPublicFilters: ApiCall<'listPublicFilters'> = {
     middleware: [],
-    call: async (req: IRequest, env: Env, _: undefined) => {
+    call: async (req: IRequest, env: Env) => {
         const filters = await env.DB.select()
             .from(FILTERS_TABLE)
             .where(eq(FILTERS_TABLE.public, true))
@@ -110,7 +117,7 @@ export const listPublicFilters = {
     },
 }
 
-export const readFilter = {
+export const readFilter: ApiCall<'readFilter'> = {
     middleware: [withAuthenticatedUserIfPresent],
     call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
         const filter = await getFilterAndCheckOwnership(req, env, id, true)

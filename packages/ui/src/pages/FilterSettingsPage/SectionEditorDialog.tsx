@@ -62,6 +62,8 @@ export const SectionEditorDialog: React.FC<SectionEditorDialogProps> = ({
 
     const handleSave = () => {
         const newSection: Section = {
+            id: generateId('section'),
+            visible: true,
             name: formData.name,
             description: formData.description,
             groups: formData.groups,
@@ -71,9 +73,11 @@ export const SectionEditorDialog: React.FC<SectionEditorDialogProps> = ({
 
     const addGroup = () => {
         const newGroup: Group = {
+            id: generateId('group'),
+            visible: true,
             name: `Group ${formData.groups.length + 1}`,
             description: '',
-            inputs: [],
+            macros: [],
         }
         setFormData((prev) => ({
             ...prev,
@@ -260,4 +264,7 @@ export const SectionEditorDialog: React.FC<SectionEditorDialogProps> = ({
             </DialogActions>
         </Dialog>
     )
+}
+function generateId(arg0: string): string {
+    throw new Error('Function not implemented.')
 }

@@ -1,6 +1,5 @@
-import { Api, ApiCallName, LootFiltersApi, Resolve } from '@loot-filters/core'
+import { ApiCallName, LootFiltersApi, Resolve } from '@loot-filters/core'
 import { AutoRouterType, IRequest } from 'itty-router'
-import { z } from 'zod'
 import { Env } from '../env'
 import {
     createFilter,
@@ -19,19 +18,18 @@ import {
     updateSettingsOnFilterVersion,
 } from './filter-version-service'
 
-type ApiCall<
-    I extends z.ZodType | undefined,
-    O extends z.ZodType | undefined,
-> = {
-    call: (req: IRequest, env: Env, data: Resolve<I>) => Promise<Resolve<O>>
+export type ApiCall<K extends keyof typeof LootFiltersApi> = {
+    call: (
+        req: IRequest,
+        env: Env,
+        data: Resolve<(typeof LootFiltersApi)[K]['inputSchema']>
+    ) => Promise<Resolve<(typeof LootFiltersApi)[K]['outputSchema']>>
     middleware: ((req: IRequest, env: Env) => Promise<Response | void>)[]
 }
 
-type ServerCalls = Required<{
-    [K in ApiCallName]: ApiCall<Api[K]['inputSchema'], Api[K]['outputSchema']>
-}>
-
-const serverCalls: ServerCalls = {
+const serverCalls: Required<{
+    [K in ApiCallName]: ApiCall<K>
+}> = {
     createFilter,
     readFilter,
     updateFilter,
@@ -61,7 +59,7 @@ export const bindApi = (router: AutoRouterType) => {
                 const apiDef = LootFiltersApi[callName]
 
                 if (apiDef.inputSchema === undefined) {
-                    const result = await call.call(req, env, undefined)
+                    const result = await call.call(req, env, undefined as any)
                     return new Response(JSON.stringify(result), {
                         status: 200,
                     })
@@ -75,7 +73,11 @@ export const bindApi = (router: AutoRouterType) => {
                         })
                     }
 
-                    const result = await call.call(req, env, parseResult.data)
+                    const result = await call.call(
+                        req,
+                        env,
+                        parseResult.data as any
+                    )
 
                     const outputSchema = apiDef.outputSchema
                     if (

@@ -121,33 +121,41 @@ const publicApiRequest = async <K extends ApiCallName>(
     }
 }
 
-type ApiCall<
-    I extends z.ZodType | undefined,
-    O extends z.ZodType | undefined,
-> = (data: Resolve<I>) => Promise<Resolve<O>>
+export type ApiCall<K extends ApiCallName> = {
+    call: (
+        data: Resolve<Api[K]['inputSchema']>
+    ) => Promise<Resolve<Api[K]['outputSchema']>>
+}
+
+// type ApiCall<
+//     I extends z.ZodType | undefined,
+//     O extends z.ZodType | undefined,
+// > = (data: Resolve<I>) => Promise<Resolve<O>>
 
 type ApiCalls = {
-    [K in ApiCallName]: ApiCall<Api[K]['inputSchema'], Api[K]['outputSchema']>
+    [K in ApiCallName]: ApiCall<K>
 }
 
 const API_ROOT = `/api/v1`
 
-const createApiHook = <L extends keyof ApiCalls>(
-    call: L extends ApiCallName
-        ? ApiCalls[L]
-        : ApiCall<Api[L]['inputSchema'], Api[L]['outputSchema']>
-) => {
+type HookResult<K extends ApiCallName> = {
+    isLoading: boolean
+    data: Resolve<Api[K]['outputSchema']> | null
+    apiCall: (data: Resolve<Api[K]['inputSchema']>) => Promise<void>
+}
+
+const createApiHook = <K extends ApiCallName>(
+    call: ApiCall<K>
+): (() => HookResult<K>) => {
     return () => {
         const [isLoading, setIsLoading] = useState(false)
         const [data, setData] = useState<Resolve<
-            Api[L]['outputSchema']
+            Api[K]['outputSchema']
         > | null>(null)
 
-        const apiCall = async (data: Resolve<Api[L]['inputSchema']>) => {
+        const apiCall = async (data: Resolve<Api[K]['inputSchema']>) => {
             setIsLoading(true)
-            const result = await (
-                call as ApiCall<Api[L]['inputSchema'], Api[L]['outputSchema']>
-            )(data)
+            const result = await call.call(data)
             setData(result)
             setIsLoading(false)
         }
@@ -202,7 +210,6 @@ export const useListPublicFilters = createApiHook<'listPublicFilters'>(
 )
 
 export const useListMyFilters = createApiHook<'listMyFilters'>(async () => {
-    console.log('useListMyFilters called')
     return apiRequest<'listMyFilters'>(
         `${API_ROOT}/listMyFilters`,
         undefined,
@@ -255,6 +262,7 @@ export const useListFilterVersions = createApiHook<'listFilterVersions'>(
             z.array(FilterVersionSchema)
         )
 )
+
 export const useReadCurrentFilterVersionSettings =
     createApiHook<'readCurrentFilterVersionSettings'>(
         async (filterId: FilterId) =>
@@ -264,3 +272,21 @@ export const useReadCurrentFilterVersionSettings =
                 FilterVersionSchema
             )
     )
+
+// just in case i forget to update the api calls
+const apiCalls: Required<{
+    [K in ApiCallName]: () => HookResult<K>
+}> = {
+    createFilter: useCreateFilter,
+    updateFilter: useUpdateFilter,
+    readFilter: useReadFilter,
+    deleteFilter: useDeleteFilter,
+    listPublicFilters: useListPublicFilters,
+    listMyFilters: useListMyFilters,
+    createFilterVersion: useCreateFilterVersion,
+    readFilterVersion: useReadFilterVersion,
+    updateSettingsOnFilterVersion: useUpdateSettingsOnFilterVersion,
+    deleteFilterVersion: useDeleteFilterVersion,
+    listFilterVersions: useListFilterVersions,
+    readCurrentFilterVersionSettings: useReadCurrentFilterVersionSettings,
+}

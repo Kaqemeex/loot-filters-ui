@@ -13,7 +13,8 @@
         "test": "npm run test --workspaces",
         "lint": "npm run lint --workspaces",
         "clean": "npm run clean --workspaces",
-        "type-check": "npm run type-check --workspaces"
+        "type-check": "npm run type-check --workspaces",
+        "format": "npm run format --workspaces"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",

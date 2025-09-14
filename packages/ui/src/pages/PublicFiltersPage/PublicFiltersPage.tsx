@@ -15,7 +15,7 @@ import {
     Tooltip,
     Typography,
 } from '@mui/material'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useListPublicFilters } from '../../utils/api'
 
@@ -39,23 +39,17 @@ export const PublicFiltersPage: React.FC = () => {
     const [error, setError] = useState<string | null>(null)
     const [favorites, setFavorites] = useState<Set<string>>(new Set())
 
-    const fetchData = useCallback(async () => {
-        try {
-            setError(null)
-            await fetchPublicFilters(undefined)
-        } catch (err) {
-            console.error('Failed to fetch public filters:', err)
+    if (!loading && !filters) {
+        setError(null)
+
+        fetchPublicFilters(undefined).catch((err) => {
             setError(
                 err instanceof Error
                     ? err.message
                     : 'Failed to fetch public filters'
             )
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchData()
-    }, [fetchData])
+        })
+    }
 
     const handleToggleFavorite = (filterId: string) => {
         setFavorites((prev) => {

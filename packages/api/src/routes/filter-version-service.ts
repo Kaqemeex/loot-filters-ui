@@ -18,6 +18,7 @@ import {
     withAuthenticatedUser,
     withAuthenticatedUserIfPresent,
 } from '../utils/route-auth-utils'
+import { ApiCall } from './router-binding'
 
 const deserializeVersionObj = (
     obj: typeof FILTER_VERSIONS_TABLE.$inferSelect
@@ -32,7 +33,7 @@ const deserializeVersionObj = (
     }
 }
 
-export const createFilterVersion = {
+export const createFilterVersion: ApiCall<'createFilterVersion'> = {
     middleware: [withAuthenticatedUser],
     call: async (req: IRequest, env: Env, egg: FilterVersionEgg) => {
         // Ensures we own the filter and that it exists
@@ -62,7 +63,7 @@ export const createFilterVersion = {
     },
 }
 
-export const readFilterVersion = {
+export const readFilterVersion: ApiCall<'readFilterVersion'> = {
     middleware: [withAuthenticatedUserIfPresent],
     call: async (
         req: IRequest,
@@ -95,31 +96,32 @@ export const readFilterVersion = {
     },
 }
 
-export const updateSettingsOnFilterVersion = {
-    middleware: [withAuthenticatedUser],
-    call: async (
-        req: IRequest,
-        env: Env,
-        data: UpdateFilterVersionSettingsRequest
-    ) => {
-        await getFilterAndCheckOwnership(req, env, data.filterId)
+export const updateSettingsOnFilterVersion: ApiCall<'updateSettingsOnFilterVersion'> =
+    {
+        middleware: [withAuthenticatedUser],
+        call: async (
+            req: IRequest,
+            env: Env,
+            data: UpdateFilterVersionSettingsRequest
+        ) => {
+            await getFilterAndCheckOwnership(req, env, data.filterId)
 
-        const updated = await env.DB.update(FILTER_VERSIONS_TABLE)
-            .set({ settings: JSON.stringify(data.settings) })
-            .where(
-                and(
-                    eq(FILTER_VERSIONS_TABLE.versionId, data.versionId),
-                    eq(FILTER_VERSIONS_TABLE.filterId, data.filterId)
+            const updated = await env.DB.update(FILTER_VERSIONS_TABLE)
+                .set({ settings: JSON.stringify(data.settings) })
+                .where(
+                    and(
+                        eq(FILTER_VERSIONS_TABLE.versionId, data.versionId),
+                        eq(FILTER_VERSIONS_TABLE.filterId, data.filterId)
+                    )
                 )
-            )
-            .returning()
-            .get()
+                .returning()
+                .get()
 
-        return deserializeVersionObj(updated)
-    },
-}
+            return deserializeVersionObj(updated)
+        },
+    }
 
-export const deleteFilterVersion = {
+export const deleteFilterVersion: ApiCall<'deleteFilterVersion'> = {
     middleware: [withAuthenticatedUser],
     call: async (
         req: IRequest,
@@ -137,7 +139,7 @@ export const deleteFilterVersion = {
     },
 }
 
-export const listFilterVersions = {
+export const listFilterVersions: ApiCall<'listFilterVersions'> = {
     middleware: [withAuthenticatedUserIfPresent],
     call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
         await getFilterAndCheckOwnership(req, env, id, true)
@@ -151,21 +153,22 @@ export const listFilterVersions = {
     },
 }
 
-export const readCurrentFilterVersionSettings = {
-    middleware: [withAuthenticatedUserIfPresent],
-    call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
-        await getFilterAndCheckOwnership(req, env, id, true)
-        const version = await env.DB.select()
-            .from(FILTER_VERSIONS_TABLE)
-            .where(eq(FILTER_VERSIONS_TABLE.filterId, id))
-            .orderBy(desc(FILTER_VERSIONS_TABLE.createdAt))
-            .limit(1)
-            .get()
+export const readCurrentFilterVersionSettings: ApiCall<'readCurrentFilterVersionSettings'> =
+    {
+        middleware: [withAuthenticatedUserIfPresent],
+        call: async (req: IRequest, env: Env, { filterId: id }: FilterId) => {
+            await getFilterAndCheckOwnership(req, env, id, true)
+            const version = await env.DB.select()
+                .from(FILTER_VERSIONS_TABLE)
+                .where(eq(FILTER_VERSIONS_TABLE.filterId, id))
+                .orderBy(desc(FILTER_VERSIONS_TABLE.createdAt))
+                .limit(1)
+                .get()
 
-        if (!version) {
-            throw new NotFoundError()
-        }
+            if (!version) {
+                throw new NotFoundError()
+            }
 
-        return deserializeVersionObj(version)
-    },
-}
+            return deserializeVersionObj(version)
+        },
+    }

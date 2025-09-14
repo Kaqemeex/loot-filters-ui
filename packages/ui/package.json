@@ -9,7 +9,8 @@
         "start": "webpack serve --mode development --open",
         "clean": "rm -rf dist",
         "type-check": "tsc --noEmit",
-        "lint": "eslint src --ext .ts,.tsx"
+        "lint": "eslint src --ext .ts,.tsx",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",

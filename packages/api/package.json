@@ -19,7 +19,8 @@
         "type-check": "tsc --noEmit",
         "lint": "eslint src --ext .ts",
         "test": "wrangler dev --test-scheduled",
-        "db:migrate": "wrangler d1 migrations apply loot-filters-v2"
+        "db:migrate": "wrangler d1 migrations apply loot-filters-v2",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
     },
     "dependencies": {
         "@loot-filters/core": "file:../core",

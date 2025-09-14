@@ -16,7 +16,8 @@
         "dev": "tsc --watch",
         "clean": "rm -rf dist",
         "type-check": "tsc --noEmit",
-        "lint": "eslint src --ext .ts"
+        "lint": "eslint src --ext .ts",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
     },
     "dependencies": {
         "zod": "^3.22.3"
