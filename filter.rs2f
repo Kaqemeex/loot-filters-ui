@@ -2,3 +2,22 @@ meta {
     name = "Hide Members Items"
     description = "filter is for hiding members items in the bank; useful for accounts without active membership"
 }
+/*@ define:module:hide_members_items
+name: Hide Members Items
+subtitle: if an item contains "members", it will be hidden in your bank
+description:  |
+    This is something I wanted to make so my bank would look cleaner when I don't have membership on my main account. Most of the items in the bank are members-only.  
+
+*/
+
+/*@ define:input:hide_members_items
+type: stringlist
+label: Items to Hide
+*/
+#define item-contains-members ["members"]
+
+if (name:item-contains-members) {
+    hidden = true;
+}
+
+
