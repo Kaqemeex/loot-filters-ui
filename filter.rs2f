@@ -1,0 +1,4 @@
+meta {
+    name = "Hide Members Items"
+    description = "filter is for hiding members items in the bank; useful for accounts without active membership"
+}
