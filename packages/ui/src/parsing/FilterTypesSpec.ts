@@ -53,3 +53,9 @@ export const ThemeSpec = z.object({
 })
 
 export type Theme = z.infer<typeof ThemeSpec>
+
+export const SiteMetadataSpec = z.object({
+    source: z.string().optional(),
+})
+
+export type SiteMetadata = z.infer<typeof SiteMetadataSpec>
