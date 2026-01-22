@@ -13,13 +13,17 @@ import { useNavigate } from 'react-router-dom'
 import {
     DEFAULT_FILTER_CONFIGURATION,
     FilterSpec,
+    Filter,
 } from '../parsing/UiTypesSpec'
 import { useAlertStore } from '../store/alerts'
 import { useFilterStore } from '../store/filterStore'
+import { useFilterConfigStore } from '../store/filterConfigurationStore'
 import { useOboardingStore } from '../store/onboarding'
 import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
+import { FilterFilePicker } from '../components/FilterFilePicker'
+import { deriveConfig, deriveUrl } from '../parsing/deriveConfig'
 
 interface ImportFilterDialogProps {
     open: boolean
@@ -36,6 +40,7 @@ export const NewFilterPage: React.FC = () => {
     const [filterUrl, setFilterUrl] = useState('')
     const [importError, setImportError] = useState('')
     const { filters, updateFilter, setActiveFilter } = useFilterStore()
+    const { setFilterConfiguration } = useFilterConfigStore()
     const navigate = useNavigate()
 
     const handleClose = () => {
@@ -77,6 +82,33 @@ export const NewFilterPage: React.FC = () => {
                     severity: 'error',
                 })
             })
+    }
+
+    const restoreFilter = async (filter: Filter) => {
+        setLoading(true)
+
+        const url = deriveUrl(filter)
+        if (!url) {
+            addAlert({
+                children: 'could not determine original filter',
+                severity: 'error',
+            })
+            setLoading(false)
+            return
+        }
+
+        const base = await loadFilterFromUrl(url)
+        const config = deriveConfig(base, filter)
+
+        setFilterConfiguration(base.id, config)
+        updateFilter(base)
+        setActiveFilter(base.id)
+
+        addAlert({
+            children: `restored "${base.name}"`,
+            severity: 'success',
+        })
+        handleClose()
     }
 
     return (
@@ -289,6 +321,43 @@ export const NewFilterPage: React.FC = () => {
                                     >
                                         Get started
                                     </Button>
+                                </CardActions>
+                            </Card>
+                        </Grid2>
+                        <Grid2 size={3}>
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Typography
+                                        variant="h6"
+                                        component="div"
+                                        fontSize="28px"
+                                        color="red"
+                                    >
+                                        Restore deleted settings
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: 'text.secondary',
+                                            fontSize: '20px',
+                                            minHeight: '3lh',
+                                        }}
+                                    >
+                                        If you lose your website settings for a
+                                        filter, you can attempt to restore them
+                                        from a downloaded copy here.
+                                    </Typography>
+                                </CardContent>
+                                <CardActions>
+                                    <FilterFilePicker
+                                        onFilter={restoreFilter}
+                                        onError={(error) => {
+                                            addAlert({
+                                                children: error.message,
+                                                severity: 'error',
+                                            })
+                                        }}
+                                    />
                                 </CardActions>
                             </Card>
                         </Grid2>

@@ -2,6 +2,7 @@ import { parse as parseYaml } from 'yaml'
 import {
     ModuleSpec as FilterSpecModule,
     ThemeSpec as FilterSpecTheme,
+    SiteMetadataSpec,
 } from './FilterTypesSpec'
 import { Module, ModuleSpec, ThemeSpec } from './UiTypesSpec'
 
@@ -25,4 +26,13 @@ export const parseTheme = (id: string, comment: string) => {
     )
     const module = parseYaml(declarationContent)
     return ThemeSpec.parse({ ...FilterSpecTheme.parse(module), id })
+}
+
+export const parseSiteMetadata = (comment: string) => {
+    const content = comment.substring(
+        comment.indexOf('\n'),
+        comment.indexOf('*/')
+    )
+    const meta = parseYaml(content)
+    return SiteMetadataSpec.parse(meta)
 }

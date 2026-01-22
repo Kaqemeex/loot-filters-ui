@@ -3,10 +3,15 @@ import { Filter, FilterSpec, Module, Theme } from './UiTypesSpec'
 import { Lexer } from './lexer'
 import { parseGroup } from './parseGroup'
 import { parseInput } from './parseInput'
-import { parseModule, parseTheme } from './parseStructuredComment'
+import {
+    parseModule,
+    parseTheme,
+    parseSiteMetadata as parseCommentSiteMetadata,
+} from './parseStructuredComment'
 import { parseMetaDescription, parseMetaName } from './rs2fParser'
 import { Token, TokenType } from './token'
 import { TokenStream } from './tokenstream'
+import { SiteMetadata } from './FilterTypesSpec'
 
 const isModuleDeclaration = (token: Token) =>
     token.type === TokenType.COMMENT &&
@@ -24,6 +29,10 @@ const isThemeDeclaration = (token: Token) =>
     token.type === TokenType.COMMENT &&
     token.value.startsWith('/*@ define:theme')
 
+const isSiteMetadataDeclaration = (token: Token) =>
+    token.type === TokenType.COMMENT &&
+    token.value.startsWith('/*@ define:sitemeta')
+
 const parseStructuredComment = (line: string) => {
     const match = line.match(/\/\*@ define:([a-z]+):([a-z0-9_]+)/)
     if (!match) {
@@ -38,6 +47,34 @@ const parseStructuredComment = (line: string) => {
 export type ParseResult = {
     errors?: Array<{ line: string; error: Error }>
     filter?: Filter
+}
+
+export type ParseSiteMetadataResult = {
+    metadata?: SiteMetadata
+    errors?: Array<{ line: string; error: Error }>
+}
+
+// the normal parse routine ignores sitemeta, that's handled explicitly here
+// instead for backup restore
+export const parseSiteMetadata = (filter: string) => {
+    let tokens: TokenStream
+    try {
+        tokens = new TokenStream(new Lexer(filter).tokenize())
+    } catch (e) {
+        return {
+            errors: [{ line: '', error: e as Error }],
+        }
+    }
+
+    for (const token of tokens.getTokens()) {
+        if (isSiteMetadataDeclaration(token)) {
+            return {
+                metadata: parseCommentSiteMetadata(token.value),
+            }
+        }
+    }
+
+    return {}
 }
 
 export const parseModules = (
