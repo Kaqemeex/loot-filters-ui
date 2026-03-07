@@ -205,7 +205,6 @@ export const parse = (
 
     const name = parseMetaName(filter)
     const description = parseMetaDescription(filter) || undefined
-    console.log('themesById', Object.values(themesById))
 
     try {
         const parsedFilter = FilterSpec.parse({

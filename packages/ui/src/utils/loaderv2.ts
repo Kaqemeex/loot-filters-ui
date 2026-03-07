@@ -9,7 +9,9 @@ export const loadFilterFromUrl = async (url: string): Promise<Filter> => {
     const response = await fetch(url)
     const filterText = await response.text()
 
+    const start = new Date().getTime()
     const { errors, filter } = await parse(filterText, true)
+    const end = new Date().getTime()
 
     if (errors && errors.length > 0) {
         throw Error(
@@ -21,6 +23,8 @@ export const loadFilterFromUrl = async (url: string): Promise<Filter> => {
     if (filter == null) {
         throw Error('This should be impossible')
     }
+
+    console.log(`parsed "${filter.name}" in`, end - start, 'ms')
 
     filter.source = url
     return addRs2fHash(filter)

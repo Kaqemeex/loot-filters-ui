@@ -12,17 +12,29 @@ export class TokenStream {
     private readonly tokens: Token[]
     private readonly firstToken: Token
 
+    private index: number = 0
+
     constructor(tokens: Token[]) {
         this.tokens = [...tokens]
         this.firstToken = tokens[0]
     }
 
     getTokens(): Token[] {
-        return [...this.tokens]
+        const tokens: Token[] = []
+        for (let i = this.index; i < this.tokens.length; ++i) {
+            tokens.push(this.tokens[i])
+        }
+
+        return tokens
     }
 
     hasTokens(): boolean {
-        return this.tokens.some((t) => !isWhitespace(t))
+        for (let i = this.index; i < this.tokens.length; ++i) {
+            if (!isWhitespace(this.tokens[i])) {
+                return true
+            }
+        }
+        return false
     }
 
     /**
@@ -30,23 +42,27 @@ export class TokenStream {
      * it.
      */
     peek(): Token {
-        const token = this.tokens.find((t) => !isWhitespace(t))
-        if (token === undefined) {
-            throw new TokenStreamEOFError(this.firstToken)
+        for (let i = this.index; i < this.tokens.length; ++i) {
+            if (!isWhitespace(this.tokens[i])) {
+                return this.tokens[i]
+            }
         }
-        return token
+
+        throw new TokenStreamEOFError(this.firstToken)
     }
 
     /**
      * Consume the first token in the stream, optionally including whitespace.
      */
     take(includeWhitespace?: boolean): Token {
-        while (this.tokens.length !== 0) {
-            const next = this.tokens.shift()!!
+        for (let i = this.index; i < this.tokens.length; ++i) {
+            const next = this.tokens[i]
             if (includeWhitespace || !isWhitespace(next)) {
+                this.index = i + 1
                 return next
             }
         }
+
         throw new TokenStreamEOFError(this.firstToken)
     }
 
@@ -72,18 +88,23 @@ export class TokenStream {
      */
     takeLine(): TokenStream {
         const line: Token[] = []
-        while (this.tokens.length !== 0) {
-            const next = this.tokens.shift()!!
+        let i: number
+
+        for (i = this.index; i < this.tokens.length; ++i) {
+            const next = this.tokens[i]
             if (next.type === TokenType.NEWLINE) {
-                return new TokenStream(line)
+                ++i
+                break
             }
             line.push(next)
         }
+
+        this.index = i
         return new TokenStream(line)
     }
 
     toString(): string {
-        return this.tokens
+        return this.getTokens()
             .map((t) =>
                 t.type === TokenType.LITERAL_STRING ? `"${t.value}"` : t.value
             )
