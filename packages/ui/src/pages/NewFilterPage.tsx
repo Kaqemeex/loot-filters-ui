@@ -23,6 +23,7 @@ import { generateId } from '../utils/idgen'
 import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
 import { FilterFilePicker } from '../components/FilterFilePicker'
+import { StornFilterVariantDialog } from '../components/StornFilterVariantDialog'
 import { deriveConfig, deriveUrl } from '../parsing/deriveConfig'
 
 interface ImportFilterDialogProps {
@@ -53,6 +54,7 @@ export const NewFilterPage: React.FC = () => {
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [loading, setLoading] = useState(false)
     const [showURLImportOptions, setShowURLImportOptions] = useState(false)
+    const [stornVariantOpen, setStornVariantOpen] = useState(false)
     const { onboardingComplete, setOnboardingComplete } = useOboardingStore()
 
     const loadFilter = (url: string) => {
@@ -187,7 +189,8 @@ export const NewFilterPage: React.FC = () => {
                                 }}
                             >
                                 Offers an original color scheme with extensive
-                                support for category-based styling/filtering.
+                                support for category-based styling/filtering,
+                                for irons and mains.
                             </Typography>
                         </CardContent>
                         <CardActions>
@@ -204,7 +207,52 @@ export const NewFilterPage: React.FC = () => {
                         </CardActions>
                     </Card>
                 </Grid2>
+                <Grid2 size={3}>
+                    <Card variant="outlined">
+                        <CardContent>
+                            <Typography
+                                variant="h6"
+                                fontSize="36px"
+                                component="div"
+                            >
+                                Storn's Filter
+                            </Typography>
+                            <Typography variant="subtitle2">
+                                by Storn42
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: 'text.secondary',
+                                    fontSize: '24px',
+                                    minHeight: '4lh',
+                                }}
+                            >
+                                Iron man and main filters with multiple variants
+                                to choose from.
+                            </Typography>
+                        </CardContent>
+                        <CardActions>
+                            <Button
+                                variant="main-action"
+                                disabled={loading}
+                                onClick={() => setStornVariantOpen(true)}
+                            >
+                                Choose variant
+                            </Button>
+                        </CardActions>
+                    </Card>
+                </Grid2>
             </Grid2>
+            <StornFilterVariantDialog
+                open={stornVariantOpen}
+                onClose={() => setStornVariantOpen(false)}
+                onSelect={(url) => {
+                    setStornVariantOpen(false)
+                    loadFilter(url)
+                }}
+                loading={loading}
+            />
             {!showAdvanced && (
                 <div
                     style={{

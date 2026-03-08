@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { StornFilterVariantDialog } from './StornFilterVariantDialog'
 import {
     DEFAULT_FILTER_CONFIGURATION,
     FilterSpec,
@@ -52,6 +53,7 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
 
     const [loading, setLoading] = useState(false)
     const [showURLImportOptions, setShowURLImportOptions] = useState(false)
+    const [stornVariantOpen, setStornVariantOpen] = useState(false)
     const { onboardingComplete, setOnboardingComplete } = useOboardingStore()
 
     return (
@@ -265,8 +267,8 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                                         minHeight: '4lh',
                                     }}
                                 >
-                                    Goal is customizable styling for every item
-                                    in every context.
+                                    Customizable styling for every item in every
+                                    context, for irons and mains.
                                 </Typography>
                             </CardContent>
                             <CardActions>
@@ -316,6 +318,65 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                                         sx={{ color: 'text.secondary' }}
                                     >
                                         Joe
+                                    </Typography>
+                                </div>
+                            </CardActions>
+                        </Card>
+                    </Grid2>
+                    <Grid2 size={3}>
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Typography
+                                    variant="h6"
+                                    fontSize="36px"
+                                    component="div"
+                                >
+                                    Storn's Filter
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        color: 'text.secondary',
+                                        fontSize: '24px',
+                                        minHeight: '4lh',
+                                    }}
+                                >
+                                    Iron man and main filters with multiple
+                                    variants to choose from.
+                                </Typography>
+                            </CardContent>
+                            <CardActions>
+                                <Button
+                                    size="small"
+                                    color="secondary"
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        window.open(
+                                            'https://github.com/Storn42',
+                                            '_blank'
+                                        )
+                                    }}
+                                >
+                                    GitHub
+                                </Button>
+                                <Button
+                                    disabled={loading}
+                                    onClick={() => setStornVariantOpen(true)}
+                                >
+                                    Choose variant
+                                </Button>
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                    }}
+                                >
+                                    <Typography
+                                        variant="body2"
+                                        sx={{ color: 'text.secondary' }}
+                                    >
+                                        Storn42
                                     </Typography>
                                 </div>
                             </CardActions>
@@ -462,6 +523,27 @@ export const ImportFilterDialog: React.FC<ImportFilterDialogProps> = ({
                     </Box>
                 </Box>
             </DialogContent>
+            <StornFilterVariantDialog
+                open={stornVariantOpen}
+                onClose={() => setStornVariantOpen(false)}
+                onSelect={(url) => {
+                    setStornVariantOpen(false)
+                    setLoading(true)
+                    loadFilterFromUrl(url)
+                        .then((filter) => {
+                            if (filter) {
+                                updateFilter(filter)
+                                setActiveFilter(filter.id)
+                                handleClose()
+                            }
+                        })
+                        .catch((error) => {
+                            setImportError(error.message)
+                        })
+                        .finally(() => setLoading(false))
+                }}
+                loading={loading}
+            />
         </Dialog>
     )
 }
