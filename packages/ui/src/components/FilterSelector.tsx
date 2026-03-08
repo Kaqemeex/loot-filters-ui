@@ -79,6 +79,9 @@ const isAutoUpdate = (filterUrl?: string): boolean =>
     ) ||
         filterUrl?.startsWith(
             'https://raw.githubusercontent.com/typical-whack/loot-filters-modules'
+        ) ||
+        filterUrl?.startsWith(
+            'https://raw.githubusercontent.com/Storn42/'
         ))
 
 const UpdateAvailableDialog: React.FC<{
