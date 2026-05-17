@@ -52,6 +52,7 @@ export const useFilterStore = create<FilterStoreState>()(
                 name: 'filter-store',
                 version: 4,
                 storage: idbStorage,
+                partialize: ({ filters }: FilterStoreState) => ({ filters }),
                 migrate: async (state: unknown, version: number) => {
                     return await migrateFilterStore(
                         state as FilterStoreState,

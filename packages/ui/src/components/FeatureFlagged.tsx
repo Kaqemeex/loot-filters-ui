@@ -31,6 +31,7 @@ export const useFeatureFlagStore = create<FeatureFlaggedStore>()(
                 name: 'feature-flags',
                 version: 1,
                 storage: idbStorage,
+                partialize: ({ themes }: FeatureFlaggedStore) => ({ themes }),
             }
         )
     )

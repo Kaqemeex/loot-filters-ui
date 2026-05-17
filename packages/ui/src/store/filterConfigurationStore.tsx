@@ -86,6 +86,7 @@ export const useFilterConfigStore = create<FilterConfigurationStoreState>()(
                 name: 'filter-configuration-store',
                 version: 1,
                 storage: idbStorage,
+                partialize: ({ filterConfigurations }: FilterConfigurationStoreState) => ({ filterConfigurations }),
             }
         )
     )
