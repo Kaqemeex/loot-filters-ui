@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { Filter } from '../parsing/UiTypesSpec'
+import { idbStorage } from './idbStorage'
 import { migrateFilterStore } from './migrations/filterStore'
 
 export interface FilterStoreState {
@@ -50,6 +51,7 @@ export const useFilterStore = create<FilterStoreState>()(
             {
                 name: 'filter-store',
                 version: 4,
+                storage: idbStorage,
                 migrate: async (state: unknown, version: number) => {
                     return await migrateFilterStore(
                         state as FilterStoreState,

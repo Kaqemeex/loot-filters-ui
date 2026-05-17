@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { BackgroundImage } from '../types/Images'
+import { idbStorage } from './idbStorage'
 
 interface BackgroundStoreState {
     background: BackgroundImage
@@ -18,6 +19,7 @@ export const useBackgroundStore = create<BackgroundStoreState>()(
             {
                 name: 'background-image-selected',
                 version: 1,
+                storage: idbStorage,
             }
         )
     )

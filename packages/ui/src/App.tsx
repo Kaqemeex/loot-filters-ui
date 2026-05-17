@@ -18,6 +18,10 @@ import {
     MigrateLegacyData,
     requiresMigration,
 } from './store/migrations/MigrateLegacyData'
+import {
+    MigrateLocalStorageToIDB,
+    requiresLocalStorageMigration,
+} from './store/migrations/MigrateLocalStorageToIDB'
 import { MuiRsTheme } from './styles/MuiTheme'
 
 const Page: React.FC<{
@@ -52,6 +56,14 @@ const Page: React.FC<{
 }
 
 export const App = () => {
+    if (requiresLocalStorageMigration()) {
+        return (
+            <ThemeProvider theme={MuiRsTheme}>
+                <MigrateLocalStorageToIDB />
+            </ThemeProvider>
+        )
+    }
+
     const doMigration = requiresMigration()
     if (doMigration && window.location.pathname !== '/debug') {
         return (

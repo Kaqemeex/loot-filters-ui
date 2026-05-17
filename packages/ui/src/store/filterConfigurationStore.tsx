@@ -2,6 +2,7 @@ import { isObject } from 'underscore'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { FilterConfiguration } from '../parsing/UiTypesSpec'
+import { idbStorage } from './idbStorage'
 
 export interface FilterConfigurationStoreState {
     filterConfigurations: Record<string, FilterConfiguration>
@@ -84,6 +85,7 @@ export const useFilterConfigStore = create<FilterConfigurationStoreState>()(
             {
                 name: 'filter-configuration-store',
                 version: 1,
+                storage: idbStorage,
             }
         )
     )

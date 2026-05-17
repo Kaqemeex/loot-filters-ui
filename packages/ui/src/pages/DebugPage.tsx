@@ -10,23 +10,49 @@ import {
     Tabs,
     Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { downloadFile, localState, localStorageKeys } from '../utils/file'
-import { useFeatureFlagStore, FLAG_NAMES } from '../components/FeatureFlagged'
+import { FLAG_NAMES, useFeatureFlagStore } from '../components/FeatureFlagged'
+import {
+    allStorageKeys,
+    clearAllState,
+    downloadFile,
+    idbKeys,
+    localState,
+    uploadState,
+} from '../utils/file'
+
+type StorageData = Record<string, unknown>
+
+const useStorageData = () => {
+    const [data, setData] = useState<StorageData>({})
+
+    const reload = async () => {
+        const state = await localState()
+        setData(state)
+    }
+
+    useEffect(() => {
+        reload()
+    }, [])
+
+    return { data, reload }
+}
 
 const FilterStoreTabs = ({
+    data,
     filterStoreTab,
     setFilterStoreTab,
 }: {
+    data: StorageData
     filterStoreTab: string
     setFilterStoreTab: (tab: string) => void
 }) => {
-    const filterStore = JSON.parse(localStorage.getItem('filter-store') ?? '{}')
+    const filterStore = data['filter-store'] as
+        | { state: { filters: Record<string, { name: string }> } }
+        | undefined
 
-    if (Object.keys(filterStore).length === 0) {
-        return null
-    }
+    if (!filterStore?.state?.filters) return null
 
     return (
         <Tabs
@@ -34,77 +60,67 @@ const FilterStoreTabs = ({
             onChange={(_, newValue) => setFilterStoreTab(newValue)}
         >
             <Tab value="everything" label="Everything" />
-            {Object.keys(filterStore['state']['filters']).map((key, i) => {
-                return (
-                    <Tab
-                        key={i}
-                        value={key}
-                        label={filterStore['state']['filters'][key].name}
-                    />
-                )
-            })}
+            {Object.entries(filterStore.state.filters).map(([key, filter]) => (
+                <Tab key={key} value={key} label={filter.name} />
+            ))}
         </Tabs>
     )
 }
 
-const renderContent = (tab: string, filterStoreTab: string) => {
-    const content = localStorage.getItem(tab)
+const renderContent = (
+    tab: string,
+    filterStoreTab: string,
+    data: StorageData
+): string => {
+    const value = data[tab]
+    if (value === undefined || value === null) return 'No data found for this tab'
 
-    if (!content) {
-        return 'No data found for this tab'
-    }
-
-    if (!content.startsWith('{')) {
-        return content
-    }
-
-    let json = JSON.parse(content)
+    let content = value as Record<string, unknown>
 
     if (tab === 'filter-store' && filterStoreTab !== 'everything') {
-        json = json['state']['filters'][filterStoreTab]
-    } else if (
-        tab === 'filter-configuration-store' &&
-        filterStoreTab !== 'everything'
-    ) {
-        json = json['state']['filterConfigurations'][filterStoreTab]
+        const state = (content as { state: { filters: Record<string, unknown> } }).state
+        content = state?.filters?.[filterStoreTab] as Record<string, unknown>
+    } else if (tab === 'filter-configuration-store' && filterStoreTab !== 'everything') {
+        const state = (content as { state: { filterConfigurations: Record<string, unknown> } }).state
+        content = state?.filterConfigurations?.[filterStoreTab] as Record<string, unknown>
     }
 
-    return JSON.stringify(json, null, 2)
+    return JSON.stringify(content, null, 2)
+}
+
+const isJson = (value: unknown): boolean => {
+    return typeof value === 'object' && value !== null
 }
 
 export const DebugPage = () => {
-    const navigator = useNavigate()
+    useNavigate()
     const [tab, setTab] = useState('filter-store')
     const [filterStoreTab, setFilterStoreTab] = useState('everything')
+    const { data, reload } = useStorageData()
 
     const { checkFeatureFlag, setFeatureFlag } = useFeatureFlagStore()
 
     return (
         <Container maxWidth="lg">
             <Box>
-                {FLAG_NAMES.map((flag) => {
-                    return (
-                        <FormControlLabel
-                            key={flag}
-                            control={
-                                <Switch
-                                    checked={checkFeatureFlag(flag)}
-                                    onChange={(e) => {
-                                        setFeatureFlag(flag, e.target.checked)
-                                    }}
-                                />
-                            }
-                            label={
-                                <Typography
-                                    color="text.secondary"
-                                    fontSize="24px"
-                                >
-                                    {flag} feature flag
-                                </Typography>
-                            }
-                        />
-                    )
-                })}
+                {FLAG_NAMES.map((flag) => (
+                    <FormControlLabel
+                        key={flag}
+                        control={
+                            <Switch
+                                checked={checkFeatureFlag(flag)}
+                                onChange={(e) => {
+                                    setFeatureFlag(flag, e.target.checked)
+                                }}
+                            />
+                        }
+                        label={
+                            <Typography color="text.secondary" fontSize="24px">
+                                {flag} feature flag
+                            </Typography>
+                        }
+                    />
+                ))}
             </Box>
             <Box
                 sx={{
@@ -119,17 +135,15 @@ export const DebugPage = () => {
                 <Button
                     sx={{ width: '250px' }}
                     variant="outlined"
-                    onClick={() => {
-                        const state = localState()
+                    onClick={async () => {
+                        const state = await localState()
                         const fileName = `filterscape_state_${Date.now()
                             .toString()
                             .replaceAll('/', '-')}.json`
                         const file = new File(
                             [JSON.stringify(state)],
                             fileName,
-                            {
-                                type: 'text/plain',
-                            }
+                            { type: 'text/plain' }
                         )
                         downloadFile(file)
                     }}
@@ -154,17 +168,10 @@ export const DebugPage = () => {
                             if (!file) return
 
                             const reader = new FileReader()
-                            reader.onload = (e) => {
+                            reader.onload = async (e) => {
                                 const content = e.target?.result as string
                                 const state = JSON.parse(content)
-                                Object.entries(state).forEach(
-                                    ([key, value]) => {
-                                        localStorage.setItem(
-                                            key,
-                                            (value as string) ?? null
-                                        )
-                                    }
-                                )
+                                await uploadState(state)
                                 window.location.href = `${window.location.protocol}://${window.location.host}`
                             }
                             reader.readAsText(file)
@@ -174,8 +181,8 @@ export const DebugPage = () => {
                 <Button
                     sx={{ width: '250px', color: 'red' }}
                     variant="outlined"
-                    onClick={() => {
-                        localStorage.clear()
+                    onClick={async () => {
+                        await clearAllState()
                         window.location.href = `${window.location.protocol}://${window.location.host}`
                     }}
                 >
@@ -185,13 +192,14 @@ export const DebugPage = () => {
             </Box>
             <Box>
                 <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)}>
-                    {localStorageKeys.map((key, i) => {
-                        return <Tab key={i} value={key} label={key} />
-                    })}
+                    {allStorageKeys.map((key) => (
+                        <Tab key={key} value={key} label={key} />
+                    ))}
                 </Tabs>
                 {(tab === 'filter-store' ||
                     tab === 'filter-configuration-store') && (
                     <FilterStoreTabs
+                        data={data}
                         filterStoreTab={filterStoreTab}
                         setFilterStoreTab={setFilterStoreTab}
                     />
@@ -199,19 +207,10 @@ export const DebugPage = () => {
 
                 <Editor
                     height="70vh"
-                    language={
-                        (localStorage.getItem(tab) ?? '').startsWith('{')
-                            ? 'json'
-                            : 'text'
-                    }
+                    language={isJson(data[tab]) ? 'json' : 'text'}
                     theme="vs-dark"
-                    options={{
-                        minimap: {
-                            enabled: false,
-                        },
-                        readOnly: true,
-                    }}
-                    value={renderContent(tab, filterStoreTab)}
+                    options={{ minimap: { enabled: false }, readOnly: true }}
+                    value={renderContent(tab, filterStoreTab, data)}
                 />
             </Box>
         </Container>

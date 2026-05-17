@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist, devtools, createJSONStorage } from 'zustand/middleware'
+import { persist, devtools } from 'zustand/middleware'
+import { idbStorage } from '../store/idbStorage'
 
 export const FLAG_NAMES = ['themes'] as const
 
@@ -29,7 +30,7 @@ export const useFeatureFlagStore = create<FeatureFlaggedStore>()(
             {
                 name: 'feature-flags',
                 version: 1,
-                storage: createJSONStorage(() => localStorage),
+                storage: idbStorage,
             }
         )
     )
