@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
+import { idbStorage } from './idbStorage'
 
 interface EditorStoreState {
     contentById: Record<string, string>
@@ -25,6 +26,8 @@ export const useEditorStore = create<EditorStoreState>()(
             {
                 name: 'editor-content',
                 version: 1,
+                storage: idbStorage,
+                partialize: ({ contentById }: EditorStoreState) => ({ contentById }),
             }
         )
     )

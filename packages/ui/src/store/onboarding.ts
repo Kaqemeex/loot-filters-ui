@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
+import { idbStorage } from './idbStorage'
 
 interface OnboardingStoreState {
     onboardingComplete: boolean
@@ -22,6 +23,8 @@ export const useOboardingStore = create<OnboardingStoreState>()(
             {
                 name: 'onboarding-complete',
                 version: 1,
+                storage: idbStorage,
+                partialize: ({ onboardingComplete, disableExportDialog }: OnboardingStoreState) => ({ onboardingComplete, disableExportDialog }),
             }
         )
     )
