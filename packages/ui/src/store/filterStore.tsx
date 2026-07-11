@@ -9,6 +9,8 @@ export interface FilterStoreState {
     updateFilter: (filter: Filter) => void
     removeFilter: (filterId: string) => void
     setActiveFilter: (filterId: string) => void
+    hasHydrated: boolean
+    setHasHydrated: (state: boolean) => void
 }
 
 export const useFilterStore = create<FilterStoreState>()(
@@ -46,12 +48,17 @@ export const useFilterStore = create<FilterStoreState>()(
                                 )
                             ),
                         })),
+                    hasHydrated: false,
+                    setHasHydrated: (state) => set({ hasHydrated: state }),
                 }
             },
             {
                 name: 'filter-store',
                 version: 4,
                 storage: idbStorage,
+                onRehydrateStorage: () => (state) => {
+                    state?.setHasHydrated(true)
+                },
                 partialize: ({ filters }: FilterStoreState) => ({ filters }),
                 migrate: async (state: unknown, version: number) => {
                     return await migrateFilterStore(

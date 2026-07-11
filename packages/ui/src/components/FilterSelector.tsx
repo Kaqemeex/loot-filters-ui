@@ -80,9 +80,7 @@ const isAutoUpdate = (filterUrl?: string): boolean =>
         filterUrl?.startsWith(
             'https://raw.githubusercontent.com/typical-whack/loot-filters-modules'
         ) ||
-        filterUrl?.startsWith(
-            'https://raw.githubusercontent.com/Storn42/'
-        ))
+        filterUrl?.startsWith('https://raw.githubusercontent.com/Storn42/'))
 
 const UpdateAvailableDialog: React.FC<{
     open: boolean
@@ -188,8 +186,13 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
 
     const { disableExportDialog, setDisableExportDialog } = useOboardingStore()
 
-    const { filters, removeFilter, setActiveFilter, updateFilter } =
-        useFilterStore()
+    const {
+        filters,
+        removeFilter,
+        setActiveFilter,
+        updateFilter,
+        hasHydrated,
+    } = useFilterStore()
 
     const { setFilterConfiguration, removeFilterConfiguration } =
         useFilterConfigStore()
@@ -239,9 +242,9 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
 
     const selectedFilter = activeFilter
         ? {
-              label: activeFilter.name,
-              value: activeFilter.id,
-          }
+            label: activeFilter.name,
+            value: activeFilter.id,
+        }
         : null
 
     const addAlert = useAlertStore((state) => state.addAlert)
@@ -608,6 +611,10 @@ export const FilterSelector: React.FC<{ reloadOnChange?: boolean }> = ({
             />
         </FeatureFlagged>
     )
+
+    if (!hasHydrated) {
+        return null
+    }
 
     if (Object.keys(filters).length === 0) {
         return <Navigate to="/new-filter" />
