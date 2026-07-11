@@ -73,16 +73,29 @@ const renderContent = (
     data: StorageData
 ): string => {
     const value = data[tab]
-    if (value === undefined || value === null) return 'No data found for this tab'
+    if (value === undefined || value === null)
+        return 'No data found for this tab'
 
     let content = value as Record<string, unknown>
 
     if (tab === 'filter-store' && filterStoreTab !== 'everything') {
-        const state = (content as { state: { filters: Record<string, unknown> } }).state
+        const state = (
+            content as { state: { filters: Record<string, unknown> } }
+        ).state
         content = state?.filters?.[filterStoreTab] as Record<string, unknown>
-    } else if (tab === 'filter-configuration-store' && filterStoreTab !== 'everything') {
-        const state = (content as { state: { filterConfigurations: Record<string, unknown> } }).state
-        content = state?.filterConfigurations?.[filterStoreTab] as Record<string, unknown>
+    } else if (
+        tab === 'filter-configuration-store' &&
+        filterStoreTab !== 'everything'
+    ) {
+        const state = (
+            content as {
+                state: { filterConfigurations: Record<string, unknown> }
+            }
+        ).state
+        content = state?.filterConfigurations?.[filterStoreTab] as Record<
+            string,
+            unknown
+        >
     }
 
     return JSON.stringify(content, null, 2)

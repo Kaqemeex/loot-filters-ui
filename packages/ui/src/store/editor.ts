@@ -27,7 +27,9 @@ export const useEditorStore = create<EditorStoreState>()(
                 name: 'editor-content',
                 version: 1,
                 storage: idbStorage,
-                partialize: ({ contentById }: EditorStoreState) => ({ contentById }),
+                partialize: ({ contentById }: EditorStoreState) => ({
+                    contentById,
+                }),
             }
         )
     )

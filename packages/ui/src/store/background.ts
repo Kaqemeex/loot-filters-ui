@@ -20,7 +20,9 @@ export const useBackgroundStore = create<BackgroundStoreState>()(
                 name: 'background-image-selected',
                 version: 1,
                 storage: idbStorage,
-                partialize: ({ background }: BackgroundStoreState) => ({ background }),
+                partialize: ({ background }: BackgroundStoreState) => ({
+                    background,
+                }),
             }
         )
     )

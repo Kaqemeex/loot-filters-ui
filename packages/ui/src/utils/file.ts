@@ -58,9 +58,11 @@ export const localState = async (): Promise<Record<string, unknown>> => {
 export const uploadState = async (state: Record<string, unknown>) => {
     for (const [key, value] of Object.entries(state)) {
         if (idbKeys.includes(key)) {
-            const parsed =
-                typeof value === 'string' ? JSON.parse(value) : value
-            await idbStorage.setItem(key, parsed as Parameters<typeof idbStorage.setItem>[1])
+            const parsed = typeof value === 'string' ? JSON.parse(value) : value
+            await idbStorage.setItem(
+                key,
+                parsed as Parameters<typeof idbStorage.setItem>[1]
+            )
         } else if (legacyLocalStorageKeys.includes(key)) {
             const serialized =
                 typeof value === 'string' ? value : JSON.stringify(value)

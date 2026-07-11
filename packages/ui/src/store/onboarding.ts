@@ -24,7 +24,13 @@ export const useOboardingStore = create<OnboardingStoreState>()(
                 name: 'onboarding-complete',
                 version: 1,
                 storage: idbStorage,
-                partialize: ({ onboardingComplete, disableExportDialog }: OnboardingStoreState) => ({ onboardingComplete, disableExportDialog }),
+                partialize: ({
+                    onboardingComplete,
+                    disableExportDialog,
+                }: OnboardingStoreState) => ({
+                    onboardingComplete,
+                    disableExportDialog,
+                }),
             }
         )
     )
