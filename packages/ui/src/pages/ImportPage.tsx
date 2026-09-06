@@ -1,3 +1,4 @@
+import { loadFilterFromUrl } from '../utils/loaderv2'
 import {
     Button,
     CircularProgress,
@@ -22,6 +23,8 @@ type SavedFilter = {
     rs2f: string
     expectedRs2fHash: string
     sourceUrl: string
+    commit?: string
+    revisionUrl?: string
 }
 
 type LoadFilterResponse = {
@@ -61,14 +64,9 @@ export const ImportPage: React.FC = () => {
                     setFilterUrl(filterUrl)
                     setFilterConfig(config)
 
-                    return fetch(filterUrl)
+                    return loadFilterFromUrl(filterUrl)
                 })
-                .then((res) => {
-                    return res.text()
-                })
-                .then((text: string) => {
-                    return parse(text)
-                })
+                .then((filter) => ({ filter }))
                 .then((parsed: ParseResult) => {
                     setParsedFilter(parsed)
                     setError(null)
@@ -86,12 +84,17 @@ export const ImportPage: React.FC = () => {
                 .then((res) => res.json())
                 .then(
                     ({
-                        filter: { rs2f, sourceUrl },
+                        filter: { rs2f, sourceUrl, commit, revisionUrl },
                         config,
                     }: LoadFilterResponse) => {
                         setFilterUrl(sourceUrl)
                         setFilterConfig(config)
-                        return parse(rs2f)
+                        return parse(rs2f).then((parsed) => ({
+                            ...parsed,
+                            filter: parsed.filter
+                                ? { ...parsed.filter, commit, revisionUrl }
+                                : undefined,
+                        }))
                     }
                 )
                 .then((parsed: ParseResult) => {

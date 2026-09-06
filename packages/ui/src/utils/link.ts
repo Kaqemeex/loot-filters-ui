@@ -8,6 +8,8 @@ type CreateLinkRequest = {
         rs2f: string
         expectedRs2fHash: string
         sourceUrl: string
+        commit?: string
+        revisionUrl?: string
     }
     config?: object
 }
@@ -26,6 +28,8 @@ export const createLink = (
             rs2f: filter.rs2f,
             expectedRs2fHash: filter.rs2fHash,
             sourceUrl: filter.source ?? '',
+            commit: filter.commit,
+            revisionUrl: filter.revisionUrl,
         },
         config,
     }

@@ -27,7 +27,16 @@ export const load = async (id: string, env: Env) => {
     const filter = await getAndDecompress(config.filterKey, env)
 
     return {
-        filter: JSON.parse(filter) as SavedFilter,
+        filter: {
+            ...(JSON.parse(filter) as SavedFilter),
+            ...(config.source
+                ? {
+                      sourceUrl: config.source.sourceUrl,
+                      commit: config.source.commit,
+                      revisionUrl: config.source.revisionUrl,
+                  }
+                : {}),
+        },
         config: config.data,
     }
 }

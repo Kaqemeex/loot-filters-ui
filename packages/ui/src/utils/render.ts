@@ -1,3 +1,5 @@
+import { stripSiteMetadata } from './siteMetadata'
+import { DEFAULT_FILTER_CONFIGURATION } from '../parsing/UiTypesSpec'
 import { Icon } from '../parsing/IconSpec'
 import { parseModules } from '../parsing/parse'
 import {
@@ -42,7 +44,19 @@ export const renderFilter = (
         } }`
     )
 
-    return filterText
+    // JSON is valid YAML. Escape comment terminators even inside custom rs2f.
+    const metadata = JSON.stringify({
+        version: 1,
+        source: filter.source,
+        commit: filter.commit,
+        revisionUrl: filter.revisionUrl,
+        sourceHash:
+            filter.rs2fHash === '00000000' ? undefined : filter.rs2fHash,
+        name: filter.name,
+        description: filter.description,
+        config: activeConfig ?? DEFAULT_FILTER_CONFIGURATION,
+    }).replace(/\*/g, '\\u002a')
+    return `${stripSiteMetadata(filterText)}\n/*@ define:sitemeta\n${metadata}\n*/\n`
 }
 
 export const applyModule = (

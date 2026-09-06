@@ -55,7 +55,20 @@ export const ThemeSpec = z.object({
 export type Theme = z.infer<typeof ThemeSpec>
 
 export const SiteMetadataSpec = z.object({
-    source: z.string().optional(),
+    version: z.literal(1).optional(),
+    source: z.string().url().optional(),
+    commit: z
+        .string()
+        .regex(/^[a-f0-9]{40}$/i)
+        .optional(),
+    revisionUrl: z.string().url().optional(),
+    sourceHash: z
+        .string()
+        .regex(/^[a-f0-9]{40}$/i)
+        .optional(),
+    config: z.record(z.string(), z.any()).optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
 })
 
 export type SiteMetadata = z.infer<typeof SiteMetadataSpec>

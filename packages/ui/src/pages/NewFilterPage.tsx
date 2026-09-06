@@ -24,7 +24,7 @@ import { createLink } from '../utils/link'
 import { loadFilterFromUrl } from '../utils/loaderv2'
 import { FilterFilePicker } from '../components/FilterFilePicker'
 import { StornFilterVariantDialog } from '../components/StornFilterVariantDialog'
-import { deriveConfig, deriveUrl } from '../parsing/deriveConfig'
+import { restoreFilter as restoreImportedFilter } from '../utils/restoreFilter'
 
 interface ImportFilterDialogProps {
     open: boolean
@@ -89,28 +89,21 @@ export const NewFilterPage: React.FC = () => {
     const restoreFilter = async (filter: Filter) => {
         setLoading(true)
 
-        const url = deriveUrl(filter)
-        if (!url) {
+        try {
+            const restored = await restoreImportedFilter(filter)
+            setFilterConfiguration(restored.filter.id, restored.config)
+            updateFilter(restored.filter)
+            setActiveFilter(restored.filter.id)
             addAlert({
-                children: 'could not determine original filter',
-                severity: 'error',
+                children: `restored "${restored.filter.name}"`,
+                severity: 'success',
             })
+            handleClose()
+        } catch (error) {
+            addAlert({ children: (error as Error).message, severity: 'error' })
+        } finally {
             setLoading(false)
-            return
         }
-
-        const base = await loadFilterFromUrl(url)
-        const config = deriveConfig(base, filter)
-
-        setFilterConfiguration(base.id, config)
-        updateFilter(base)
-        setActiveFilter(base.id)
-
-        addAlert({
-            children: `restored "${base.name}"`,
-            severity: 'success',
-        })
-        handleClose()
     }
 
     return (
