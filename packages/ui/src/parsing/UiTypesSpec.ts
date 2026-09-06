@@ -141,6 +141,11 @@ export const FilterSpec = z.object({
     importedOn: z.string().datetime().default(new Date().toISOString()),
     updatedOn: z.string().datetime().optional(),
     source: z.string().url().optional(),
+    commit: z
+        .string()
+        .regex(/^[a-f0-9]{40}$/i)
+        .optional(),
+    revisionUrl: z.string().url().optional(),
     modules: z.array(ModuleSpec),
     themes: z.array(ThemeSpec).default([]),
     rs2f: z.string(),

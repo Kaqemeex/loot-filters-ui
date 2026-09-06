@@ -16,12 +16,15 @@ export type SavedFilter = {
     rs2f: string
     expectedRs2fHash: string
     sourceUrl: string
+    commit?: string
+    revisionUrl?: string
 }
 
 export type SavedConfig = {
     id: string
     filterKey: string
     configKey: string
+    source?: Pick<SavedFilter, 'sourceUrl' | 'commit' | 'revisionUrl'>
     data?: object
 }
 
@@ -81,6 +84,13 @@ export const save = async (
             filterKey,
             configKey,
             data: toStore.config,
+            // Provenance belongs to the share: identical content can come from
+            // different URLs or commits, while the rs2f blob stays deduplicated.
+            source: {
+                sourceUrl: toStore.filter.sourceUrl,
+                commit: toStore.filter.commit,
+                revisionUrl: toStore.filter.revisionUrl,
+            },
         }
         const configJson = await compress(JSON.stringify(savedConfig))
         if (configJson.byteLength > 1024 * 5) {

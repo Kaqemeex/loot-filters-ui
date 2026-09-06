@@ -68,8 +68,12 @@ export const parseSiteMetadata = (filter: string) => {
 
     for (const token of tokens.getTokens()) {
         if (isSiteMetadataDeclaration(token)) {
-            return {
-                metadata: parseCommentSiteMetadata(token.value),
+            try {
+                return { metadata: parseCommentSiteMetadata(token.value) }
+            } catch (error) {
+                return {
+                    errors: [{ line: token.value, error: error as Error }],
+                }
             }
         }
     }
@@ -146,6 +150,9 @@ export const parse = (
                 modulesById[decl.id] = parseModule(decl.id, next.value)
 
                 modulesById[currentModule].rs2f += next.value
+            } else if (isSiteMetadataDeclaration(next)) {
+                // Export metadata belongs to the file, never to a module.
+                continue
             } else if (isGroupDeclaration(next)) {
                 const group = parseGroup(next.value)
 

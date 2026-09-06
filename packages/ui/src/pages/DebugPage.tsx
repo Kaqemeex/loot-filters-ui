@@ -1,3 +1,9 @@
+import { useFilterStore } from '../store/filterStore'
+import { useFilterConfigStore } from '../store/filterConfigurationStore'
+import { useAlertStore } from '../store/alerts'
+import { deriveUrl } from '../parsing/deriveConfig'
+import { parseSiteMetadata } from '../parsing/parse'
+import { reassociateFilter } from '../utils/restoreFilter'
 import { Editor } from '@monaco-editor/react'
 import { Delete, Download, Upload } from '@mui/icons-material'
 import {
@@ -110,6 +116,45 @@ export const DebugPage = () => {
     const [tab, setTab] = useState('filter-store')
     const [filterStoreTab, setFilterStoreTab] = useState('everything')
     const { data, reload } = useStorageData()
+    const { filters, updateFilter } = useFilterStore()
+    const { filterConfigurations, setFilterConfiguration } =
+        useFilterConfigStore()
+    const { addAlert } = useAlertStore()
+    const [reassociating, setReassociating] = useState(false)
+    const selectedFilter = filters[filterStoreTab]
+
+    const forceReassociation = async () => {
+        if (!selectedFilter) return
+        setReassociating(true)
+        try {
+            const metadata = parseSiteMetadata(selectedFilter.rs2f).metadata
+            const source =
+                selectedFilter.source ??
+                deriveUrl(selectedFilter) ??
+                window
+                    .prompt('Enter the original source URL for this filter:')
+                    ?.trim()
+            if (!source) return
+            const restored = await reassociateFilter(
+                selectedFilter,
+                filterConfigurations[selectedFilter.id],
+                source,
+                selectedFilter.commit ?? metadata?.commit,
+                selectedFilter.revisionUrl ?? metadata?.revisionUrl
+            )
+            updateFilter(restored.filter)
+            setFilterConfiguration(restored.filter.id, restored.config)
+            await reload()
+            addAlert({
+                children: `Re-associated "${restored.filter.name}" with its source`,
+                severity: 'success',
+            })
+        } catch (error) {
+            addAlert({ children: (error as Error).message, severity: 'error' })
+        } finally {
+            setReassociating(false)
+        }
+    }
 
     const { checkFeatureFlag, setFeatureFlag } = useFeatureFlagStore()
 
@@ -218,6 +263,18 @@ export const DebugPage = () => {
                     />
                 )}
 
+                {(tab === 'filter-store' ||
+                    tab === 'filter-configuration-store') &&
+                    selectedFilter && (
+                        <Button
+                            disabled={reassociating}
+                            onClick={forceReassociation}
+                        >
+                            {reassociating
+                                ? 'Re-associating…'
+                                : 'Force re-association'}
+                        </Button>
+                    )}
                 <Editor
                     height="70vh"
                     language={isJson(data[tab]) ? 'json' : 'text'}
