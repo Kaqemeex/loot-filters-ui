@@ -362,10 +362,10 @@ const HelpContent = () => {
                         <br />
                         <br />
                         .WAV is the default windows audio format, but it's not
-                        as commonly used as something like mp3. There are plenty
-                        of online audio converters to turn an mp3 into a wav
-                        file, or you can use something like audacity to edit/cut
-                        sound files locally.
+                        as commonly used as something like mp3. There many
+                        online audio converters / youtube rippers. If you use one and the sound doesn't play 
+                        its probably because the website produced an invalid file that RuneLite/Java can't play.
+                        If this happens we recommend that you use <a href="https://www.audacityteam.org/">Audacity</a> to re-export the file or to edit/cut the original sound files instead.
                         <br />
                         <br />
                         <b>
